@@ -22,10 +22,13 @@ Backlog cho hệ thống quản lý kho lạnh 3 dải nhiệt của một công
 | [docs/breakdown-conventions.md](docs/breakdown-conventions.md) | Quy ước break: kích cỡ issue, Định nghĩa xong, nhãn, sprint |
 | [docs/differences-vs-lab4.md](docs/differences-vs-lab4.md) | Mọi chỗ backlog break khác detail design LAB-4 đã nộp, kèm lý do |
 | [docs/spec-gaps.md](docs/spec-gaps.md) | Chỗ hở / mâu thuẫn của spec phát hiện khi break |
-| `docs/wbs-master-schedule.md` | WBS master schedule: milestone theo tháng (bổ sung sau khi chấm SWP) |
-| `docs/wbs-detail.md` | WBS chi tiết theo sprint (bổ sung sau khi chấm SWP) |
-| `docs/hours-convention.md` | Cách quy SWP ra giờ và lý do (bổ sung sau khi chấm SWP) |
-| `reports/` | Báo cáo SWP và báo cáo tiến độ sprint giả lập |
+| [docs/wbs-master-schedule.md](docs/wbs-master-schedule.md) · [xlsx](reports/wbs-master-schedule.xlsx) | WBS master schedule: giai đoạn / gate và giờ epic × tháng (10/2026 → 06/2027) |
+| [docs/wbs-detail.md](docs/wbs-detail.md) · [xlsx](reports/wbs-detail.xlsx) | WBS chi tiết: epic → issue → sub-issue, sprint, role, SWP, giờ, độ tin, trạng thái |
+| [docs/hours-convention.md](docs/hours-convention.md) | Cách quy SWP ra giờ (1,85 h/SWP), contingency, so với estimate LAB-1 |
+| [docs/sprint-capacity.md](docs/sprint-capacity.md) | Năng lực và tải từng sprint sau khi cân |
+| [reports/swp-estimate-261024.html](reports/swp-estimate-261024.html) | Báo cáo SWP của `/tkm:sun-estimate` (tải về để mở) |
+| [reports/progress-report-sprint-S1.md](reports/progress-report-sprint-S1.md) | Báo cáo tiến độ sprint S1 (giả lập) lấy từ Project |
+| [AI-report.md](AI-report.md) | Cách làm với AI, chỗ AI sai, cách ghi SWP vào Project |
 
 ## Lưu ý
 - Dữ liệu và khách hàng đều là **giả lập** cho mục đích học tập.

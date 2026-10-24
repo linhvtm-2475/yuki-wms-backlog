@@ -34,8 +34,16 @@ class GH:
         if self.dry:
             print("DRY gh", " ".join(args)[:160])
             return {}
-        p = subprocess.run(["gh"] + args, input=json.dumps(input_json) if input_json else None,
-                           capture_output=True, text=True)
+        for attempt in range(6):
+            p = subprocess.run(["gh"] + args, input=json.dumps(input_json) if input_json else None,
+                               capture_output=True, text=True)
+            err = p.stderr.lower()
+            if p.returncode != 0 and any(k in err for k in ("rate limit", "abuse", "submitted too quickly", "connection reset", "timeout", "eof", "502", "503", "504")):
+                wait = 120 * (attempt + 1)
+                print(f"rate-limited, sleep {wait}s", flush=True)
+                time.sleep(wait)
+                continue
+            break
         if p.returncode != 0:
             raise RuntimeError(f"gh {' '.join(args)[:120]} → {p.stderr.strip()[:400]}")
         return json.loads(p.stdout) if parse and p.stdout.strip() else p.stdout
@@ -116,6 +124,8 @@ def main():
             r = gh.run(args)
             m["issues"][it["id"]] = {"number": r.get("number"), "id": r.get("id"), "node_id": r.get("node_id"), "kind": kind}
             save()
+            if len(m["issues"]) % 50 == 0:
+                print(f"issues created: {len(m['issues'])}", flush=True)
             time.sleep(THROTTLE)
         print(f"issues={len(m['issues'])}")
 
@@ -128,7 +138,7 @@ def main():
             gh.run(["api", f"repos/{repo}/issues/{p['number']}/sub_issues", "-F", f"sub_issue_id={c['id']}"])
             m["links"].append([parent["id"], it["id"]])
             save()
-            time.sleep(THROTTLE)
+            time.sleep(THROTTLE / 4)
         print(f"links={len(m['links'])}")
 
     if "project" in steps and not m["project"].get("id"):
@@ -175,8 +185,18 @@ def main():
             if rec.get("item_id"):
                 continue
             url = f"https://github.com/{repo}/issues/{rec['number']}"
-            r = gh.run(["project", "item-add", str(m["project"]["number"]), "--owner", a.owner, "--url", url, "--format", "json"])
-            rec["item_id"] = r.get("id")
+            try:
+                r = gh.run(["project", "item-add", str(m["project"]["number"]), "--owner", a.owner, "--url", url, "--format", "json"])
+                rec["item_id"] = r.get("id")
+            except RuntimeError as exc:
+                if "already exists" not in str(exc):
+                    raise
+                # Item was auto-added (e.g. via sub-issue linking): look up its existing item id.
+                q = ("query($o:String!,$r:String!,$n:Int!){repository(owner:$o,name:$r){issue(number:$n)"
+                     "{projectItems(first:10){nodes{id project{id}}}}}}")
+                res = gh.graphql(q, o=a.owner, r=a.repo, n=rec["number"])
+                nodes = res["data"]["repository"]["issue"]["projectItems"]["nodes"]
+                rec["item_id"] = next(n["id"] for n in nodes if n["project"]["id"] == pid)
             base = ["project", "item-edit", "--id", rec["item_id"], "--project-id", pid]
             if it.get("role") in f["Role"]["options"]:
                 gh.run(base + ["--field-id", f["Role"]["id"], "--single-select-option-id", f["Role"]["options"][it["role"]]], parse=False)
@@ -185,7 +205,7 @@ def main():
             if "Todo" in f.get("Status", {}).get("options", {}):
                 gh.run(base + ["--field-id", f["Status"]["id"], "--single-select-option-id", f["Status"]["options"]["Todo"]], parse=False)
             save()
-            time.sleep(THROTTLE / 2)
+            time.sleep(0.5)
         print("items added")
 
     if "bodies" in steps:
@@ -202,7 +222,7 @@ def main():
             gh.run(["api", "-X", "PATCH", f"repos/{repo}/issues/{m['issues'][it['id']]['number']}", "-f", f"body={body}{dep_line}"])
             m["issues"][it["id"]]["deps_linked"] = True
             save()
-            time.sleep(THROTTLE)
+            time.sleep(THROTTLE / 4)
         print("bodies linked")
     return 0
 

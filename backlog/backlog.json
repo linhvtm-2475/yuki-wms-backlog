@@ -465,7 +465,7 @@
      "title": "Chuyển bảng mã sang giá trị ASCII và tách nhãn JA",
      "body": "**Mục tiêu:** DB chỉ lưu mã ASCII; nhãn tiếng Nhật chỉ ở tầng hiển thị.\n\n**Phạm vi:**\n- Làm: sinh CHECK từ code-definitions; bảng tra nhãn JA cho UI / 帳票 / CSV; hàm kiểm chuyển trạng thái theo code-definitions §5\n- Không làm: nhãn mới chưa có trong code-definitions\n\n**Nguồn:** SPEC:code-definitions §0 (Q-CD-01), §5; LAB4:L5-DB-02; LAB4:05-database diff D1\n\n**Định nghĩa xong:**\n- [ ] Mọi cột trạng thái có CHECK theo CD-*\n- [ ] Test tự động: không có chữ Nhật trong CHECK / DEFAULT / WHERE / view\n- [ ] UI và CSV lấy nhãn từ bảng tra\n- [ ] Chuyển trạng thái sai trả mã V-2\n\n**Phụ thuộc:** EP00-I09\n\n**Ràng buộc nghiệp vụ:** Máy trạng thái 引当 / タスク (§5.4) đang mâu thuẫn OUT_DB R9 (ISS-35 H-7): chỉ nạp phần đó khi CR được duyệt.",
      "role": "BE",
-     "sprint": "S1",
+     "sprint": "S5",
      "labels": [
       "type:issue",
       "role:BE",
@@ -482,7 +482,7 @@
        "title": "Sinh CHECK và bảng tra nhãn từ code-definitions",
        "body": "**Mục tiêu:** Một nguồn sinh cho DB và UI.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S1",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -494,7 +494,7 @@
        "title": "Viết thành phần hiển thị nhãn cho UI / CSV",
        "body": "**Mục tiêu:** Màn không tự viết nhãn.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
        "role": "FE",
-       "sprint": "S1",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:FE",
@@ -506,7 +506,7 @@
        "title": "Viết hàm kiểm chuyển trạng thái theo §5",
        "body": "**Mục tiêu:** Chặn chuyển sai ở service.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S1",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -519,7 +519,7 @@
        "title": "Test không chữ Nhật trong DB",
        "body": "**Mục tiêu:** Bắt vi phạm Q-CD-01.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
        "role": "QA",
-       "sprint": "S1",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:QA",
@@ -1575,7 +1575,7 @@
      "title": "Dựng màn COM-02 menu theo 職務",
      "body": "**Mục tiêu:** Mỗi 職務 thấy đúng menu và số việc cần làm của mình.\n\n**Phạm vi:**\n- Làm: menu theo role_permission; số 承認待ち, mail 送信失敗 (要対応); menu dạng sheet cho ハンディ; M_COM-07 / M_COM-08\n- Không làm: nội dung các màn nghiệp vụ\n\n**Nguồn:** SPEC:COM-02; FLOW:F-COM-03; SPEC:BATCH_LIST B-10 (đếm failed)\n\n**Định nghĩa xong:**\n- [ ] Menu khớp ma trận quyền cho 8 職務\n- [ ] Số 要対応 khớp dữ liệu nguồn\n- [ ] Bố cục ハンディ 360px đúng wireframe\n- [ ] Kiểm axe đạt\n\n**Phụ thuộc:** EP00-I14, EP10-I01",
      "role": "FE",
-     "sprint": "S2",
+     "sprint": "S5",
      "labels": [
       "type:issue",
       "role:FE",
@@ -1595,7 +1595,7 @@
        "title": "Viết DD COM-02",
        "body": "**Mục tiêu:** COM-02 chỉ có spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
        "role": "SA",
-       "sprint": "S1",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:SA",
@@ -1607,7 +1607,7 @@
        "title": "API đếm việc cần làm theo 職務",
        "body": "**Mục tiêu:** Đếm từ hàng đợi duyệt và mail_outbox.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S2",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -1619,7 +1619,7 @@
        "title": "FE màn COM-02 (PC và ハンディ)",
        "body": "**Mục tiêu:** Theo wireframe.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
        "role": "FE",
-       "sprint": "S2",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:FE",
@@ -1631,7 +1631,7 @@
        "title": "Ca kiểm thử menu 8 職務",
        "body": "**Mục tiêu:** Mỗi 職務 một bộ.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
        "role": "QA",
-       "sprint": "S2",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:QA",
@@ -1645,7 +1645,7 @@
      "title": "Dựng COM-03 khóa phiên theo lớp thiết bị",
      "body": "**Mục tiêu:** Phiên tự khóa khi không thao tác, thời gian theo lớp thiết bị.\n\n**Phạm vi:**\n- Làm: thời gian khóa / cảnh báo theo lớp thiết bị (config nhóm session, Q-COM-04); M_COM-09, M_COM-05; thao tác không ghi khi hết phiên (M_COM-11); mở lại qua COM-01\n- Không làm: đăng nhập (EP00-I11)\n\n**Nguồn:** SPEC:COM-03; FLOW:F-COM-02; REQ:NFR-SEC-02; Q-COM-04\n\n**Định nghĩa xong:**\n- [ ] Khóa đúng thời gian theo từng lớp thiết bị (đọc từ config_parameter)\n- [ ] Thao tác gửi sau khi hết phiên không được ghi và báo M_COM-11\n- [ ] Mở lại cùng người cùng 職務 quay về màn trước\n- [ ] Audit idle_lock\n\n**Phụ thuộc:** EP00-I12, EP00-I22",
      "role": "FE",
-     "sprint": "S2",
+     "sprint": "S5",
      "labels": [
       "type:issue",
       "role:FE",
@@ -1664,7 +1664,7 @@
        "title": "Viết DD COM-03",
        "body": "**Mục tiêu:** COM-03 chỉ có spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
        "role": "SA",
-       "sprint": "S1",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:SA",
@@ -1676,7 +1676,7 @@
        "title": "BE hết phiên và audit khóa",
        "body": "**Mục tiêu:** Theo lớp thiết bị.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S2",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -1688,7 +1688,7 @@
        "title": "FE COM-03 cảnh báo và khóa",
        "body": "**Mục tiêu:** Đếm ngược theo spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
        "role": "FE",
-       "sprint": "S2",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:FE",
@@ -1700,7 +1700,7 @@
        "title": "Ca kiểm thử khóa phiên",
        "body": "**Mục tiêu:** Mỗi lớp thiết bị.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
        "role": "QA",
-       "sprint": "S2",
+       "sprint": "S5",
        "labels": [
         "type:sub-issue",
         "role:QA",
@@ -1714,7 +1714,7 @@
      "title": "Xác định lớp thiết bị ở server và chỉ cho duyệt trên PC",
      "body": "**Mục tiêu:** Server tự biết thiết bị đang dùng để chặn duyệt ngoài PC, không tin cookie client.\n\n**Phạm vi:**\n- Làm: đọc claim thiết bị / compliance từ Entra ID + Conditional Access; device_class vào audit; chặn duyệt trên thiết bị chung\n- Không làm: MDM cấu hình thiết bị (phía khách)\n\n**Nguồn:** LAB4:SEC-01; ISS-21; Q-COMDB-03; Q-COM-13; ADR-008\n\n**Định nghĩa xong:**\n- [ ] Cookie / tham số client không đổi được lớp thiết bị\n- [ ] Duyệt từ tablet chung bị chặn (test)\n- [ ] audit ghi device_class\n- [ ] Thiết bị chưa đăng ký → M_COM-16\n\n**Phụ thuộc:** EP00-I13, EP09-I08",
      "role": "BE",
-     "sprint": "S2",
+     "sprint": "HARD",
      "labels": [
       "type:issue",
       "role:BE",
@@ -1733,7 +1733,7 @@
        "title": "BE đọc claim thiết bị và chặn duyệt",
        "body": "**Mục tiêu:** Kiểm ở server.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S2",
+       "sprint": "HARD",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -1745,7 +1745,7 @@
        "title": "Bộ lọc thiết bị trong Conditional Access",
        "body": "**Mục tiêu:** Phân lớp PC / dùng chung / MDM.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
        "role": "Infra",
-       "sprint": "S2",
+       "sprint": "HARD",
        "labels": [
         "type:sub-issue",
         "role:Infra",
@@ -1757,7 +1757,7 @@
        "title": "Ca kiểm thử duyệt theo thiết bị",
        "body": "**Mục tiêu:** Mỗi lớp thiết bị.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
        "role": "QA",
-       "sprint": "S2",
+       "sprint": "HARD",
        "labels": [
         "type:sub-issue",
         "role:QA",
@@ -1771,7 +1771,7 @@
      "title": "Mã hóa dữ liệu khi truyền, khi lưu và trong tệp",
      "body": "**Mục tiêu:** Đạt NFR-SEC-03 cho đường truyền, DB, tệp và cột cá nhân.\n\n**Phạm vi:**\n- Làm: TLS ở App Gateway và nội bộ; mã hóa lưu PostgreSQL; mã hóa Blob; mã hóa cột cá nhân không tra cứu ở ứng dụng theo data-lifecycle §4\n- Không làm: hàng đợi POD trên thiết bị (EP-03 / EP-04, T08-01)\n\n**Nguồn:** REQ:NFR-SEC-03; SPEC:data-lifecycle §4; DB:COM_DB 4.1 (Q-COMDB-10); LAB4:02-architecture §5.3\n\n**Định nghĩa xong:**\n- [ ] Mọi kết nối ngoài và nội bộ dùng TLS (quét cấu hình)\n- [ ] DB và Blob bật mã hóa lưu\n- [ ] Cột cá nhân trong data-lifecycle §4 được mã hóa theo cách đã chốt (GAP-10-02)\n- [ ] Khóa nằm ở Key Vault, có xoay vòng\n\n**Phụ thuộc:** EP00-I02, EP10-I06\n\n**Spec gap:** GAP-10-02",
      "role": "Infra",
-     "sprint": "S2",
+     "sprint": "HARD",
      "labels": [
       "type:issue",
       "role:Infra",
@@ -1791,7 +1791,7 @@
        "title": "Cấu hình TLS và mã hóa lưu DB / Blob",
        "body": "**Mục tiêu:** Theo IaC.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
        "role": "Infra",
-       "sprint": "S2",
+       "sprint": "HARD",
        "labels": [
         "type:sub-issue",
         "role:Infra",
@@ -1803,7 +1803,7 @@
        "title": "Mã hóa cột cá nhân ở ứng dụng",
        "body": "**Mục tiêu:** Cột không tra cứu.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S2",
+       "sprint": "HARD",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -1815,7 +1815,7 @@
        "title": "Kiểm mã hóa",
        "body": "**Mục tiêu:** Đọc thô DB / Blob không thấy dữ liệu cá nhân.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
        "role": "QA",
-       "sprint": "S2",
+       "sprint": "HARD",
        "labels": [
         "type:sub-issue",
         "role:QA",
@@ -1906,7 +1906,7 @@
      "title": "Cảnh báo batch không chạy hoặc chạy quá giờ",
      "body": "**Mục tiêu:** Biết ngay khi một batch theo lịch không chạy hay chạy quá khung.\n\n**Phạm vi:**\n- Làm: heartbeat cho B-01〜B-16; khung giờ mong đợi theo lịch APV-014; cảnh báo tới IT\n- Không làm: nội dung batch\n\n**Nguồn:** SPEC:BATCH_LIST tổng quan; review-261024-step3-dr-final M-4 (C M03)\n\n**Định nghĩa xong:**\n- [ ] Batch không chạy đúng giờ sinh cảnh báo trong khung đã định\n- [ ] Batch chạy quá giờ (vd purge quá 04:00) sinh cảnh báo\n- [ ] Test bằng cách tắt một batch trên test\n\n**Phụ thuộc:** EP00-I27, EP10-I07",
      "role": "Infra",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:Infra",
@@ -2205,7 +2205,7 @@
      "title": "Dựng hiển thị JST và định dạng Nhật dùng chung",
      "body": "**Mục tiêu:** Mọi màn hiển thị ngày giờ JST và định dạng Nhật thống nhất.\n\n**Phạm vi:**\n- Làm: thành phần ngày (2026年10月10日), giờ JST, số thập phân, nhiệt độ âm; nhận / trả ISO 8601\n- Không làm: dịch UI sang ngôn ngữ khác\n\n**Nguồn:** REQ:NFR-LOC-01; SPEC:common-ui-rules; LAB4:02-architecture §5.3\n\n**Định nghĩa xong:**\n- [ ] Thành phần dùng chung có test với giờ quanh 00:00 JST\n- [ ] API trả ISO 8601 có múi giờ\n- [ ] Màn không tự định dạng ngày\n\n**Phụ thuộc:** EP00-I09",
      "role": "FE",
-     "sprint": "S1",
+     "sprint": "S5",
      "labels": [
       "type:issue",
       "role:FE",
@@ -2224,7 +2224,7 @@
      "title": "Đưa kiểm WCAG 2.2 AA tự động vào CI",
      "body": "**Mục tiêu:** Lỗi a11y bị bắt ngay khi màn được viết, không dồn tới hardening.\n\n**Phạm vi:**\n- Làm: axe chạy trong CI cho mọi màn; trạng thái luôn có chữ + biểu tượng; ngưỡng chặn merge\n- Không làm: kiểm tay (EP10-I22)\n\n**Nguồn:** REQ:NFR-ACC-01; SPEC:common-ui-rules; LAB4:01-wireframes/design-system\n\n**Định nghĩa xong:**\n- [ ] axe chạy trong CI cho mọi màn đã có\n- [ ] Lỗi mức A / AA chặn merge\n- [ ] Báo cáo axe lưu theo build\n\n**Phụ thuộc:** EP00-I03",
      "role": "QA",
-     "sprint": "S1",
+     "sprint": "S5",
      "labels": [
       "type:issue",
       "role:QA",
@@ -2823,7 +2823,7 @@
      "title": "Xử lý 依頼 閉鎖・再開 vị trí và IF設定 trong 14-04",
      "body": "**Mục tiêu:** Đổi trạng thái vị trí và thiết lập IF chỉ có hiệu lực sau khi được duyệt.\n\n**Phạm vi:**\n- Làm: 依頼 từ SCR-02 View 3; M_MST-33 khi vị trí còn tồn; 閉鎖 chỉ chặn đưa vào, vẫn lấy ra; IF設定 → config_parameter active, bản cũ thôi hiệu lực\n- Không làm: nút gửi 依頼 ở SCR-02 (EP-02)\n\n**Nguồn:** SPEC:SCR-14 E-6, D-8.4; CR:location-close-reopen (APV-002); Q-FLW-INV-14; DB:MST_DB Q-MSTDB-03; Q-FLW-06\n\n**Định nghĩa xong:**\n- [ ] Duyệt 閉鎖 → vị trí không nhận 入庫 nhưng vẫn 出庫 được (test)\n- [ ] IF設定 chưa duyệt không áp dụng\n- [ ] Người gửi không tự duyệt\n- [ ] Mỗi lần đổi có audit\n\n**Phụ thuộc:** EP08-I09, EP00-I22\n\n**Spec gap:** GAP-08-03",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -2843,7 +2843,7 @@
        "title": "Viết DD luồng 依頼 閉鎖・再開 và IF設定",
        "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
        "role": "SA",
-       "sprint": "S2",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:SA",
@@ -2855,7 +2855,7 @@
        "title": "BE áp 依頼 sau duyệt",
        "body": "**Mục tiêu:** Hai loại 依頼.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -2867,7 +2867,7 @@
        "title": "Ca kiểm thử 依頼",
        "body": "**Mục tiêu:** Vị trí còn tồn, chưa duyệt.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA",
@@ -2941,7 +2941,7 @@
      "title": "Hiển thị lịch sử version và reversal chỉ đọc (M.4)",
      "body": "**Mục tiêu:** Người dùng xem được version cũ, retired và reversal của master.\n\n**Phạm vi:**\n- Làm: B-5 / C-5 / D-6: version bất biến, người làm, thời điểm, trạng thái, retired / reversal\n- Không làm: UI tạo event (không có)\n\n**Nguồn:** SPEC:SCR-14 B-5, C-5, D-6; DB:MST_DB R4; bidding:S8.4\n\n**Định nghĩa xong:**\n- [ ] Lịch sử dựng từ event + version, không từ cột hiện hành\n- [ ] Không có nút sửa trên lịch sử\n- [ ] Test hiện đúng thứ tự thời gian\n\n**Phụ thuộc:** EP08-I01",
      "role": "FE",
-     "sprint": "S2",
+     "sprint": "HARD",
      "labels": [
       "type:issue",
       "role:FE",
@@ -3240,7 +3240,7 @@
      "title": "Kiểm phân quyền SCR-14 theo 職務",
      "body": "**Mục tiêu:** SCR-14 chỉ mở đúng vùng cho đúng 職務.\n\n**Phạm vi:**\n- Làm: 品質管理 chỉ 14-03 温度ポリシー, 14-04 lọc loại, 14-06 G-4 / G-8 / G-12 / G-13; CS, 監査者 → COM-04; gọi trực tiếp → M_MST-11\n- Không làm: quyền các màn khác\n\n**Nguồn:** SPEC:SCR-14 §3 権限, §5 初期処理; SPEC:screen-list ma trận\n\n**Định nghĩa xong:**\n- [ ] Mỗi vùng có ca cho 8 職務\n- [ ] Gọi API trực tiếp trái quyền trả M_MST-11\n- [ ] Kết quả đưa vào EP10-I19\n\n**Phụ thuộc:** EP08-I02, EP08-I05, EP08-I07, EP08-I08, EP08-I09",
      "role": "QA",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:QA",
@@ -3265,7 +3265,7 @@
      "title": "Nạp dữ liệu master mẫu cho dev và test",
      "body": "**Mục tiêu:** Đội có master giả lập ổn định để phát triển và kiểm thử các module.\n\n**Phạm vi:**\n- Làm: 12 SKU, 15 hợp đồng (2 dòng 未確定), vị trí seed 入荷エリア và 隔離, zone A / C / F nạp qua release có người duyệt\n- Không làm: migration dữ liệu thật (EP-12)\n\n**Nguồn:** SPEC:SCR-14 §3 (Q37), §6 dữ liệu cực đoan; DB:MST_DB 4.0 (đổi qua release); REQ:R-01, R-02, R-04\n\n**Định nghĩa xong:**\n- [ ] Seed chạy lại được, không trùng\n- [ ] Chỉ dữ liệu giả lập, không dữ liệu thật\n- [ ] Zone nạp qua release có người duyệt khác người nạp\n\n**Phụ thuộc:** EP00-I18\n\n**Spec gap:** GAP-08-02",
      "role": "BE",
-     "sprint": "S1",
+     "sprint": "S5",
      "labels": [
       "type:issue",
       "role:BE",
@@ -3458,7 +3458,7 @@
      "title": "Chạy B-03 xuất 入出庫・在庫結果 sang ERP lúc 23:30",
      "body": "**Mục tiêu:** ERP nhận kết quả nhập / xuất / tồn trong ngày đúng một lần mỗi ngày nghiệp vụ.\n\n**Phạm vi:**\n- Làm: stock_event trong ngày JST (出荷 ghi ở 出荷確認) + tồn cuối ngày theo lô; gửi lỗi → error + N-06; 再実行 → dòng resent cùng nội dung\n- Không làm: nhận phản hồi từ ERP\n\n**Nguồn:** SPEC:BATCH_LIST B-03; DB:MST_DB 4.12; ADR-005; Q4; bidding:S9.1\n\n**Định nghĩa xong:**\n- [ ] Nội dung tệp khớp stock_event trong ngày (test đối soát)\n- [ ] Gửi lại tạo dòng resent, nội dung không đổi\n- [ ] Khóa ngày + schema version 【仮】 (ISS-31) ghi trong DD\n\n**Phụ thuộc:** EP09-I01, EP00-I27\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp. Cần stock_event 出荷 của EP-03 (D-A).",
      "role": "BE",
-     "sprint": "S4",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -3477,7 +3477,7 @@
        "title": "Viết DD B-03",
        "body": "**Mục tiêu:** Nội dung tệp và khóa ngày.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
        "role": "SA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:SA",
@@ -3489,7 +3489,7 @@
        "title": "BE batch B-03",
        "body": "**Mục tiêu:** Xuất lên SFTP.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -3501,7 +3501,7 @@
        "title": "Ca kiểm thử B-03",
        "body": "**Mục tiêu:** Đối soát và gửi lại.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
        "role": "QA",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA",
@@ -3591,7 +3591,7 @@
      "title": "Dựng cổng nhận tệp datalogger (IF-LOG-01)",
      "body": "**Mục tiêu:** Tệp logger tải lên có kiểm soát, giữ tệp gốc và SHA-256, không nạp trùng.\n\n**Phạm vi:**\n- Làm: nhận tệp từ SCR-09 View 2; lưu tệp gốc ở Blob + SHA-256; trùng hash → từ chối; ánh xạ trạng thái temperature_import_file → interface_run (failed → rejected); adapter để mở rộng IoT sau\n- Không làm: parse dòng, đánh giá, alarm (EP-05); kết nối IoT trực tiếp (ngoài gói)\n\n**Nguồn:** SPEC:BATCH_LIST B-04; SPEC:SCR-14 F-4; REQ:IF-LOG-01; ISS-36 B#29; bidding:S9.2\n\n**Định nghĩa xong:**\n- [ ] Tệp trùng hash bị từ chối (test)\n- [ ] Tệp gốc tải lại được và hash khớp\n- [ ] Trạng thái hiện ở 14-05 đúng ánh xạ\n- [ ] Ranh giới với EP-05 ghi trong DD (B#29)\n\n**Phụ thuộc:** EP00-I28, EP00-I08\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp.",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -3610,7 +3610,7 @@
        "title": "Viết DD cổng nhận tệp logger",
        "body": "**Mục tiêu:** Chốt ranh giới với EP-05.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
        "role": "SA",
-       "sprint": "S2",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:SA",
@@ -3622,7 +3622,7 @@
        "title": "BE cổng nhận tệp",
        "body": "**Mục tiêu:** Blob + hash.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -3636,7 +3636,7 @@
      "title": "Dựng adapter bản đồ IF-MAP-01",
      "body": "**Mục tiêu:** Lập route lấy được thời gian di chuyển ổn định, có cache và báo lỗi rõ.\n\n**Phạm vi:**\n- Làm: MapPort cho Azure Maps; timeout 10 giây, thử lại 1 lần; cache 24 giờ theo cặp điểm; interface_run; tuổi cache cho 14-05 F-3; lỗi không có cache → báo để SCR-07 trả M_DSP-09\n- Không làm: chặn 公開 khi ước tính cũ hơn 24 giờ (EP-04)\n\n**Nguồn:** SPEC:BATCH_LIST B-12; Q45; SPEC:ARCH_system-overview §2 (Maps); bidding:S9.3\n\n**Định nghĩa xong:**\n- [ ] Timeout và thử lại theo đúng tham số (test với adapter giả)\n- [ ] Cache trả kết quả trong 24 giờ, quá hạn gọi lại\n- [ ] Mỗi lần gọi có interface_run\n- [ ] Khóa Maps nằm ở Key Vault\n\n**Phụ thuộc:** EP00-I08\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp.",
      "role": "BE",
-     "sprint": "S2",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -3654,7 +3654,7 @@
        "title": "Viết DD adapter bản đồ",
        "body": "**Mục tiêu:** Khóa cache, xử lý lỗi.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
        "role": "SA",
-       "sprint": "S1",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:SA",
@@ -3666,7 +3666,7 @@
        "title": "BE adapter Maps và cache",
        "body": "**Mục tiêu:** Qua MapPort.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
        "role": "BE",
-       "sprint": "S2",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE",
@@ -3678,7 +3678,7 @@
        "title": "Cấp tài nguyên Azure Maps",
        "body": "**Mục tiêu:** Theo IaC.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
        "role": "Infra",
-       "sprint": "S2",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:Infra",
@@ -3819,7 +3819,7 @@
      "title": "Dựng bộ phân giải người nhận và mẫu thông báo N-01〜N-16",
      "body": "**Mục tiêu:** Module chỉ phát sự kiện; người nhận và nội dung lấy từ một chỗ.\n\n**Phạm vi:**\n- Làm: nhóm nhận theo config_parameter (không theo 職務); mẫu chữ từng N; API phát sự kiện cho module\n- Không làm: sự kiện nghiệp vụ của từng module\n\n**Nguồn:** SPEC:notification-list; DB:COM_DB 4.7; Q-COMDB-05; Q-COMDB-06; bidding:S9.5\n\n**Định nghĩa xong:**\n- [ ] 16 N-xx có mẫu và nhóm nhận\n- [ ] Nhóm nhận đổi qua cấu hình có version\n- [ ] Không lưu email cá nhân trong user_profile (DR-PRIV-01)\n\n**Phụ thuộc:** EP09-I09, EP00-I22",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -3839,7 +3839,7 @@
      "title": "Dựng gửi lại mail failed từ 14-05 (F-21)",
      "body": "**Mục tiêu:** マスター管理者 gửi lại được thông báo đã failed, có ghi vết.\n\n**Phạm vi:**\n- Làm: chỉ dòng failed chưa 再送; tạo dòng mới queued, dòng gốc giữ; N-05 / N-15 (recall) disabled; M_MST-39 / 40; audit\n- Không làm: liên hệ tay của CS cho recall (EP-06)\n\n**Nguồn:** SPEC:SCR-14 F-18, F-21; SPEC:BATCH_LIST B-10; Q-FLW-03; bidding:S9.5\n\n**Định nghĩa xong:**\n- [ ] Dòng không phải failed hoặc đã 再送 → disabled kèm lý do, API trả M_MST-06\n- [ ] Dòng gốc không đổi sau 再送\n- [ ] Mỗi lần 再送 có audit\n\n**Phụ thuộc:** EP09-I09, EP09-I05",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -4563,7 +4563,7 @@
      "title": "Nhập 返品 theo dòng giao vào 隔離",
      "body": "**Mục tiêu:** Hàng 持戻り / 受領拒否 / 顧客返品 vào lại kho qua 返品入荷 và luôn thành lô 隔離, không vượt số đã giao.\n\n**Phạm vi:** Làm: khung G-1 / G-2 hàng chờ 返品, ô 元ロット / 返品起因 / 元配送履歴行, kiểm Σ 返品 ≤ số giao (khóa shipment_line), lô 返品 lấy 仕入先 của lô gốc. Không làm: POD và 出荷確認 (EP-03); hạn nhắc 返品 (Q68 trống).\n\n**Nguồn:** DD:SCR-01 §3.3.B G-1/G-2, §3.3.D D-25〜D-28, §4.2; DB:REC_DB R10; ADR-006; LAB4:REC-FEAT-01, REC-FIX-05; SEQ_return-into-quarantine\n\n**Định nghĩa xong:**\n- [ ] 返品 + E-2 > 0 / E-3 > 0 → M_REC-23 / M_REC-24 (TP-26)\n- [ ] Vượt số giao → M_REC-33 với số giao / đã nhập (TP-28)\n- [ ] Lô 返品 có original_lot_id và 仕入先 lô gốc\n- [ ] G-1 chỉ hiện dòng đã đồng bộ POD\n- [ ] Không đếm tồn hai lần với D-A\n\n**Phụ thuộc:** EP01-I09, EP02-I15; ngoài nhóm: EP-03 (出荷確認 trừ tồn một lần D-A, shipment_line, POD 持戻り / 受領拒否)\n\n**Spec gap:** GAP-01-05",
      "role": "BE",
-     "sprint": "S4",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -4583,7 +4583,7 @@
        "title": "Test case 返品入荷",
        "body": "**Mục tiêu:** Case theo dòng giao.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-26〜28\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
        "role": "QA",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -4594,7 +4594,7 @@
        "title": "Kiểm 返品 theo dòng giao ở service",
        "body": "**Mục tiêu:** R10 + khóa shipment_line.\n\n**Nguồn:** DD:SCR-01 §4.2; DB:REC_DB R10\n\n**Định nghĩa xong:**\n- [ ] Kiểm lúc lưu nháp và lúc 判定\n- [ ] Test đỏ → xanh",
        "role": "BE",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE"
@@ -4605,7 +4605,7 @@
        "title": "Khung G-1 / G-2 và ô 返品 trên View 2",
        "body": "**Mục tiêu:** Điền sẵn từ dòng giao.\n\n**Nguồn:** DD:SCR-01 §3.3.B, §3.3.D\n\n**Định nghĩa xong:**\n- [ ] Chỉ 入荷担当者 thấy G-2\n- [ ] Quá hạn nhắc nổi bật khi có giá trị",
        "role": "FE",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -4618,7 +4618,7 @@
      "title": "Xuất RPT-16 受入票 PDF",
      "body": "**Mục tiêu:** In phiếu nhận hàng từ giá trị đã lưu lúc 判定, có vết xuất.\n\n**Phạm vi:** Làm: sinh PDF theo RPT-16_SPEC từ dữ liệu đã lưu, export_manifest + audit_log, chặn khi chưa 判定, chặn 監査者. Không làm: tính lại kiểm khi in; máy in vật lý (Q-RPT-16-01).\n\n**Nguồn:** DD:SCR-01 §4.7; SPEC:RPT-16; LAB4:REC-FEAT-03; gap-261024-wbs-summary A#8\n\n**Định nghĩa xong:**\n- [ ] PDF đúng layout RPT-16\n- [ ] Chưa 判定 → M_REC-25\n- [ ] 監査者 gọi → M_REC-09\n- [ ] export_manifest có SHA-256\n\n**Phụ thuộc:** EP01-I09; ngoài nhóm: EP-00 (export_manifest, dịch vụ sinh PDF)\n\n**Ràng buộc nghiệp vụ:** Ứng viên cắt đầu tiên nếu thu hẹp phạm vi (Q-RPT-16-04) — PO quyết trước S3.",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -4636,7 +4636,7 @@
        "title": "Test case RPT-16",
        "body": "**Mục tiêu:** Case nội dung và quyền.\n\n**Nguồn:** SPEC:RPT-16; DD:SCR-01 §4.7\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -4647,7 +4647,7 @@
        "title": "Sinh PDF RPT-16 + manifest",
        "body": "**Mục tiêu:** Đọc giá trị đã lưu, không tính lại.\n\n**Nguồn:** SPEC:RPT-16 §4\n\n**Định nghĩa xong:**\n- [ ] Cột cố định in 「—」 khi không có\n- [ ] Trạng thái lô in theo đáp án Q-RPT-16-02",
        "role": "BE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE"
@@ -4660,7 +4660,7 @@
      "title": "Chạy kiểm thử SCR-01 trên môi trường test",
      "body": "**Mục tiêu:** Toàn bộ điểm kiểm thử SCR-01 chạy xanh trên test trước khi sang E2.\n\n**Phạm vi:** Làm: chạy bộ case TP-01〜32, ghi TR, triage bug, kiểm quyền và khóa phiên. Không làm: kiểm thử hiệu năng (hardening).\n\n**Nguồn:** DD:SCR-01 §5.2; plan-261024-dev-phase-wbs §5 T7\n\n**Định nghĩa xong:**\n- [ ] TR có kết quả từng case\n- [ ] Không còn bug Sev1 / Sev2 mở\n- [ ] Quyền 監査者 / センター作業者 đúng (TP-31)\n- [ ] Khóa 5 phút tablet chung đúng (TP-32)\n\n**Phụ thuộc:** EP01-I03, EP01-I04, EP01-I08, EP01-I09, EP01-I10; ngoài nhóm: EP-00 (môi trường test Azure)",
      "role": "QA",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:QA",
@@ -4686,7 +4686,7 @@
        "title": "Chạy bộ case chức năng SCR-01",
        "body": "**Mục tiêu:** TP-01〜30.\n\n**Nguồn:** DD:SCR-01 §5.2\n\n**Định nghĩa xong:**\n- [ ] TR lưu repo\n- [ ] Bug có link case",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -4697,7 +4697,7 @@
        "title": "Chạy case quyền và phiên SCR-01",
        "body": "**Mục tiêu:** TP-31, TP-32 + gọi API trực tiếp.\n\n**Nguồn:** DD:SCR-01 §3.6, §5.2\n\n**Định nghĩa xong:**\n- [ ] Mỗi hành động trong ma trận §3.6 có case\n- [ ] Gọi API thiếu quyền trả M_REC-09",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -4857,7 +4857,7 @@
      "title": "Đề xuất vị trí lưu kho hợp lệ (FEFO, cùng SKU khác hạn)",
      "body": "**Mục tiêu:** Hệ thống chỉ đề xuất vị trí hợp lệ; chọn vị trí khác ngoài đề xuất phải có lý do.\n\n**Phạm vi:** Làm: tính top-N vị trí theo dải áp dụng, trạng thái, dung lượng, loại vị trí chứa cùng SKU khác hạn, ưu tiên trống / cùng hạn; cảnh báo + lý do khi chọn vị trí cùng SKU khác hạn. Không làm: tối ưu đường đi picking.\n\n**Nguồn:** SPEC:SCR-02 §5 G-5〜G-9; FR-INV-02; Q12\n\n**Định nghĩa xong:**\n- [ ] Không đề xuất vị trí không hợp lệ\n- [ ] Không có vị trí hợp lệ → M_INV-10\n- [ ] Chọn ngoài đề xuất mà thiếu lý do bị chặn\n- [ ] Test xanh\n\n**Phụ thuộc:** EP02-I03, EP02-I05, EP02-I06",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -4877,7 +4877,7 @@
        "title": "Test case đề xuất vị trí",
        "body": "**Mục tiêu:** Case FEFO, khác hạn, đầy.\n\n**Nguồn:** SPEC:SCR-02 §5 G-5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -4925,7 +4925,7 @@
      "title": "Giữ dung lượng / 閉鎖 vị trí và gửi 閉鎖・再開依頼",
      "body": "**Mục tiêu:** Không đưa hàng vào vị trí đóng hoặc đầy; センター作業者 đề xuất đóng / mở để người khác duyệt.\n\n**Phạm vi:** Làm: chặn đưa vào vị trí 閉鎖 (vẫn cho lấy ra), chặn vượt dung lượng pallet, View G-10 tình trạng vị trí, G-17〜G-19 gửi 依頼 vào hàng đợi duyệt. Không làm: màn duyệt ở SCR-14 14-04 (EP-08); sửa master vị trí.\n\n**Nguồn:** SPEC:SCR-02 §3 (FR-INV-01), §5 G-13, G-17; CR-202610-location-close-reopen-request (APV-002); DB:INV_DB R6; Q-INVDB-04\n\n**Định nghĩa xong:**\n- [ ] Vị trí 閉鎖 → M_INV-03 khi đưa vào, lấy ra vẫn được\n- [ ] Vượt dung lượng → M_INV-04\n- [ ] Đã có 依頼 chờ → M_INV-34\n- [ ] Trạng thái vị trí chỉ đổi sau khi người khác duyệt\n\n**Phụ thuộc:** EP02-I02; ngoài nhóm: EP-08 (hàng đợi 14-04, master vị trí / dung lượng)",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -4943,7 +4943,7 @@
        "title": "Test case dung lượng và 閉鎖",
        "body": "**Mục tiêu:** Case đóng / đầy / 依頼.\n\n**Nguồn:** SPEC:SCR-02 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -5251,7 +5251,7 @@
      "title": "Điều chỉnh chênh lệch kiểm kê: lý do, ngưỡng có version, maker–checker",
      "body": "**Mục tiêu:** Chênh lệch chỉ thành điều chỉnh tồn khi có lý do; vượt ngưỡng cần マスター管理者 khác người duyệt.\n\n**Phạm vi:** Làm: View 3 đối chiếu sau nộp, điều chỉnh dưới ngưỡng (lý do), 承認申請 / 承認 / 却下 / 取下げ, ngưỡng theo dòng có version (= 0 lúc Go-Live), giải phóng 引当 khi tồn < 引当, hủy task chưa 完了. Không làm: báo cáo KPI 未説明差異 (Q-INV-17).\n\n**Nguồn:** SPEC:SCR-16 §5 F-4〜F-12, C-7, §6 (ngưỡng); DB:INV_DB 4.9, R7〜R9, R16; Q17\n\n**Định nghĩa xong:**\n- [ ] Vượt ngưỡng mà không duyệt (gọi trực tiếp) → M_REC-09\n- [ ] Tự duyệt → M_MST-05\n- [ ] Lô đổi sau khi nộp → M_INV-11, yêu cầu đếm lại\n- [ ] Hủy task: dòng chờ đóng như 却下, điều chỉnh đã áp giữ nguyên\n- [ ] Retry cùng request_id không điều chỉnh hai lần\n\n**Phụ thuộc:** EP02-I13; ngoài nhóm: EP-00 (bảng quy tắc có version cho ngưỡng 棚卸し), EP-08 (kích hoạt 版 ở SCR-14 14-03); EP-03 (dịch vụ 解放 引当 + đánh dấu 再引当 của SCR-05 §4.5)\n\n**Ràng buộc nghiệp vụ:** Lane 米 / 牛 luôn ngưỡng 0 (mọi chênh lệch cần duyệt).\n\n**Spec gap:** GAP-02-03",
      "role": "BE",
-     "sprint": "S4",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -5270,7 +5270,7 @@
        "title": "Test case điều chỉnh kiểm kê",
        "body": "**Mục tiêu:** Case ngưỡng, duyệt, hủy.\n\n**Nguồn:** SPEC:SCR-16 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
        "role": "QA",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -5281,7 +5281,7 @@
        "title": "Màn View 3 đối chiếu + duyệt",
        "body": "**Mục tiêu:** Dùng được trên PC.\n\n**Nguồn:** SPEC:SCR-16 §2 View 3\n\n**Định nghĩa xong:**\n- [ ] Hiện 「提出後の移動あり」\n- [ ] Ẩn nút duyệt khi cùng người",
        "role": "FE",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -5337,7 +5337,7 @@
      "title": "Chốt câu hỏi mở tồn kho / kiểm kê với PO",
      "body": "**Mục tiêu:** Có đáp án hoặc mặc định đã xác nhận cho các câu chặn DD SCR-02 / 03 / 16.\n\n**Phạm vi:** Làm: gửi và theo dõi Q-INV-07, Q-INV-12〜14, Q-INV-16〜18, Q-INVDB-04〜06, ISS-19 và các GAP-02-*. Không làm: quyết thay khách.\n\n**Nguồn:** SPEC:SCR-02 §6, SPEC:SCR-16 §6; DB:INV_DB §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi câu có trạng thái + người trả lời\n- [ ] Đáp án phản ánh vào DD trước khi DD review\n- [ ] Câu còn mở có mặc định 【仮】 và tác động ghi rõ\n\n**Phụ thuộc:** —\n\n**Spec gap:** GAP-02-01, GAP-02-03, GAP-02-04",
      "role": "BrSE",
-     "sprint": "S2",
+     "sprint": "HARD",
      "labels": [
       "type:issue",
       "role:BrSE",
@@ -5357,7 +5357,7 @@
      "title": "Chạy kiểm thử SCR-02 / 03 / 16 trên môi trường test",
      "body": "**Mục tiêu:** Các màn tồn kho chạy xanh trên test trước hardening.\n\n**Phạm vi:** Làm: chạy case của EP02-I02〜I15, TR, triage. Không làm: hiệu năng.\n\n**Nguồn:** plan-261024-dev-phase-wbs §5 T7\n\n**Định nghĩa xong:**\n- [ ] TR có kết quả từng case\n- [ ] Không còn Sev1 / Sev2 mở\n- [ ] Truy vết FR-INV ↔ TC hai chiều\n\n**Phụ thuộc:** EP02-I03, EP02-I10, EP02-I11, EP02-I12, EP02-I14",
      "role": "QA",
-     "sprint": "S4",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:QA",
@@ -5459,7 +5459,7 @@
      "title": "Chốt câu hỏi khách về logger CSV và mức HACCP",
      "body": "**Mục tiêu:** Có mẫu CSV logger và các quyết định HACCP của khách trước khi DD / code nhập CSV (S3–S4).\n\n**Phạm vi:** Làm: gửi và theo dõi Q-TMP-03 (mẫu cột, mã hóa, timezone, cỡ tối đa), Q-DTL-TMP-04, 05, 07, 09, Q-DTL-HACCP-01〜03, Q-TMP-09 / 10 (RPT-17), Q-TMP-24 (nguồn lượt khách). Không làm: quyết thay khách.\n\n**Nguồn:** DD:SCR-09 §3.3 (CSV), §5.4, §5.6; PREMISE §5\n\n**Định nghĩa xong:**\n- [ ] Có tệp CSV mẫu thật hoặc mặc định 【仮】 được khách chấp nhận\n- [ ] Q-DTL-TMP-09 có quyết định chặn / chỉ cảnh báo\n- [ ] Mức HACCP và danh sách ca vệ sinh có câu trả lời hoặc mặc định ghi rõ\n- [ ] Đáp án vào DD trước review S3\n\n**Phụ thuộc:** —\n\n**Spec gap:** GAP-05-01, GAP-05-02",
      "role": "BrSE",
-     "sprint": "S1",
+     "sprint": "S5",
      "labels": [
       "type:issue",
       "role:BrSE",
@@ -6668,7 +6668,7 @@
      "title": "Màn SCR-04 View 2: duyệt dòng từ 2 tệp ERP delta",
      "body": "**Mục tiêu**\nクレーム/CS xem dòng 未確定 từ tệp 10:30 / 13:30, nhãn 要確認, 除外 dòng tệp có audit.\n\n**Phạm vi**\n- Làm: View 2 danh sách dòng tệp, lỗi / cảnh báo theo dòng, 除外, 一括確定 cho dòng sạch\n- Không làm: đọc tệp, kiểm tệp, B-02 (EP-09 IF.1)\n\n**Nguồn**\nSPEC:SCR-04 View 2, E-1, E-6; SEQ_erp-order-import; bidding:S3.1\n\n**Định nghĩa xong**\n- [ ] Dòng エラー không 確定 được\n- [ ] 除外 ghi audit_log\n- [ ] Test E2E: tệp có 1 dòng lỗi + 1 dòng sạch\n\n**Phụ thuộc**\nEP03-I06; EP-09 (ngoài nhóm): B-02 nạp tệp ERP; DR H-4 / M-3 chưa đóng",
      "role": "FE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:FE",
@@ -6686,7 +6686,7 @@
        "title": "Viết DD SCR-04 — View 2 dòng tệp ERP",
        "body": "**Mục tiêu**\nViết detail design SCR-04 phần View 2 dòng tệp ERP theo khuôn BM-2-901-53, bám spec đã duyệt, không đặt giá trị tạm.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có sequence, bảng xử lý server (Input / Output / Error / Detail), máy trạng thái, ma trận quyền\n- [ ] Có điểm kiểm thử biên và bảng câu hỏi mở trỏ Q-xx\n- [ ] Qua review-detail-design, đạt DoR trước sprint code",
        "role": "BrSE",
-       "sprint": "S2",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BrSE"
@@ -7149,7 +7149,7 @@
      "title": "受注取消 trước picking (F-5) và job phục hồi dòng kẹt 処理中",
      "body": "**Mục tiêu**\nCS hủy đơn chưa picking, giải phóng 引当; dòng kẹt `processing` từ 一括 được trả về `unconfirmed`.\n\n**Phạm vi**\n- Làm: F-5 với lý do bắt buộc, xác nhận 2 bước, khóa D → 0 → 1 → 2 → 3, kiểm lại `picked_at` sau khóa; job R12 ngưỡng 5 phút 【仮】 SKIP LOCKED + N-11\n- Không làm: lịch chạy batch (EP-00 bộ lập lịch); F-5 từ no_eligible_lot / conflict_rejected / out_of_scope chờ Q-CD-04 (làm theo spec màn)\n\n**Nguồn**\nDD:SCR-05 4.4, 4.6; CR-202610-order-cancel-before-picking (APV-002); LAB4:OUT-JOB-01; gap-261024-wbs-A #15; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] SQL T-26, T-30, T-35 (F-5 × quét đầu, không deadlock) xanh\n- [ ] E2E T-27\n- [ ] Job chạy trên Azure Functions timer ở môi trường test\n\n**Phụ thuộc**\nEP03-I08, EP03-I06; EP-00 (ngoài nhóm): bộ lập lịch batch",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -7168,7 +7168,7 @@
        "title": "Viết TC F-5 và job R12",
        "body": "**Mục tiêu**\nTC T-26, T-27, T-30, T-35.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca 2 kết nối",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -7179,7 +7179,7 @@
        "title": "Cài API F-5 受注取消",
        "body": "**Mục tiêu**\nTheo 4.4.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-26, T-35 xanh",
        "role": "BE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE"
@@ -7190,7 +7190,7 @@
        "title": "Cài job R12 処理中 timeout",
        "body": "**Mục tiêu**\nTheo 4.6.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-30 xanh",
        "role": "BE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE"
@@ -7203,7 +7203,7 @@
      "title": "Màn SCR-05 ロット引当結果確認 (xem kết quả, đánh giá lô, F-4 / F-5)",
      "body": "**Mục tiêu**\nNgười dùng xem kết quả 引当 và lý do loại từng lô; CS chạy 再引当 / 受注取消 trên PC.\n\n**Phạm vi**\n- Làm: vùng A〜F, lọc B-4 trống (Q-OUT-35), CS mặc định 要対応; D tính bằng cùng hàm thuần, không khóa; chỉ PC (M_COM-26); nút theo 職務\n- Không làm: sửa lô thủ công (ngoài phạm vi đề)\n\n**Nguồn**\nDD:SCR-05 §3.3, §3.4, §3.7, 4.1; SPEC:SCR-05; wireframe SCR-05_wf-view1; LAB4:OUT-UI-01; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] E2E: dòng đã 引当 hiện bằng chứng đã lưu\n- [ ] Truy cập từ ハンディ → M_COM-26\n- [ ] Lý do loại hiện chữ + biểu tượng, không chỉ màu\n- [ ] Nút F-4 / F-5 ẩn với 職務 khác CS\n\n**Phụ thuộc**\nEP03-I08, EP03-I15, EP03-I16",
      "role": "FE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:FE",
@@ -7223,7 +7223,7 @@
        "title": "Dựng màn SCR-05 vùng A〜D",
        "body": "**Mục tiêu**\nDanh sách + panel đánh giá lô.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Khớp wireframe\n- [ ] Skeleton khi > 1 giây",
        "role": "FE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -7234,7 +7234,7 @@
        "title": "Nối F-4 / F-5 và thông điệp E-1",
        "body": "**Mục tiêu**\nGọi API, xác nhận 2 bước, giữ D-8.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] E2E T-27 xanh",
        "role": "FE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -7245,7 +7245,7 @@
        "title": "Kiểm E2E SCR-05",
        "body": "**Mục tiêu**\nChạy luồng chính + quyền.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -7681,7 +7681,7 @@
      "title": "Màn SCR-06 ba view (ハンディ View 1〜2, tablet View 3)",
      "body": "**Mục tiêu**\nGiao diện quét / 積込確認 trên ハンディ 360 px và 出荷前チェック / 出荷確認 / 積込取消 trên tablet cửa xuất.\n\n**Phạm vi**\n- Làm: chữ 18–20 px, số lượng ≥ 32 px, vùng chạm ≥ 48 px; lý do chặn hiện trong màn, giữ dữ liệu đã quét; xác nhận 2 bước; khóa phiên 5 phút\n- Không làm: PC cho View 1〜2 (Q-DD06-04 chưa chốt)\n\n**Nguồn**\nDD:SCR-06 §3.3, §3.4, §3.7; SPEC:SCR-06; wireframe SCR-06_wf-view1〜3; LAB4:OUT-UI-02; bidding:S3.4; bidding:S3.5; bidding:S3.6\n\n**Định nghĩa xong**\n- [ ] E2E/a11y P-29 xanh\n- [ ] P-06, P-25 xanh\n- [ ] Thao tác View 3 từ ハンディ bị chặn\n\n**Phụ thuộc**\nEP03-I18, EP03-I19, EP03-I20, EP03-I21",
      "role": "FE",
-     "sprint": "S4",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:FE",
@@ -7704,7 +7704,7 @@
        "title": "Dựng View 1〜2 cho ハンディ",
        "body": "**Mục tiêu**\nDanh sách task + quét + C-11.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Không cuộn ngang ở 360 px",
        "role": "FE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -7715,7 +7715,7 @@
        "title": "Dựng View 3 cho tablet",
        "body": "**Mục tiêu**\nD-13, D-8, D-6, D-11.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Xác nhận 2 bước",
        "role": "FE",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -7726,7 +7726,7 @@
        "title": "Kiểm E2E / a11y SCR-06",
        "body": "**Mục tiêu**\nLuồng chính + P-29.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
        "role": "QA",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -8063,7 +8063,7 @@
      "title": "Màn SCR-08 POD登録 và vùng đồng bộ (375 px)",
      "body": "**Mục tiêu**\nTài xế đăng ký POD theo dòng và theo dõi đồng bộ trên smartphone MDM.\n\n**Phạm vi**\n- Làm: header A-4〜A-7; View 2 C-1〜C-16; E-1, E-2; B-8 sửa bản 同期待ち (M_DSP-37) / chỉ đọc sau khi server nhận (M_DSP-36); 同期状態 tách 配送状態\n- Không làm: View 1 lịch trình và View 3 例外事象 (EP04)\n\n**Nguồn**\nDD:SCR-08 §3.3 A, C, E; SPEC:SCR-08; wireframe SCR-08_wf-view2; bidding:S3.7; bidding:S3.8\n\n**Định nghĩa xong**\n- [ ] E2E offline (giả lập) TP08-06, TP08-15 xanh\n- [ ] TP08-19 bố cục 375 px\n- [ ] Không hiện 「端末判定」\n\n**Phụ thuộc**\nEP03-I30, EP03-I31, EP03-I29",
      "role": "FE",
-     "sprint": "S4",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:FE",
@@ -8084,7 +8084,7 @@
        "title": "Dựng View 2 POD登録",
        "body": "**Mục tiêu**\nC-1〜C-16.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Khớp wireframe",
        "role": "FE",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -8095,7 +8095,7 @@
        "title": "Dựng header và vùng đồng bộ",
        "body": "**Mục tiêu**\nA-4〜A-7, E-1, E-2.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Hai trục trạng thái",
        "role": "FE",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -8106,7 +8106,7 @@
        "title": "Kiểm E2E offline SCR-08 POD",
        "body": "**Mục tiêu**\nPlaywright giả lập offline.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
        "role": "QA",
-       "sprint": "S4",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -8258,7 +8258,7 @@
      "title": "Chỉnh DD SCR-08 phần lịch trình, シール確認, 出発 / 帰着, 例外事象",
      "body": "**Mục tiêu**\nĐưa phần mốc chuyến và 例外事象 của DD SCR-08 về hệ đích; giờ thiết bị / giờ server rõ ràng.\n\n**Phạm vi**\n- Làm: service cho loadSchedule / recordSealCheck / recordTripMovement / registerException; CK-1〜CK-4; ghi phần chờ ISS-35 (cổng 出発 H-5)\n- Không làm: POD / hàng đợi (EP03)\n\n**Nguồn**\nDD:SCR-08 §3.5 (c), §3.6, 4.1〜4.3, 4.5; ADR-009; CR-202610-driver-departure-return-and-seal-check (APV-002)\n\n**Định nghĩa xong**\n- [ ] DD không còn RPC\n- [ ] Q-DD08-04 có trạng thái\n- [ ] DoR đạt\n\n**Phụ thuộc**\n—\n\n**Spec gap**\nGAP-04-03",
      "role": "SA",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:SA",
@@ -8276,7 +8276,7 @@
        "title": "Viết lại 4.1〜4.3, 4.5 DD SCR-08 theo service",
        "body": "**Mục tiêu**\nTheo hệ đích.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Ranh giới giao dịch rõ",
        "role": "SA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:SA"
@@ -8287,7 +8287,7 @@
        "title": "Review DD SCR-08 phần chuyến và chốt DoR",
        "body": "**Mục tiêu**\nDuyệt DD.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
        "role": "BrSE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BrSE"
@@ -8647,7 +8647,7 @@
      "title": "Sửa nháp, 版 n+1, đơn sau 14:00 và chặn bỏ stop đã giao",
      "body": "**Mục tiêu**\n配送計画者 sửa nháp có kiểm đồng thời, công bố 版 mới khi có đơn muộn mà không mất bằng chứng giao.\n\n**Phạm vi**\n- Làm: editDraft 4.2 (move / remove / placeName / newVersion); sửa → xóa kết quả E-3; row_version (M_DSP-14); 版 n+1 sao chép 版 n, lý do bắt buộc; N-12 gộp cho đơn 確定 sau 14:00; chặn bỏ stop đã có POD (tạm M_DSP-32, Q-DD07-03)\n- Không làm: thao tác hủy route (gap-A #36, chưa có)\n\n**Nguồn**\nDD:SCR-07 4.2, 3.4 「版 n / n+1」, G07-11, G07-16, G07-19; FR-SCH-04; Q-FLW-OUT-16 (APV-015); LAB4:T07-06; LAB4:T07-11; bidding:S4.4\n\n**Định nghĩa xong**\n- [ ] TP07-14, TP07-15, TP07-22 xanh\n- [ ] Stop có POD không bị xóa vật lý\n- [ ] 版 cũ xem được ở F-6 / F-7\n\n**Phụ thuộc**\nEP04-I07, EP04-I05",
      "role": "BE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:BE",
@@ -8666,7 +8666,7 @@
        "title": "Viết TC 版 n+1 và bỏ stop đã giao",
        "body": "**Mục tiêu**\nTC TP07-14, TP07-22.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có route in_progress",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -8677,7 +8677,7 @@
        "title": "Cài editDraft và newVersion",
        "body": "**Mục tiêu**\n4.2.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
        "role": "BE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE"
@@ -8688,7 +8688,7 @@
        "title": "Cài N-12 cho đơn sau 14:00",
        "body": "**Mục tiêu**\nPhát qua mail_outbox, gộp một mail.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] N-12 gửi một lần",
        "role": "BE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:BE"
@@ -9299,7 +9299,7 @@
      "title": "Màn SCR-07 View 1 ルート作成 và View 3 公開・版履歴",
      "body": "**Mục tiêu**\n配送計画者 lập / sửa / công bố route; 監査者 chỉ xem lịch sử 版.\n\n**Phạm vi**\n- Làm: header, bộ lọc, C-1 (POD拒否 / 最終同期 từ sổ receipt); D-1〜D-14; F-1〜F-7 (checklist F-2, lý do F-3, xác nhận F-5); quyền 監査者 chỉ F-1, F-6, F-7; PC\n- Không làm: View 2 (issue riêng)\n\n**Nguồn**\nDD:SCR-07 §3.3, 4.5, §5.1; SPEC:SCR-07; wireframe SCR-07_wf-view1, view3; LAB4:T07-09; bidding:S4.1; bidding:S4.4\n\n**Định nghĩa xong**\n- [ ] TP07-17 xanh\n- [ ] E2E: tạo → kiểm → 公開 một luồng\n- [ ] B-1 mặc định trống (Q-DSP-31)\n\n**Phụ thuộc**\nEP04-I07, EP04-I09, EP04-I05",
      "role": "FE",
-     "sprint": "S3",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:FE",
@@ -9320,7 +9320,7 @@
        "title": "Dựng View 1 ルート作成",
        "body": "**Mục tiêu**\nD-1〜D-14.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] D-11 luôn hiện",
        "role": "FE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -9331,7 +9331,7 @@
        "title": "Dựng View 3 公開・版履歴",
        "body": "**Mục tiêu**\nF-1〜F-7.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] F-4 disabled khi F-2 có ✖",
        "role": "FE",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:FE"
@@ -9342,7 +9342,7 @@
        "title": "Kiểm E2E SCR-07 View 1 / 3",
        "body": "**Mục tiêu**\nLuồng chính + quyền.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
        "role": "QA",
-       "sprint": "S3",
+       "sprint": "ST",
        "labels": [
         "type:sub-issue",
         "role:QA"
@@ -11839,7 +11839,7 @@
      "title": "Báo cáo tuần và RAID S1–S2",
      "body": "**Mục tiêu:** Theo dõi sprint 1–2.\n\n**Phạm vi:**\n- Làm: báo cáo tuần, RAID, steering tháng.\n- Không làm: —\n\n**Nguồn:** S4-04 · bidding:S15.2\n\n**Định nghĩa xong:**\n- [ ] Báo cáo tuần đủ mục S4-04 (mốc, phạm vi nghiệm thu, test / defect, đối soát 移行, bảo mật, chất lượng dữ liệu, thay đổi, rủi ro, quyết định khách, dự báo)\n- [ ] RAID cập nhật mỗi tuần\n- [ ] Không báo % hoàn thành khi không có bằng chứng\n\n**Phụ thuộc:** EP15-I01\n\n**Spec gap:** —",
      "role": "PM",
-     "sprint": "S2",
+     "sprint": "S5",
      "labels": [
       "type:issue",
       "role:PM",
@@ -11858,7 +11858,7 @@
      "title": "Báo cáo tuần và RAID S3–S4 (bắt đầu 移行)",
      "body": "**Mục tiêu:** Theo dõi sprint 3–4 và khởi động E12.\n\n**Phạm vi:**\n- Làm: báo cáo tuần, RAID, steering tháng, mục đối soát 移行.\n- Không làm: —\n\n**Nguồn:** S4-04 · bidding:S15.2\n\n**Định nghĩa xong:**\n- [ ] Báo cáo tuần đủ mục S4-04 (mốc, phạm vi nghiệm thu, test / defect, đối soát 移行, bảo mật, chất lượng dữ liệu, thay đổi, rủi ro, quyết định khách, dự báo)\n- [ ] RAID cập nhật mỗi tuần\n- [ ] Không báo % hoàn thành khi không có bằng chứng\n\n**Phụ thuộc:** EP15-I01\n\n**Spec gap:** —",
      "role": "PM",
-     "sprint": "S4",
+     "sprint": "ST",
      "labels": [
       "type:issue",
       "role:PM",
@@ -11970,7 +11970,7 @@
      "title": "Theo dõi câu hỏi chặn trước S4 (dữ liệu 移行, layout IF, pháp lý)",
      "body": "**Mục tiêu:** Câu hỏi chặn E12 / E9 / E11 có đáp án trước khi sprint cần.\n\n**Phạm vi:**\n- Làm: theo dõi Q-DEV-13 / ISS-10, Q-DEV-09 / ISS-11, Q63, Q60–Q61, Q-OUT-25.\n- Không làm: không hạ tiêu chí khi chưa có đáp án.\n\n**Nguồn:** ISS-10 · ISS-11 · Q-DEV-09 · Q-DEV-13 · Q63 · bidding:S15.3\n\n**Định nghĩa xong:**\n- [ ] Mỗi câu có quyết định hoặc phương án dự phòng được duyệt\n- [ ] Ảnh hưởng MD / lịch ghi vào RAID\n\n**Phụ thuộc:** EP15-I09\n\n**Spec gap:** —",
      "role": "BrSE",
-     "sprint": "S3",
+     "sprint": "HARD",
      "labels": [
       "type:issue",
       "role:BrSE",
