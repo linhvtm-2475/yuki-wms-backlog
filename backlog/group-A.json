@@ -1,0 +1,4314 @@
+{
+ "group": "A",
+ "epics": [
+  {
+   "id": "EP-00",
+   "title": "Nền tảng: Azure, CI/CD, khung app, xác thực và cơ chế dùng chung",
+   "body": "**Mục tiêu:** Dựng hạ tầng Azure và các cơ chế dùng chung mà mọi module nghiệp vụ dựa vào, xong trước khi module cần.\n\n**Phạm vi:**\n- Làm: môi trường dev / test / UAT / prod + DR, IaC, CI/CD, khung modular monolith, đăng nhập Entra ID + chọn 職務 + MFA, quyền, thứ tự khóa, idempotency, bảng quy tắc có version, catalog mã, audit chỉ thêm, gói xuất SHA-256, partition, mã ASCII, khung batch, lưu tệp\n- Không làm: nghiệp vụ của từng module; chi tiết từng IF (EP-09); NFR đo kiểm (EP-10)\n\n**Nguồn:** plan:§0 D-1, D-3; LAB4:README đợt 0; ADR-001; ADR-003; ADR-007; ADR-008; ADR-010; ADR-011\n\n**Định nghĩa xong:**\n- [ ] Mọi issue con xong và có test\n- [ ] Module nghiệp vụ S1 dùng được khung (auth, quyền, audit, khóa) mà không tự viết lại\n- [ ] ADR mới thay ADR-002 / ADR-012 đã có APV\n\n**Phụ thuộc:** không có",
+   "labels": [
+    "type:epic"
+   ],
+   "issues": [
+    {
+     "id": "EP00-I01",
+     "title": "Viết ADR kiến trúc đích Azure thay ADR-002 và ADR-012",
+     "body": "**Mục tiêu:** Chốt quyết định kiến trúc cho hệ viết mới trên Azure để mọi DD và code sau dựa vào cùng một nền.\n\n**Phạm vi:**\n- Làm: ADR logic nghiệp vụ ở App Service (DB giữ ràng buộc, khóa, transaction); ADR hạ tầng Azure gồm 4 môi trường + DR Japan West và điểm nhận SFTP; nơi giữ phiên một 職務; cập nhật ARCH_system-overview\n- Không làm: chọn nhà cung cấp bản đồ / mail relay (chờ ISS-11); thiết kế API từng module\n\n**Nguồn:** plan:§0 D-1, D-3; plan:§8.1 bước 1.4; ADR-001; ADR-002; ADR-012; SPEC:ARCH_system-overview §2–§3; LAB4:02-architecture §5.1\n\n**Định nghĩa xong:**\n- [ ] ADR mới có bối cảnh, quyết định, phương án bỏ, hệ quả (Nygard)\n- [ ] ADR-002 và ADR-012 chuyển Superseded, có trỏ sang ADR mới\n- [ ] ARCH_system-overview §2 khớp D-1: 4 môi trường dev / test / UAT / prod + DR, có thành phần SFTP\n- [ ] Có quyết định nơi giữ phiên một 職務 (đóng GAP-00-01)\n- [ ] Người duyệt ghi APV\n\n**Phụ thuộc:** không có\n\n**Spec gap:** GAP-00-01, GAP-09-01",
+     "role": "SA",
+     "sprint": "S0",
+     "labels": [
+      "type:issue",
+      "role:SA",
+      "dd:yes",
+      "spec-gap"
+     ],
+     "depends_on": [],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I01-S01",
+       "title": "Soạn ADR logic nghiệp vụ trên App Service, DB giữ ràng buộc",
+       "body": "**Mục tiêu:** Thay ADR-002: quy tắc nằm ở service, PostgreSQL giữ CHECK / FK / khóa / transaction.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I01-S02",
+       "title": "Soạn ADR hạ tầng Azure, môi trường và DR",
+       "body": "**Mục tiêu:** Thay ADR-012: thành phần Azure, 4 môi trường, DR Japan West, SFTP cho ERP.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I01-S03",
+       "title": "Cập nhật ARCH_system-overview theo ADR mới",
+       "body": "**Mục tiêu:** Đồng bộ tài liệu kiến trúc đã duyệt với ADR mới qua CR.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I01-S04",
+       "title": "Review chéo ADR và xin APV",
+       "body": "**Mục tiêu:** Đưa ADR qua vòng review / duyệt của dự án.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Kết quả được người có thẩm quyền xác nhận, có ghi vết (APV / biên bản)",
+       "role": "PM",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:PM",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I02",
+     "title": "Dựng IaC môi trường dev và test trên Azure",
+     "body": "**Mục tiêu:** Có hai môi trường dev và test dựng lại được từ mã, đúng thành phần của D-1.\n\n**Phạm vi:**\n- Làm: IaC cho App Gateway WAF v2, App Service container, PostgreSQL Flexible, Key Vault + managed identity, Blob, Service Bus + Functions, App Insights / Log Analytics; tách dev và test\n- Không làm: UAT, prod, DR (EP00-I04, EP00-I05); không tạo khóa trong repo\n\n**Nguồn:** plan:§0 D-1; plan:§8.2 bước 2.4; SPEC:ARCH_system-overview §2; REQ:OPS-ENV-01; LAB4:02-architecture §5.1\n\n**Định nghĩa xong:**\n- [ ] Chạy IaC dựng lại được môi trường từ đầu\n- [ ] Không có bí mật trong mã IaC, quét secret trong CI xanh\n- [ ] dev và test tách DB, tách tài nguyên\n- [ ] IaC được người khác người viết review\n- [ ] Hướng dẫn dựng môi trường nằm trong repo\n\n**Phụ thuộc:** EP00-I01",
+     "role": "Infra",
+     "sprint": "S0",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I01"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I02-S01",
+       "title": "Viết IaC mạng và App Gateway WAF",
+       "body": "**Mục tiêu:** Điểm vào công khai duy nhất có TLS.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I02-S02",
+       "title": "Viết IaC App Service, PostgreSQL Flexible, Key Vault",
+       "body": "**Mục tiêu:** Ứng dụng đọc bí mật qua managed identity.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I02-S03",
+       "title": "Viết IaC Blob, Service Bus, Functions, App Insights",
+       "body": "**Mục tiêu:** Đủ thành phần cho batch, tệp và quan sát.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I02-S04",
+       "title": "Review IaC dev / test",
+       "body": "**Mục tiêu:** Kiểm IaC khớp ADR hạ tầng.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I03",
+     "title": "Dựng pipeline CI/CD cho repo code",
+     "body": "**Mục tiêu:** Mọi thay đổi đi qua build, test, quét và deploy tự động tới dev / test bằng cùng một artifact.\n\n**Phạm vi:**\n- Làm: build, unit test, lint, quét license và secret, migration DB, deploy dev / test, artifact bất biến để promote\n- Không làm: cổng duyệt release cho UAT / prod (EP00-I04)\n\n**Nguồn:** plan:§8.2 bước 2.3–2.4; REQ:OPS-ENV-01; ISS-36 C#3; ISS-22\n\n**Định nghĩa xong:**\n- [ ] PR đỏ thì không merge được\n- [ ] Deploy test dùng đúng artifact đã build, không build lại\n- [ ] Migration DB chạy tự động, có kịch bản quay lui\n- [ ] Test SQL chạy trên PostgreSQL thật trong CI, không dùng PGlite\n\n**Phụ thuộc:** EP00-I02",
+     "role": "Infra",
+     "sprint": "S0",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I02"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I03-S01",
+       "title": "Dựng CI build, test, lint, quét license / secret",
+       "body": "**Mục tiêu:** Chặn merge khi một bước đỏ.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I03-S02",
+       "title": "Dựng CD dev / test và bước migration DB",
+       "body": "**Mục tiêu:** Deploy tự động sau merge.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I03-S03",
+       "title": "Chạy test DB trên PostgreSQL trong CI",
+       "body": "**Mục tiêu:** Thay PGlite bằng PostgreSQL cùng bản với Azure.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I04",
+     "title": "Dựng môi trường UAT và cổng duyệt release",
+     "body": "**Mục tiêu:** UAT sẵn trước 04-05, release vào UAT có người duyệt và ghi vết.\n\n**Phạm vi:**\n- Làm: UAT dựng từ cùng IaC; promote artifact từ test; cổng duyệt (người duyệt khác người deploy); smoke test sau release\n- Không làm: dữ liệu che (EP00-I06); prod (EP00-I05)\n\n**Nguồn:** plan:§7 lịch UAT 04-05; REQ:OPS-ENV-01; plan:§8.8\n\n**Định nghĩa xong:**\n- [ ] UAT dựng bằng cùng IaC với dev / test\n- [ ] Release vào UAT cần duyệt và có ghi vết\n- [ ] Smoke test chạy tự động sau mỗi release\n- [ ] Có tài khoản theo 8 職務 cho UAT\n\n**Phụ thuộc:** EP00-I02, EP00-I03",
+     "role": "Infra",
+     "sprint": "S5",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I02",
+      "EP00-I03"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I04-S01",
+       "title": "Viết IaC môi trường UAT",
+       "body": "**Mục tiêu:** Môi trường UAT tách khỏi test.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I04-S02",
+       "title": "Thêm cổng duyệt release và smoke test",
+       "body": "**Mục tiêu:** Release có người duyệt khác người deploy.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I05",
+     "title": "Dựng môi trường prod và DR Japan West",
+     "body": "**Mục tiêu:** Prod zone-redundant và vùng DR sẵn sàng trước hardening để diễn tập.\n\n**Phạm vi:**\n- Làm: prod App Service / PostgreSQL HA zone-redundant; replica Japan West; bản sao Blob (gồm WORM) và Key Vault ở vùng DR\n- Không làm: diễn tập restore / failover (EP10-I14)\n\n**Nguồn:** plan:§0 D-1; SPEC:ARCH_system-overview §2 (DR); REQ:NFR-BCP-01; LAB4:02-architecture §5.1\n\n**Định nghĩa xong:**\n- [ ] Prod dựng bằng IaC, không tạo tay\n- [ ] Replica Japan West chạy, độ trễ sao chép đo được\n- [ ] Blob WORM có bản ở vùng DR hoặc có quyết định khác được duyệt (GAP-10-03)\n- [ ] Chỉ pipeline có quyền ghi prod\n\n**Phụ thuộc:** EP00-I04\n\n**Spec gap:** GAP-10-03",
+     "role": "Infra",
+     "sprint": "S6",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:yes",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I04"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I05-S01",
+       "title": "Viết IaC prod",
+       "body": "**Mục tiêu:** Prod HA zone-redundant.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S6",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I05-S02",
+       "title": "Cấu hình replica PostgreSQL và sao chép Blob sang Japan West",
+       "body": "**Mục tiêu:** Dữ liệu và tệp có ở vùng DR.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S6",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I05-S03",
+       "title": "Review quyền truy cập prod",
+       "body": "**Mục tiêu:** Không còn quyền ghi tay vào prod.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S6",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I06",
+     "title": "Che dữ liệu khi chép sang môi trường dưới",
+     "body": "**Mục tiêu:** Dữ liệu ở test / UAT không lộ thông tin cá nhân theo OPS-ENV-01.\n\n**Phạm vi:**\n- Làm: script che các cột cá nhân trong data-lifecycle §4 khi làm mới test / UAT; nhật ký lần che\n- Không làm: dữ liệu rehearsal migration (chờ câu hỏi ISS-36 C#20)\n\n**Nguồn:** REQ:OPS-ENV-01; SPEC:data-lifecycle §4; ISS-36 C#20\n\n**Định nghĩa xong:**\n- [ ] Script che phủ đủ cột trong data-lifecycle §4\n- [ ] Kiểm mẫu sau che không còn giá trị gốc\n- [ ] Mỗi lần che có ghi nhật ký người chạy, thời điểm\n- [ ] Chạy được trong pipeline làm mới môi trường\n\n**Phụ thuộc:** EP00-I04",
+     "role": "Infra",
+     "sprint": "S5",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I04"
+     ],
+     "bidding_ref": [],
+     "sub_issues": []
+    },
+    {
+     "id": "EP00-I07",
+     "title": "Dựng khung modular monolith theo 9 module",
+     "body": "**Mục tiêu:** Code chia đúng 9 module theo feature, mỗi module chỉ ghi bảng của mình.\n\n**Phạm vi:**\n- Làm: cấu trúc common + 8 feature; lớp API /api/v1 có correlation ID; đọc chéo qua API nội bộ; luật kiến trúc trong CI; service luôn kiểm lại quy tắc từ dữ liệu server\n- Không làm: logic nghiệp vụ của module\n\n**Nguồn:** ADR-001; SPEC:ARCH_system-overview §1; LAB4:02-architecture §2; LAB4:ADR-002 Consequences (3 ngoại lệ)\n\n**Định nghĩa xong:**\n- [ ] 9 module rỗng có test mẫu chạy trong CI\n- [ ] Luật CI bắt được module ghi bảng của module khác\n- [ ] Mỗi request có correlation ID ở header phản hồi và log\n- [ ] Quy ước 'không tin trạng thái / kết quả kiểm do client gửi' ghi trong DD khung\n\n**Phụ thuộc:** EP00-I01",
+     "role": "BE",
+     "sprint": "S0",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I01"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I07-S01",
+       "title": "Viết DD khung module và quy ước API",
+       "body": "**Mục tiêu:** Ranh giới module, đọc chéo, lỗi chung.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I07-S02",
+       "title": "Scaffold 9 module, lớp API và correlation ID",
+       "body": "**Mục tiêu:** Khung chạy được trên dev.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I07-S03",
+       "title": "Thêm luật kiểm kiến trúc vào CI",
+       "body": "**Mục tiêu:** Chặn ghi chéo bảng giữa module.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I08",
+     "title": "Định nghĩa cổng adapter Auth, Storage, Mail, Map, Queue",
+     "body": "**Mục tiêu:** Module nghiệp vụ không gọi SDK hạ tầng trực tiếp, test được bằng adapter giả.\n\n**Phạm vi:**\n- Làm: 5 interface; adapter giả cho test; khung adapter Azure\n- Không làm: nghiệp vụ từng IF (EP-09)\n\n**Nguồn:** ADR-012 (ý tưởng port); SPEC:ARCH_system-overview §3; LAB4:02-architecture §5.1, G-10\n\n**Định nghĩa xong:**\n- [ ] 5 interface có test hợp đồng chạy với adapter giả\n- [ ] Luật CI cấm import SDK Azure ngoài thư mục adapter\n- [ ] Adapter giả dùng được trong test tích hợp của module\n\n**Phụ thuộc:** EP00-I07",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I07"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I08-S01",
+       "title": "Viết 5 interface và adapter giả",
+       "body": "**Mục tiêu:** Có test hợp đồng.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I08-S02",
+       "title": "Thêm luật CI cấm gọi SDK hạ tầng ngoài adapter",
+       "body": "**Mục tiêu:** Giữ ranh giới cổng.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I09",
+     "title": "Dựng nền schema DB và quy ước dữ liệu",
+     "body": "**Mục tiêu:** Mọi bảng nghiệp vụ dựng trên cùng quy ước khóa, thời điểm, số và event / version.\n\n**Phạm vi:**\n- Làm: schema wms; PK BIGINT identity + *_code UNIQUE; TIMESTAMPTZ, hiển thị JST; numeric; công cụ migration; mẫu event bất biến + version → view hiện hành\n- Không làm: bảng nghiệp vụ của từng module\n\n**Nguồn:** SPEC:er-overview; DB:COM_DB quy ước chung; LAB4:05-database diff D10; bidding:S8.4\n\n**Định nghĩa xong:**\n- [ ] Migration đầu chạy trên PostgreSQL Flexible dev\n- [ ] Mẫu event + version + view hiện hành có test\n- [ ] CI chặn cột thời điểm không có TZ\n- [ ] Quy ước dữ liệu ghi trong repo\n\n**Phụ thuộc:** EP00-I07",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I07"
+     ],
+     "bidding_ref": [
+      "S8.4"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP00-I09-S01",
+       "title": "Chọn công cụ migration và tạo schema wms",
+       "body": "**Mục tiêu:** Migration có thứ tự, chạy lại được.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I09-S02",
+       "title": "Viết mẫu event bất biến + version + view hiện hành",
+       "body": "**Mục tiêu:** Mẫu cho M.4.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I09-S03",
+       "title": "Kiểm CI kiểu cột thời điểm và mã nghiệp vụ",
+       "body": "**Mục tiêu:** Bắt lỗi quy ước sớm.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I10",
+     "title": "Chuyển bảng mã sang giá trị ASCII và tách nhãn JA",
+     "body": "**Mục tiêu:** DB chỉ lưu mã ASCII; nhãn tiếng Nhật chỉ ở tầng hiển thị.\n\n**Phạm vi:**\n- Làm: sinh CHECK từ code-definitions; bảng tra nhãn JA cho UI / 帳票 / CSV; hàm kiểm chuyển trạng thái theo code-definitions §5\n- Không làm: nhãn mới chưa có trong code-definitions\n\n**Nguồn:** SPEC:code-definitions §0 (Q-CD-01), §5; LAB4:L5-DB-02; LAB4:05-database diff D1\n\n**Định nghĩa xong:**\n- [ ] Mọi cột trạng thái có CHECK theo CD-*\n- [ ] Test tự động: không có chữ Nhật trong CHECK / DEFAULT / WHERE / view\n- [ ] UI và CSV lấy nhãn từ bảng tra\n- [ ] Chuyển trạng thái sai trả mã V-2\n\n**Phụ thuộc:** EP00-I09\n\n**Ràng buộc nghiệp vụ:** Máy trạng thái 引当 / タスク (§5.4) đang mâu thuẫn OUT_DB R9 (ISS-35 H-7): chỉ nạp phần đó khi CR được duyệt.",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "blocked:ISS-35"
+     ],
+     "depends_on": [
+      "EP00-I09"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I10-S01",
+       "title": "Sinh CHECK và bảng tra nhãn từ code-definitions",
+       "body": "**Mục tiêu:** Một nguồn sinh cho DB và UI.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I10-S02",
+       "title": "Viết thành phần hiển thị nhãn cho UI / CSV",
+       "body": "**Mục tiêu:** Màn không tự viết nhãn.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I10-S03",
+       "title": "Viết hàm kiểm chuyển trạng thái theo §5",
+       "body": "**Mục tiêu:** Chặn chuyển sai ở service.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes",
+        "blocked:ISS-35"
+       ]
+      },
+      {
+       "id": "EP00-I10-S04",
+       "title": "Test không chữ Nhật trong DB",
+       "body": "**Mục tiêu:** Bắt vi phạm Q-CD-01.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I11",
+     "title": "Đăng nhập Entra ID có chọn 職務 trước và kiểm 職務 được gán",
+     "body": "**Mục tiêu:** Người dùng chọn 職務 trước khi SSO, server chỉ mở phiên khi 職務 đó được gán.\n\n**Phạm vi:**\n- Làm: COM-01 3 view; giữ 職務 đã chọn phía server; thứ tự kiểm OIDC → thiết bị → 職務 → MFA; M_COM-24 không lộ 職務 khác; audit login_success / login_failure / denied; điều hướng sau đăng nhập\n- Không làm: adapter OIDC (EP09-I08); MFA (EP00-I13); khóa phiên COM-03 (EP10-I03)\n\n**Nguồn:** SPEC:COM-01; FLOW:F-COM-01; SEQ:SEQ_login-sso; ADR-008; APV-011\n\n**Định nghĩa xong:**\n- [ ] Chọn 職務 không được gán → M_COM-24 và audit denied\n- [ ] 職務 không nhận lại từ tham số trình duyệt (test giả mạo)\n- [ ] ドライバー vào SCR-08, 職務 khác vào COM-02\n- [ ] Test E2E đăng nhập cho 8 職務\n\n**Phụ thuộc:** EP09-I08, EP00-I12",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP09-I08",
+      "EP00-I12"
+     ],
+     "bidding_ref": [
+      "S10.5",
+      "S9.4"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP00-I11-S01",
+       "title": "Viết DD COM-01 và luồng đăng nhập",
+       "body": "**Mục tiêu:** COM-01 chưa có DD, chỉ có spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP00-I11-S02",
+       "title": "BE kiểm 職務 được gán và ghi audit đăng nhập",
+       "body": "**Mục tiêu:** Server giữ 職務 đã chọn.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP00-I11-S03",
+       "title": "FE màn COM-01",
+       "body": "**Mục tiêu:** 3 view theo spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP00-I11-S04",
+       "title": "Ca kiểm thử đăng nhập theo 8 職務",
+       "body": "**Mục tiêu:** Gồm giả mạo tham số và vai không gán.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I12",
+     "title": "Lưu phiên một 職務 phía server",
+     "body": "**Mục tiêu:** Mỗi phiên giữ đúng một 職務 để quyền, menu và audit rõ ràng.\n\n**Phạm vi:**\n- Làm: session store phía server; acting_role_id gắn mọi audit; đổi 職務 = đăng xuất; hết phiên trả M_COM-04\n- Không làm: khóa do không thao tác (EP10-I03)\n\n**Nguồn:** ADR-008; DB:COM_DB §2 ghi chú phiên (Q-COMDB-03); LAB4:05-database diff #13 (L5-DOC-02); FLOW:F-COM-02\n\n**Định nghĩa xong:**\n- [ ] API chỉ thấy 職務 của phiên\n- [ ] Người 兼務 không tự duyệt bản mình lập trong cùng phiên\n- [ ] Mọi ghi có acting_role_id trong audit\n- [ ] Hết phiên trả M_COM-04, thao tác dở trả M_COM-11\n\n**Phụ thuộc:** EP00-I01, EP00-I09\n\n**Spec gap:** GAP-00-01",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I01",
+      "EP00-I09"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I12-S01",
+       "title": "Viết DD lưu phiên một 職務",
+       "body": "**Mục tiêu:** Chốt nơi lưu theo ADR mới.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I12-S02",
+       "title": "BE session store và middleware 職務",
+       "body": "**Mục tiêu:** Middleware đọc 職務 từ phiên.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I12-S03",
+       "title": "Ca kiểm thử phiên và đổi 職務",
+       "body": "**Mục tiêu:** Gồm người 兼務.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I13",
+     "title": "Bắt MFA theo 職務 được gán",
+     "body": "**Mục tiêu:** Người được gán vai đặc quyền luôn phải MFA, kể cả khi chọn vai thường.\n\n**Phạm vi:**\n- Làm: role.is_privileged (品質管理, マスター管理者, 監査者); kiểm amr trong token; chính sách Conditional Access; M_COM-17\n- Không làm: MFA giả của prototype\n\n**Nguồn:** ADR-008; APV-016; FLOW:F-COM-01 bước 5; LAB4:SEC-01\n\n**Định nghĩa xong:**\n- [ ] Chọn vai thường khi được gán vai đặc quyền vẫn bị đòi MFA\n- [ ] Thiếu amr → M_COM-17 và audit\n- [ ] Chính sách Conditional Access nằm trong IaC\n- [ ] Test né MFA bị chặn\n\n**Phụ thuộc:** EP00-I11, EP09-I08",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I11",
+      "EP09-I08"
+     ],
+     "bidding_ref": [
+      "S10.5"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP00-I13-S01",
+       "title": "BE kiểm amr theo vai được gán",
+       "body": "**Mục tiêu:** Không xét vai đã chọn.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I13-S02",
+       "title": "Cấu hình Conditional Access cho vai đặc quyền",
+       "body": "**Mục tiêu:** Chính sách trong IaC.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I13-S03",
+       "title": "Ca kiểm thử né MFA",
+       "body": "**Mục tiêu:** Chọn vai thường để né.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I14",
+     "title": "Kiểm quyền theo 職務 ở lớp API theo ma trận",
+     "body": "**Mục tiêu:** Mọi route kiểm quyền mức màn và mức thao tác theo 職務 của phiên.\n\n**Phạm vi:**\n- Làm: role_permission (職務 × màn / view / 帳票 × mức) nạp qua release; middleware M_COM-13 / M_COM-22; luật CI mỗi route phải khai báo quyền\n- Không làm: RLS làm lớp quyền chính; quyền theo dòng riêng của từng màn (module tự làm)\n\n**Nguồn:** DB:COM_DB 4.4; SPEC:screen-list ma trận; FLOW:F-COM-03; LAB4:L5-DB-01 = SEC-02; ISS-19\n\n**Định nghĩa xong:**\n- [ ] Ma trận nạp từ cấu hình có version\n- [ ] Gọi trái quyền trả đúng mã và ghi audit (Q-COM-09)\n- [ ] Test tự động 8 職務 × mọi route\n- [ ] CI đỏ khi route thiếu khai báo quyền\n\n**Phụ thuộc:** EP00-I12",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I12"
+     ],
+     "bidding_ref": [
+      "S10.5"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP00-I14-S01",
+       "title": "Bảng role_permission và nạp qua release",
+       "body": "**Mục tiêu:** Ma trận có version.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I14-S02",
+       "title": "Middleware quyền và luật CI khai báo quyền",
+       "body": "**Mục tiêu:** Không route nào bỏ sót.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I14-S03",
+       "title": "Test ma trận 8 職務",
+       "body": "**Mục tiêu:** Mỗi route × mỗi 職務.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I15",
+     "title": "Dựng cơ chế duyệt hai người dùng chung",
+     "body": "**Mục tiêu:** Một chỗ duy nhất kiểm 起票者 ≠ 承認者 cho mọi luồng duyệt.\n\n**Phạm vi:**\n- Làm: kiểm người duyệt khác người tạo và mọi người đã sửa (tra audit); CHECK decided_by <> requested_by ở bảng duyệt; mã M_COM-23\n- Không làm: giao diện duyệt của từng màn\n\n**Nguồn:** FLOW:F-COM-04; DB:MST_DB R2; LAB4:L5-DB-05; REQ:NFR-SEC-02\n\n**Định nghĩa xong:**\n- [ ] Thư viện duyệt có test với người sửa giữa chừng\n- [ ] CHECK ở DB chặn ghi thẳng\n- [ ] Người 兼務 bị chặn dù đăng nhập vai khác\n- [ ] Trả cờ khi số người duyệt hợp lệ < 2\n\n**Phụ thuộc:** EP00-I12, EP00-I24",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I12",
+      "EP00-I24"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I15-S01",
+       "title": "Thư viện kiểm người duyệt",
+       "body": "**Mục tiêu:** Dùng chung cho master, 廃棄, 訂正, purge.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I15-S02",
+       "title": "Ca kiểm thử tự duyệt và người sửa giữa chừng",
+       "body": "**Mục tiêu:** Gồm người 兼務.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I16",
+     "title": "Cài thứ tự khóa chung theo ADR-003",
+     "body": "**Mục tiêu:** Mọi luồng ghi tồn lấy khóa theo cùng một thứ tự để không deadlock và không over-allocation.\n\n**Phạm vi:**\n- Làm: helper khóa (0) 顧客×SKU (advisory, cặp tăng dần) → (1) lô theo id tăng → (2) stock_unit → (3) allocation / タスク; cấm lấy (0) sau (1)–(3); lock_timeout 【仮】; tranh chấp trả M_OUT-08\n- Không làm: logic 引当 và FEFO (EP-03)\n\n**Nguồn:** ADR-003; SEQ:SEQ_allocation-atomic; DB:INV_DB R2; DB:OUT_DB R4a; LAB4:OUT-ALLOC-02; LAB4:02-architecture §3.2\n\n**Định nghĩa xong:**\n- [ ] Helper là API duy nhất để lấy khóa, gọi sai thứ tự ném lỗi trong test\n- [ ] Test song song 2 khách tranh 1 lô: không deadlock, không vượt tồn\n- [ ] Test 2 đơn cùng 顧客×SKU đọc mốc 日付逆転 tuần tự\n- [ ] Bảng khóa cho 隔離 / recall / 逸脱 có trong DD (GAP-00-04)\n\n**Phụ thuộc:** EP00-I09\n\n**Ràng buộc nghiệp vụ:** Mốc 日付逆転 chỉ được đọc sau khi giữ khóa (0) của cặp 顧客×SKU.\n\n**Spec gap:** GAP-00-04",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "domain:date-reversal",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I09"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I16-S01",
+       "title": "Viết DD bảng khóa chung cho mọi luồng ghi tồn",
+       "body": "**Mục tiêu:** Mở rộng ADR-003 cho 隔離, recall, 逸脱.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes",
+        "domain:date-reversal"
+       ]
+      },
+      {
+       "id": "EP00-I16-S02",
+       "title": "Helper khóa trong transaction",
+       "body": "**Mục tiêu:** advisory lock + FOR UPDATE theo thứ tự.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes",
+        "domain:date-reversal"
+       ]
+      },
+      {
+       "id": "EP00-I16-S03",
+       "title": "Test đồng thời và deadlock",
+       "body": "**Mục tiêu:** Chạy song song nhiều phiên.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes",
+        "domain:date-reversal"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I17",
+     "title": "Dựng sổ idempotency dùng chung cho thao tác ghi",
+     "body": "**Mục tiêu:** Gửi lặp một thao tác không tạo bản ghi thứ hai và trả lại kết quả lần đầu.\n\n**Phạm vi:**\n- Làm: client gửi request_id (UUID); middleware ghi biên nhận và trả kết quả cũ khi trùng; cột UK theo bảng như INV_DB; khóa IF và biên nhận POD theo cùng quy ước\n- Không làm: đồng bộ POD offline (EP-03 / EP-04)\n\n**Nguồn:** DB:INV_DB request_id; LAB4:T08-06; LAB4:REC-DB-01 / REC-FIX-06; DB:MST_DB 4.12; LAB4:README đợt 0\n\n**Định nghĩa xong:**\n- [ ] Cùng request_id gửi lại → không thêm bản ghi, trả kết quả cũ\n- [ ] Cùng request_id khác nội dung → từ chối\n- [ ] Test hai tab bấm cùng lúc\n- [ ] Hợp đồng idempotency ghi trong DD (GAP-00-02)\n\n**Phụ thuộc:** EP00-I07, EP00-I09\n\n**Spec gap:** GAP-00-02",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I07",
+      "EP00-I09"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I17-S01",
+       "title": "Viết DD hợp đồng idempotency",
+       "body": "**Mục tiêu:** Thống nhất request_id, idempotency_key, row_version.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I17-S02",
+       "title": "Middleware và bảng biên nhận",
+       "body": "**Mục tiêu:** Trả lại kết quả lần đầu.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I17-S03",
+       "title": "Ca kiểm thử gửi lặp",
+       "body": "**Mục tiêu:** Gồm gửi đồng thời.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I18",
+     "title": "Dựng khung bảng quy tắc có version",
+     "body": "**Mục tiêu:** Mọi quy tắc / master có version, hiệu lực theo ngày và giao dịch giữ version đã dùng.\n\n**Phạm vi:**\n- Làm: vòng đời created → review → active → retired; hiệu lực không chồng (EXCLUDE); khóa nội dung khi rời created; FK tới version đã dùng; hàm chọn version theo ngày JST\n- Không làm: màn soạn / duyệt (EP-08)\n\n**Nguồn:** ADR-007; DB:MST_DB 4.0, R1, R4, R9; LAB4:02-architecture §4.7; bidding:S8.4\n\n**Định nghĩa xong:**\n- [ ] Chồng hiệu lực bị chặn ở DB\n- [ ] Sửa bản đã rời created bị chặn\n- [ ] Hàm chọn version có test biên 00:00 JST\n- [ ] Quyết định cũ đọc lại đúng version đã dùng\n\n**Phụ thuộc:** EP00-I09, EP00-I15",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I09",
+      "EP00-I15"
+     ],
+     "bidding_ref": [
+      "S8.4"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP00-I18-S01",
+       "title": "DB và ràng buộc hiệu lực",
+       "body": "**Mục tiêu:** EXCLUDE theo mã + khoảng ngày.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I18-S02",
+       "title": "Hàm chọn version hiệu lực",
+       "body": "**Mục tiêu:** Theo ngày JST.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I18-S03",
+       "title": "Ca kiểm thử biên hiệu lực",
+       "body": "**Mục tiêu:** Ngày đầu, ngày cuối, chồng.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I19",
+     "title": "Dựng temperature_policy_version và đánh giá nhiệt theo version",
+     "body": "**Mục tiêu:** Ngưỡng 3 dải và tham số alarm có version, mọi đánh giá nhiệt ghi version đã dùng.\n\n**Phạm vi:**\n- Làm: ngưỡng theo 有効日; phút alarm theo dải; khoảng データ欠落; API đánh giá trả version id; FK từ REC / OUT / TMP\n- Không làm: màn soạn (EP08-I08); tính alarm (EP-05)\n\n**Nguồn:** ADR-007; DB:MST_DB 4.9; LAB4:L5-DB-06 = REC-TMP-01 = TMP-DB-01; LAB4:02-architecture §4.1\n\n**Định nghĩa xong:**\n- [ ] Giá trị khởi tạo nạp từ nguồn đã duyệt, không hard-code\n- [ ] Đánh giá trả version id\n- [ ] Test biên từng dải (trong / ngoài ngưỡng ở mép)\n- [ ] Version cũ vẫn dùng được để đánh giá lại\n\n**Phụ thuộc:** EP00-I18\n\n**Ràng buộc nghiệp vụ:** Ngưỡng là chính sách công ty Yuki, không phải số luật; giao dịch đã xong giữ version đã dùng.",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "domain:temp-band",
+      "domain:haccp"
+     ],
+     "depends_on": [
+      "EP00-I18"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I19-S01",
+       "title": "DB và dữ liệu khởi tạo ngưỡng",
+       "body": "**Mục tiêu:** Nạp theo nguồn đã duyệt.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes",
+        "domain:temp-band",
+        "domain:haccp"
+       ]
+      },
+      {
+       "id": "EP00-I19-S02",
+       "title": "API đánh giá nhiệt theo version",
+       "body": "**Mục tiêu:** Dùng chung cho nhập, xuất, giám sát.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes",
+        "domain:temp-band",
+        "domain:haccp"
+       ]
+      },
+      {
+       "id": "EP00-I19-S03",
+       "title": "Ca kiểm thử biên 3 dải",
+       "body": "**Mục tiêu:** Mép ngưỡng từng dải.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes",
+        "domain:temp-band",
+        "domain:haccp"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I20",
+     "title": "Dựng duty_rule_version nạp qua release",
+     "body": "**Mục tiêu:** Giới hạn giờ lái có version, chỉ đổi qua release có người duyệt.\n\n**Phạm vi:**\n- Làm: bảng duty_rule_version; script nạp trong pipeline với người duyệt ≠ người nạp; cờ đã xác minh; không có màn sửa\n- Không làm: engine kiểm 改善基準告示 và chặn 公開 (EP-04)\n\n**Nguồn:** ADR-007; DB:DSP_DB 4.5; LAB4:T07-01; LAB4:02-architecture §4.6; Q30; Q63\n\n**Định nghĩa xong:**\n- [ ] Nạp version chỉ qua release có ghi người duyệt\n- [ ] Route lưu FK version đã dùng\n- [ ] Version chưa xác minh có cờ để EP-04 chặn 公開\n- [ ] Giá trị lấy từ bảng đối chiếu OPS-LAW-01, không tự đặt\n\n**Phụ thuộc:** EP00-I18, EP00-I03\n\n**Ràng buộc nghiệp vụ:** Giá trị 拘束 / 休息 / 運転 theo 告示 bản 2024; 36協定 không nới là giả định chưa qua 法務 (L-4, Q63).",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "domain:duty-hours-2024"
+     ],
+     "depends_on": [
+      "EP00-I18",
+      "EP00-I03"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I20-S01",
+       "title": "DB và script nạp ルール版",
+       "body": "**Mục tiêu:** Không có đường sửa qua màn.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes",
+        "domain:duty-hours-2024"
+       ]
+      },
+      {
+       "id": "EP00-I20-S02",
+       "title": "Bước release nạp ルール版",
+       "body": "**Mục tiêu:** Cần người duyệt khác người nạp.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes",
+        "domain:duty-hours-2024"
+       ]
+      },
+      {
+       "id": "EP00-I20-S03",
+       "title": "Ca kiểm thử nạp sai người duyệt",
+       "body": "**Mục tiêu:** Release bị chặn.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes",
+        "domain:duty-hours-2024"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I21",
+     "title": "Version hóa quy tắc 1/3・1/2 theo 顧客×SKU",
+     "body": "**Mục tiêu:** Quy tắc cửa sổ giao theo hợp đồng có version và tra được theo ngày.\n\n**Phạm vi:**\n- Làm: customer_sku_agreement theo version; delivery_window_rule ∈ ONE_THIRD / ONE_HALF / LABEL_DATE_ONLY / NULL; API tra rule hiệu lực; allocation lưu FK hợp đồng\n- Không làm: màn 14-02 (EP08-I05); tính 納品期限日 và loại lô (EP-03)\n\n**Nguồn:** ADR-007; DB:MST_DB 4.3; DB:OUT_DB allocation; LAB4:02-architecture §4.4\n\n**Định nghĩa xong:**\n- [ ] NULL giữ nghĩa 未確定, không suy mặc định\n- [ ] Tra rule theo cặp + ngày có test\n- [ ] allocation lưu FK version hợp đồng\n- [ ] Không có hợp đồng → trả 'không áp', khác với 未確定\n\n**Phụ thuộc:** EP00-I18\n\n**Ràng buộc nghiệp vụ:** 1/3・1/2 là tập quán thương mại, không phải hạn dùng và không phải yêu cầu luật.",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "domain:delivery-window"
+     ],
+     "depends_on": [
+      "EP00-I18"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I21-S01",
+       "title": "DB và API tra rule hợp đồng",
+       "body": "**Mục tiêu:** Theo cặp 顧客×SKU và ngày.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes",
+        "domain:delivery-window"
+       ]
+      },
+      {
+       "id": "EP00-I21-S02",
+       "title": "Ca kiểm thử rule trống và không hợp đồng",
+       "body": "**Mục tiêu:** Phân biệt 未確定 với 契約なし.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes",
+        "domain:delivery-window"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I22",
+     "title": "Dựng tham số cấu hình có version (config_parameter)",
+     "body": "**Mục tiêu:** Tham số vận hành có version, có người duyệt và giao dịch ghi tham số đã dùng.\n\n**Phạm vi:**\n- Làm: config_parameter + 有効日; đổi qua release (release_ref, người duyệt) và qua 14-04 cho mục được phép; API đọc tham số hiệu lực\n- Không làm: màn nhập tham số (EP09-I05)\n\n**Nguồn:** DB:COM_DB 4.9; Q-COMDB-07; SPEC:SCR-14 §6 bảng tham số\n\n**Định nghĩa xong:**\n- [ ] Mọi tham số ở SCR-14 §6 có dòng cấu hình\n- [ ] Đổi qua release thiếu người duyệt bị chặn\n- [ ] Giao dịch ghi FK tham số đã dùng\n- [ ] Danh sách tham số được đổi qua màn đã được chốt (GAP-08-03)\n\n**Phụ thuộc:** EP00-I18\n\n**Spec gap:** GAP-08-03",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I18"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I22-S01",
+       "title": "DB và API đọc tham số hiệu lực",
+       "body": "**Mục tiêu:** Theo nhóm và ngày.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I22-S02",
+       "title": "Bước release nạp tham số",
+       "body": "**Mục tiêu:** Có ghi người duyệt.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I23",
+     "title": "Dựng catalog mã thông điệp từ error-codes 1.6.0",
+     "body": "**Mục tiêu:** Một nguồn mã thông điệp cho API và UI, đủ cả 22 mã của APV-016.\n\n**Phạm vi:**\n- Làm: sinh catalog từ error-codes; mã chung M_COM-19〜23 và alias; API trả mã + tham số, UI tra chữ; CI kiểm mã dùng trong code có trong catalog\n- Không làm: đặt chữ mới ngoài error-codes\n\n**Nguồn:** SPEC:error-codes 1.6.0, mục Mã dùng chung; LAB4:COM-MSG-01; LAB4:SCR-05 G2\n\n**Định nghĩa xong:**\n- [ ] Catalog sinh tự động trong CI từ error-codes\n- [ ] CI đỏ khi code dùng mã không có\n- [ ] Số mã của catalog khớp error-codes\n- [ ] Có bảng HTTP status theo nhóm mã (GAP-00-03)\n\n**Phụ thuộc:** EP00-I07\n\n**Spec gap:** GAP-00-03",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I07"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I23-S01",
+       "title": "Bộ sinh catalog và kiểm CI",
+       "body": "**Mục tiêu:** Đọc error-codes, sinh mã cho BE / FE.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I23-S02",
+       "title": "Thành phần hiển thị thông điệp",
+       "body": "**Mục tiêu:** Tra chữ theo mã + tham số.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I23-S03",
+       "title": "Đối chiếu mã theo từng spec",
+       "body": "**Mục tiêu:** Mỗi spec dùng đúng mã đã đăng ký.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I24",
+     "title": "Dựng audit_log chỉ thêm",
+     "body": "**Mục tiêu:** Sự kiện trạng thái, master, duyệt, export, xác thực được ghi không sửa được, cùng giao dịch với thao tác.\n\n**Phạm vi:**\n- Làm: audit_log theo COM_DB 4.5; user DB của app chỉ INSERT; trigger chặn UPDATE / DELETE / TRUNCATE ở audit_log, stock_event, lot_status_event; acting_role_id, correlation_id; payload không token / chữ ký / ảnh; CHECK export_code\n- Không làm: màn tra cứu audit (EP-07)\n\n**Nguồn:** ADR-011; DB:COM_DB 4.5; FLOW:F-COM-06; LAB4:SEC-AUD-01 (SCR-05 G18); LAB4:02-architecture §5.2; bidding:S10.7\n\n**Định nghĩa xong:**\n- [ ] Test UPDATE / DELETE / TRUNCATE bị chặn, kể cả với user app\n- [ ] Client không có đường ghi audit tùy ý\n- [ ] Lỗi ghi audit làm rollback cả giao dịch\n- [ ] Tìm được theo correlation_id và đối tượng\n\n**Phụ thuộc:** EP00-I09, EP00-I12",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I09",
+      "EP00-I12"
+     ],
+     "bidding_ref": [
+      "S10.7"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP00-I24-S01",
+       "title": "DB, trigger và quyền chỉ INSERT",
+       "body": "**Mục tiêu:** Cho 3 bảng chỉ thêm.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I24-S02",
+       "title": "Thư viện ghi audit trong transaction",
+       "body": "**Mục tiêu:** Mọi module dùng chung.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I24-S03",
+       "title": "Ca kiểm thử chỉ thêm và rollback",
+       "body": "**Mục tiêu:** Gồm thử sửa bằng SQL trực tiếp.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I25",
+     "title": "Dựng thư viện gói xuất có manifest SHA-256",
+     "body": "**Mục tiêu:** Gói xuất kiểm toán / archive tái tạo được và kiểm được bằng hash.\n\n**Phạm vi:**\n- Làm: CSV chuẩn hóa (thứ tự tất định); SHA-256 từng tệp; manifest (基準日時, tham số, include_pii); export_manifest + export_code; so hash khi tái tạo\n- Không làm: màn RPT-13 (EP-07); archive RPT-14 (EP09-I12)\n\n**Nguồn:** ADR-011; DB:COM_DB 4.8; SEQ:SEQ_audit-export; REQ:IF-ARCH-01; bidding:S10.7, S9.6\n\n**Định nghĩa xong:**\n- [ ] Cùng tham số + 基準日時 → cùng hash (test)\n- [ ] Hash lệch → rejected\n- [ ] Cột cá nhân thay 「除外」 khi không chọn PII\n- [ ] Audit export luôn có export_code\n\n**Phụ thuộc:** EP00-I24, EP00-I28",
+     "role": "BE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I24",
+      "EP00-I28"
+     ],
+     "bidding_ref": [
+      "S10.7",
+      "S9.6"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP00-I25-S01",
+       "title": "Chuẩn hóa CSV, hash và manifest",
+       "body": "**Mục tiêu:** Kết quả tất định.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I25-S02",
+       "title": "Ca kiểm thử tái tạo hash",
+       "body": "**Mục tiêu:** Gồm dữ liệu có PII.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I26",
+     "title": "Phân vùng tháng cho bảng lớn",
+     "body": "**Mục tiêu:** Bảng lớn chia theo tháng để truy vết nhanh và purge rẻ.\n\n**Phạm vi:**\n- Làm: partition tháng audit_log, stock_event, temperature_reading, temperature_event; job tạo partition trước; PK / UNIQUE gồm cột partition; purge bằng detach (trừ audit_log)\n- Không làm: PoC đo PERF-02 (EP10-I11)\n\n**Nguồn:** ADR-010; SPEC:ARCH_system-overview §0 A-2; DB:COM_DB 4.5; DB:INV_DB stock_event; DB:TMP_DB temperature_reading; ISS-36 C#8\n\n**Định nghĩa xong:**\n- [ ] Partition tháng tới được tạo tự động và có cảnh báo khi thiếu\n- [ ] PK / UNIQUE hợp lệ trên bảng partition (đóng GAP-00-05)\n- [ ] Truy vấn theo khoảng chỉ quét partition cần (EXPLAIN trong test)\n- [ ] Có ghi phương án đổi nếu PoC PERF-02 cho kết quả khác\n\n**Phụ thuộc:** EP00-I09\n\n**Spec gap:** GAP-00-05",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I09"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I26-S01",
+       "title": "Viết DD khóa và unique trên bảng partition",
+       "body": "**Mục tiêu:** Sửa DB design cho hợp lệ.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I26-S02",
+       "title": "DDL partition và job tạo partition",
+       "body": "**Mục tiêu:** Chạy theo lịch.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I26-S03",
+       "title": "Test partition pruning",
+       "body": "**Mục tiêu:** Theo khoảng thời gian.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I27",
+     "title": "Dựng khung chạy batch trên Functions",
+     "body": "**Mục tiêu:** Mọi batch B-01〜B-16 chạy theo một khung: lịch JST, khóa lần chạy, correlation_id, ghi kết quả.\n\n**Phạm vi:**\n- Làm: cron JST; khóa một lần chạy; correlation_id mỗi lần; ghi interface_run / audit; batch gọi API nội bộ; lỗi đẩy tới giám sát\n- Không làm: nội dung từng batch\n\n**Nguồn:** SPEC:BATCH_LIST quy tắc chung; SPEC:ARCH_system-overview §2.1; LAB4:02-architecture G-10\n\n**Định nghĩa xong:**\n- [ ] Hai lần chạy chồng bị chặn (test)\n- [ ] Lịch theo giờ JST, đổi qua cấu hình\n- [ ] Batch lỗi bắn cảnh báo (EP10-I08)\n- [ ] Không batch nào ghi thẳng bảng ngoài API module\n\n**Phụ thuộc:** EP00-I02, EP00-I08, EP00-I24",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I02",
+      "EP00-I08",
+      "EP00-I24"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I27-S01",
+       "title": "Khung trigger và khóa lần chạy",
+       "body": "**Mục tiêu:** Dùng chung cho mọi batch.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I27-S02",
+       "title": "Hạ tầng Functions và lịch JST",
+       "body": "**Mục tiêu:** Theo IaC.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I27-S03",
+       "title": "Ca kiểm thử chạy chồng và lỗi",
+       "body": "**Mục tiêu:** Khóa lần chạy giữ đúng.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:yes"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP00-I28",
+     "title": "Lưu tệp đính kèm trên Blob và container WORM",
+     "body": "**Mục tiêu:** Tệp bằng chứng và gói xuất có hash, không sửa được ở container WORM.\n\n**Phạm vi:**\n- Làm: attachment (sha256, storage_key, contains_pii, supersedes); tải lên / tải về qua StoragePort; container WORM cho archive / bằng chứng; mở tệp ghi audit\n- Không làm: chụp ảnh / chữ ký POD trên thiết bị (EP-03 / EP-04)\n\n**Nguồn:** DB:COM_DB 4.6; ADR-011; LAB4:05-database diff D12; SPEC:data-lifecycle §2\n\n**Định nghĩa xong:**\n- [ ] Hash lưu khớp hash tính lại\n- [ ] Sửa / xóa ở container WORM bị từ chối (test)\n- [ ] Mở tệp có audit\n- [ ] storage_key không phải URL công khai\n\n**Phụ thuộc:** EP00-I02, EP00-I08",
+     "role": "BE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:yes"
+     ],
+     "depends_on": [
+      "EP00-I02",
+      "EP00-I08"
+     ],
+     "bidding_ref": [],
+     "sub_issues": [
+      {
+       "id": "EP00-I28-S01",
+       "title": "Chính sách WORM và container",
+       "body": "**Mục tiêu:** Theo thời hạn lưu.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:yes"
+       ]
+      },
+      {
+       "id": "EP00-I28-S02",
+       "title": "API tải lên / tải về qua StoragePort",
+       "body": "**Mục tiêu:** Ghi attachment và audit.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:yes"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EP-10",
+   "title": "NFR, セキュリティ và 可観測性",
+   "body": "**Mục tiêu:** Đạt và chứng minh được các yêu cầu phi chức năng: hiệu năng, phục hồi, sẵn sàng, quan sát, bảo mật, ngôn ngữ và a11y.\n\n**Phạm vi:**\n- Làm: COM-02 / 03 / 04, lớp thiết bị, mã hóa, bí mật, quan sát, cảnh báo batch, runbook, dữ liệu đo, PERF-01 / 02, backup / restore / DR, HA, mất mạng, JST, WCAG, kiểm quyền, gói bằng chứng\n- Không làm: cơ chế nền đã ở EP-00 (đăng nhập, quyền, audit); hàng đợi POD offline (EP-03 / EP-04)\n\n**Nguồn:** REQ:NFR-PERF-01/02, BCP-01, AVL-01/02, OPS-01, SEC-01/02/03, LOC-01, ACC-01; LAB4:02-architecture §5.3; plan:§8.6; bidding:E10\n\n**Định nghĩa xong:**\n- [ ] Mọi NFR có bằng chứng trong gói ACC-NFR-01\n- [ ] Diễn tập restore đã chạy và có số liệu\n- [ ] Load test và PERF-02 có báo cáo\n\n**Phụ thuộc:** không có",
+   "labels": [
+    "type:epic"
+   ],
+   "issues": [
+    {
+     "id": "EP10-I01",
+     "title": "Dựng màn COM-04 lỗi chung",
+     "body": "**Mục tiêu:** Lỗi quyền và lỗi hệ thống hiện thống nhất, có mã tương quan để tra log.\n\n**Phạm vi:**\n- Làm: View 1 không quyền (M_COM-13); View 2 lỗi hệ thống (M_COM-14 / M_COM-15 kèm correlation ID); ngoài giờ phục vụ (M_COM-18)\n- Không làm: lỗi nghiệp vụ trong màn (mỗi màn tự hiện)\n\n**Nguồn:** SPEC:COM-04; FLOW:F-COM-07; SPEC:error-codes M_COM-13〜15, 18\n\n**Định nghĩa xong:**\n- [ ] Lỗi 500 hiện correlation ID khớp log\n- [ ] Không lộ stack / chi tiết kỹ thuật\n- [ ] Kiểm axe đạt\n- [ ] Test từ chối quyền dẫn tới View 1\n\n**Phụ thuộc:** EP00-I07, EP00-I23",
+     "role": "FE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I07",
+      "EP00-I23"
+     ],
+     "bidding_ref": [
+      "S10.8"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I01-S01",
+       "title": "Viết DD COM-04",
+       "body": "**Mục tiêu:** COM-04 chỉ có spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I01-S02",
+       "title": "FE màn COM-04",
+       "body": "**Mục tiêu:** 2 view theo spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I01-S03",
+       "title": "Ca kiểm thử COM-04",
+       "body": "**Mục tiêu:** Quyền, lỗi hệ thống, ngoài giờ.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I02",
+     "title": "Dựng màn COM-02 menu theo 職務",
+     "body": "**Mục tiêu:** Mỗi 職務 thấy đúng menu và số việc cần làm của mình.\n\n**Phạm vi:**\n- Làm: menu theo role_permission; số 承認待ち, mail 送信失敗 (要対応); menu dạng sheet cho ハンディ; M_COM-07 / M_COM-08\n- Không làm: nội dung các màn nghiệp vụ\n\n**Nguồn:** SPEC:COM-02; FLOW:F-COM-03; SPEC:BATCH_LIST B-10 (đếm failed)\n\n**Định nghĩa xong:**\n- [ ] Menu khớp ma trận quyền cho 8 職務\n- [ ] Số 要対応 khớp dữ liệu nguồn\n- [ ] Bố cục ハンディ 360px đúng wireframe\n- [ ] Kiểm axe đạt\n\n**Phụ thuộc:** EP00-I14, EP10-I01",
+     "role": "FE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I14",
+      "EP10-I01"
+     ],
+     "bidding_ref": [
+      "S10.5",
+      "S10.8"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I02-S01",
+       "title": "Viết DD COM-02",
+       "body": "**Mục tiêu:** COM-02 chỉ có spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I02-S02",
+       "title": "API đếm việc cần làm theo 職務",
+       "body": "**Mục tiêu:** Đếm từ hàng đợi duyệt và mail_outbox.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I02-S03",
+       "title": "FE màn COM-02 (PC và ハンディ)",
+       "body": "**Mục tiêu:** Theo wireframe.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I02-S04",
+       "title": "Ca kiểm thử menu 8 職務",
+       "body": "**Mục tiêu:** Mỗi 職務 một bộ.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I03",
+     "title": "Dựng COM-03 khóa phiên theo lớp thiết bị",
+     "body": "**Mục tiêu:** Phiên tự khóa khi không thao tác, thời gian theo lớp thiết bị.\n\n**Phạm vi:**\n- Làm: thời gian khóa / cảnh báo theo lớp thiết bị (config nhóm session, Q-COM-04); M_COM-09, M_COM-05; thao tác không ghi khi hết phiên (M_COM-11); mở lại qua COM-01\n- Không làm: đăng nhập (EP00-I11)\n\n**Nguồn:** SPEC:COM-03; FLOW:F-COM-02; REQ:NFR-SEC-02; Q-COM-04\n\n**Định nghĩa xong:**\n- [ ] Khóa đúng thời gian theo từng lớp thiết bị (đọc từ config_parameter)\n- [ ] Thao tác gửi sau khi hết phiên không được ghi và báo M_COM-11\n- [ ] Mở lại cùng người cùng 職務 quay về màn trước\n- [ ] Audit idle_lock\n\n**Phụ thuộc:** EP00-I12, EP00-I22",
+     "role": "FE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I12",
+      "EP00-I22"
+     ],
+     "bidding_ref": [
+      "S10.5"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I03-S01",
+       "title": "Viết DD COM-03",
+       "body": "**Mục tiêu:** COM-03 chỉ có spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I03-S02",
+       "title": "BE hết phiên và audit khóa",
+       "body": "**Mục tiêu:** Theo lớp thiết bị.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I03-S03",
+       "title": "FE COM-03 cảnh báo và khóa",
+       "body": "**Mục tiêu:** Đếm ngược theo spec.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I03-S04",
+       "title": "Ca kiểm thử khóa phiên",
+       "body": "**Mục tiêu:** Mỗi lớp thiết bị.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I04",
+     "title": "Xác định lớp thiết bị ở server và chỉ cho duyệt trên PC",
+     "body": "**Mục tiêu:** Server tự biết thiết bị đang dùng để chặn duyệt ngoài PC, không tin cookie client.\n\n**Phạm vi:**\n- Làm: đọc claim thiết bị / compliance từ Entra ID + Conditional Access; device_class vào audit; chặn duyệt trên thiết bị chung\n- Không làm: MDM cấu hình thiết bị (phía khách)\n\n**Nguồn:** LAB4:SEC-01; ISS-21; Q-COMDB-03; Q-COM-13; ADR-008\n\n**Định nghĩa xong:**\n- [ ] Cookie / tham số client không đổi được lớp thiết bị\n- [ ] Duyệt từ tablet chung bị chặn (test)\n- [ ] audit ghi device_class\n- [ ] Thiết bị chưa đăng ký → M_COM-16\n\n**Phụ thuộc:** EP00-I13, EP09-I08",
+     "role": "BE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I13",
+      "EP09-I08"
+     ],
+     "bidding_ref": [
+      "S10.5"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I04-S01",
+       "title": "BE đọc claim thiết bị và chặn duyệt",
+       "body": "**Mục tiêu:** Kiểm ở server.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I04-S02",
+       "title": "Bộ lọc thiết bị trong Conditional Access",
+       "body": "**Mục tiêu:** Phân lớp PC / dùng chung / MDM.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I04-S03",
+       "title": "Ca kiểm thử duyệt theo thiết bị",
+       "body": "**Mục tiêu:** Mỗi lớp thiết bị.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I05",
+     "title": "Mã hóa dữ liệu khi truyền, khi lưu và trong tệp",
+     "body": "**Mục tiêu:** Đạt NFR-SEC-03 cho đường truyền, DB, tệp và cột cá nhân.\n\n**Phạm vi:**\n- Làm: TLS ở App Gateway và nội bộ; mã hóa lưu PostgreSQL; mã hóa Blob; mã hóa cột cá nhân không tra cứu ở ứng dụng theo data-lifecycle §4\n- Không làm: hàng đợi POD trên thiết bị (EP-03 / EP-04, T08-01)\n\n**Nguồn:** REQ:NFR-SEC-03; SPEC:data-lifecycle §4; DB:COM_DB 4.1 (Q-COMDB-10); LAB4:02-architecture §5.3\n\n**Định nghĩa xong:**\n- [ ] Mọi kết nối ngoài và nội bộ dùng TLS (quét cấu hình)\n- [ ] DB và Blob bật mã hóa lưu\n- [ ] Cột cá nhân trong data-lifecycle §4 được mã hóa theo cách đã chốt (GAP-10-02)\n- [ ] Khóa nằm ở Key Vault, có xoay vòng\n\n**Phụ thuộc:** EP00-I02, EP10-I06\n\n**Spec gap:** GAP-10-02",
+     "role": "Infra",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I02",
+      "EP10-I06"
+     ],
+     "bidding_ref": [
+      "S10.6"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I05-S01",
+       "title": "Cấu hình TLS và mã hóa lưu DB / Blob",
+       "body": "**Mục tiêu:** Theo IaC.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I05-S02",
+       "title": "Mã hóa cột cá nhân ở ứng dụng",
+       "body": "**Mục tiêu:** Cột không tra cứu.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I05-S03",
+       "title": "Kiểm mã hóa",
+       "body": "**Mục tiêu:** Đọc thô DB / Blob không thấy dữ liệu cá nhân.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I06",
+     "title": "Quản lý bí mật bằng Key Vault và managed identity",
+     "body": "**Mục tiêu:** Không có bí mật trong mã, env hay pipeline log.\n\n**Phạm vi:**\n- Làm: Key Vault + managed identity cho app, Functions, pipeline; quét secret trong CI; quy trình xoay khóa\n- Không làm: khóa phía hệ thống khách (ERP / relay)\n\n**Nguồn:** SPEC:ARCH_system-overview §2 (Key Vault); REQ:NFR-SEC-03; LAB4:ADR-012 Decision (khóa trong shell)\n\n**Định nghĩa xong:**\n- [ ] App và Functions đọc bí mật qua managed identity\n- [ ] Quét secret CI chặn commit có khóa\n- [ ] Có quy trình xoay khóa được thử một lần\n\n**Phụ thuộc:** EP00-I02",
+     "role": "Infra",
+     "sprint": "S0",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I02"
+     ],
+     "bidding_ref": [
+      "S10.6"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I07",
+     "title": "Dựng quan sát: log có cấu trúc, trace, metric, alert",
+     "body": "**Mục tiêu:** Sự cố tra được theo correlation ID từ UI qua API tới batch, có cảnh báo hành động được.\n\n**Phạm vi:**\n- Làm: App Insights + Log Analytics; trường log chuẩn gồm correlation_id; cấm token / dữ liệu cá nhân trong log; metric; alert P0; dashboard\n- Không làm: runbook (EP10-I09)\n\n**Nguồn:** REQ:NFR-OPS-01; SPEC:log-convention; SPEC:BATCH_LIST quy tắc chung; LAB4:02-architecture §5.3\n\n**Định nghĩa xong:**\n- [ ] Quy ước log có correlation_id và múi giờ được chốt (GAP-10-01)\n- [ ] Tìm một request theo correlation ID ra đủ log UI → API → job\n- [ ] Kịch bản P0 bắn alert có chỉ dẫn\n- [ ] Test log không chứa token / chữ ký\n\n**Phụ thuộc:** EP00-I07, EP00-I02\n\n**Spec gap:** GAP-10-01",
+     "role": "Infra",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I07",
+      "EP00-I02"
+     ],
+     "bidding_ref": [
+      "S10.4"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I07-S01",
+       "title": "Chốt quy ước log có cấu trúc",
+       "body": "**Mục tiêu:** Sửa log-convention, hỏi chuyên gia.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I07-S02",
+       "title": "Gắn log / trace cho API và batch",
+       "body": "**Mục tiêu:** Theo quy ước đã chốt.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I07-S03",
+       "title": "Alert P0 và dashboard",
+       "body": "**Mục tiêu:** Trong IaC.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I08",
+     "title": "Cảnh báo batch không chạy hoặc chạy quá giờ",
+     "body": "**Mục tiêu:** Biết ngay khi một batch theo lịch không chạy hay chạy quá khung.\n\n**Phạm vi:**\n- Làm: heartbeat cho B-01〜B-16; khung giờ mong đợi theo lịch APV-014; cảnh báo tới IT\n- Không làm: nội dung batch\n\n**Nguồn:** SPEC:BATCH_LIST tổng quan; review-261024-step3-dr-final M-4 (C M03)\n\n**Định nghĩa xong:**\n- [ ] Batch không chạy đúng giờ sinh cảnh báo trong khung đã định\n- [ ] Batch chạy quá giờ (vd purge quá 04:00) sinh cảnh báo\n- [ ] Test bằng cách tắt một batch trên test\n\n**Phụ thuộc:** EP00-I27, EP10-I07",
+     "role": "Infra",
+     "sprint": "S3",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I27",
+      "EP10-I07"
+     ],
+     "bidding_ref": [
+      "S10.4"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I09",
+     "title": "Soạn runbook sự cố P0",
+     "body": "**Mục tiêu:** Mỗi alert P0 có runbook để người trực xử lý được.\n\n**Phạm vi:**\n- Làm: runbook cho DB ngừng, IF ERP lỗi, mail relay lỗi, purge aborted, chạy lại batch nội bộ\n- Không làm: quy trình vận hành sau hypercare (PLAN-B7)\n\n**Nguồn:** REQ:NFR-OPS-01; SPEC:BATCH_LIST quy tắc chung (chạy lại theo runbook); plan:§8.6\n\n**Định nghĩa xong:**\n- [ ] Mỗi alert P0 trỏ tới một runbook\n- [ ] Runbook được thử trên test ít nhất một lần\n- [ ] Runbook nằm trong repo, có người chịu trách nhiệm\n\n**Phụ thuộc:** EP10-I07",
+     "role": "Infra",
+     "sprint": "S6",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP10-I07"
+     ],
+     "bidding_ref": [
+      "S10.4"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I09-S01",
+       "title": "Viết runbook theo từng alert P0",
+       "body": "**Mục tiêu:** Luồng xử lý sự cố.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S6",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I09-S02",
+       "title": "Diễn tập runbook trên test",
+       "body": "**Mục tiêu:** Ghi kết quả.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S6",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I10",
+     "title": "Dựng bộ dữ liệu giả cỡ thật để đo hiệu năng",
+     "body": "**Mục tiêu:** Có dữ liệu giả đủ cỡ để đo PERF-01 / PERF-02 trước hardening.\n\n**Phạm vi:**\n- Làm: script sinh 300.000 dòng giao, 2,5 triệu reading, 3 năm, có lô 牛 / 米; tái lập được\n- Không làm: dữ liệu thật của khách\n\n**Nguồn:** REQ:NFR-PERF-02; plan:§8.6 bước 5.1; ISS-36 C#8\n\n**Định nghĩa xong:**\n- [ ] Script sinh lại cùng bộ dữ liệu với cùng seed\n- [ ] Khối lượng đạt mức NFR-PERF-02\n- [ ] Dữ liệu qua được ràng buộc DB (không tắt CHECK khi nạp)\n\n**Phụ thuộc:** EP00-I26\n\n**Ràng buộc nghiệp vụ:** Plan ghi story dữ liệu ở S6; đề xuất kéo về S4 để kịp quyết partition / A-3 (xem ISS-36 C#8).",
+     "role": "QA",
+     "sprint": "S4",
+     "labels": [
+      "type:issue",
+      "role:QA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I26"
+     ],
+     "bidding_ref": [
+      "S10.1"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I11",
+     "title": "Đo truy vết 3 năm ≤ 60 giây và quyết A-3",
+     "body": "**Mục tiêu:** Có bằng chứng PERF-02 và quyết định bật hay không Azure AI Search.\n\n**Phạm vi:**\n- Làm: chỉ mục lô / mã bò / recall_relation; đo trên bộ dữ liệu giả; báo cáo; đề xuất A-3\n- Không làm: triển khai AI Search (chỉ khi PoC trượt, CR riêng)\n\n**Nguồn:** REQ:NFR-PERF-02; ADR-010; SPEC:ARCH_system-overview §0 A-3; ISS-36 C#8\n\n**Định nghĩa xong:**\n- [ ] Kết quả đo có số liệu và cách đo tái lập\n- [ ] Truy vết lô / 牛個体識別番号 3 năm ≤ 60 giây hoặc có phương án được duyệt\n- [ ] Quyết định A-3 ghi APV\n\n**Phụ thuộc:** EP10-I10",
+     "role": "BE",
+     "sprint": "S5",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP10-I10"
+     ],
+     "bidding_ref": [
+      "S10.1"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I11-S01",
+       "title": "Tối ưu chỉ mục truy vết",
+       "body": "**Mục tiêu:** Theo kết quả đo.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I11-S02",
+       "title": "Đo và báo cáo PERF-02",
+       "body": "**Mục tiêu:** Script đo trong repo.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I12",
+     "title": "Load test p95 đọc ≤ 2 giây, ghi ≤ 3 giây với 80 phiên",
+     "body": "**Mục tiêu:** Chứng minh PERF-01 trên môi trường gần prod.\n\n**Phạm vi:**\n- Làm: kịch bản theo vai và giờ cao điểm (2 tệp 受注 10:30 / 13:30, lập route 14:00); chạy; tối ưu\n- Không làm: tối ưu ngoài phạm vi NFR\n\n**Nguồn:** REQ:NFR-PERF-01; plan:§8.6 bước 5.1\n\n**Định nghĩa xong:**\n- [ ] Kịch bản có trộn đọc / ghi theo vai\n- [ ] p95 đạt ngưỡng ở 80 phiên hoặc có danh sách điểm nghẽn + kế hoạch\n- [ ] Báo cáo đưa vào gói bằng chứng NFR\n\n**Phụ thuộc:** EP10-I10, EP00-I05",
+     "role": "QA",
+     "sprint": "HARD",
+     "labels": [
+      "type:issue",
+      "role:QA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP10-I10",
+      "EP00-I05"
+     ],
+     "bidding_ref": [
+      "S10.1"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I12-S01",
+       "title": "Viết kịch bản load test theo vai",
+       "body": "**Mục tiêu:** Có giờ cao điểm.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S6",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I12-S02",
+       "title": "Chạy load test và báo cáo",
+       "body": "**Mục tiêu:** Trên môi trường gần prod.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "HARD",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I12-S03",
+       "title": "Tối ưu điểm nghẽn",
+       "body": "**Mục tiêu:** Theo báo cáo.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "HARD",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I13",
+     "title": "Cấu hình backup và PITR cho PostgreSQL và Blob",
+     "body": "**Mục tiêu:** Đạt RPO 15 phút cho dữ liệu và tệp.\n\n**Phạm vi:**\n- Làm: PITR PostgreSQL; giữ backup; soft delete / version cho Blob; ghi cách xử lý dữ liệu đã purge còn trong backup (Q-LC-04)\n- Không làm: diễn tập (EP10-I14)\n\n**Nguồn:** REQ:NFR-BCP-01; SPEC:BATCH_LIST B-14; SPEC:data-lifecycle §5; Q-LC-04\n\n**Định nghĩa xong:**\n- [ ] Backup tự động có thời hạn giữ ghi rõ\n- [ ] Khôi phục tới một thời điểm thử được trên test\n- [ ] Ghi quyết định về dữ liệu đã purge trong backup\n\n**Phụ thuộc:** EP00-I05\n\n**Spec gap:** GAP-10-03",
+     "role": "Infra",
+     "sprint": "S6",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I05"
+     ],
+     "bidding_ref": [
+      "S10.2"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I14",
+     "title": "Diễn tập restore và chuyển vùng DR, đo RTO 4 giờ",
+     "body": "**Mục tiêu:** Đo thật RTO / RPO và có quy trình diễn tập hằng quý.\n\n**Phạm vi:**\n- Làm: restore DB + Blob + cấu hình; chuyển sang Japan West; đo thời gian; kiểm dữ liệu POD / mail sau restore; ghi corrective action\n- Không làm: BCP nghiệp vụ phía khách\n\n**Nguồn:** REQ:NFR-BCP-01; SPEC:ARCH_system-overview §2 (DR); review-261024-step3-dr-final M-4 (C M04)\n\n**Định nghĩa xong:**\n- [ ] RTO và RPO đo được, so với 4 giờ / 15 phút\n- [ ] Kiểm sau restore: không mất POD đã synced, mail_outbox nhất quán\n- [ ] Corrective action ghi lại khi không đạt\n- [ ] Lịch diễn tập hằng quý có người chịu trách nhiệm\n\n**Phụ thuộc:** EP10-I13\n\n**Spec gap:** GAP-10-03",
+     "role": "Infra",
+     "sprint": "HARD",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP10-I13"
+     ],
+     "bidding_ref": [
+      "S10.2"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP10-I14-S01",
+       "title": "Viết DD luồng restore và chuyển vùng",
+       "body": "**Mục tiêu:** Các bước, người làm, điểm kiểm.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S6",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I14-S02",
+       "title": "Chạy diễn tập và đo",
+       "body": "**Mục tiêu:** Ghi số liệu.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "HARD",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP10-I14-S03",
+       "title": "Kiểm dữ liệu sau restore",
+       "body": "**Mục tiêu:** POD, mail, audit.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "HARD",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP10-I15",
+     "title": "Cấu hình HA đạt 99,5% trong giờ phục vụ",
+     "body": "**Mục tiêu:** Đạt NFR-AVL-01 trong khung 05:00〜23:00 JST.\n\n**Phạm vi:**\n- Làm: App Service / PostgreSQL zone-redundant; cửa sổ bảo trì ngoài giờ; đo uptime hằng tháng\n- Không làm: offline POD (EP-03 / EP-04)\n\n**Nguồn:** REQ:NFR-AVL-01; SPEC:ARCH_system-overview §2\n\n**Định nghĩa xong:**\n- [ ] Cấu hình HA trong IaC\n- [ ] Có đo uptime theo giờ phục vụ\n- [ ] Bảo trì có lịch và thông báo trước\n\n**Phụ thuộc:** EP00-I05",
+     "role": "Infra",
+     "sprint": "S6",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I05"
+     ],
+     "bidding_ref": [
+      "S10.3"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I16",
+     "title": "Kiểm hành vi mất mạng ở màn kho và màn PC",
+     "body": "**Mục tiêu:** Xác nhận chỉ app tài xế có hàng đợi offline, các màn khác chặn ghi khi mất mạng.\n\n**Phạm vi:**\n- Làm: thử mất mạng ở các màn kho / PC: chặn ghi M_COM-20, giữ dữ liệu đang nhập, nút 再試行\n- Không làm: app tài xế (EP-03 / EP-04)\n\n**Nguồn:** ADR-009; REQ:NFR-AVL-02; SPEC:error-codes M_COM-20 / 21\n\n**Định nghĩa xong:**\n- [ ] Mọi màn ghi có ca mất mạng\n- [ ] Không màn nào ngoài SCR-08 lưu hàng đợi offline\n- [ ] Dữ liệu đang nhập không mất sau 再試行\n\n**Phụ thuộc:** EP00-I23",
+     "role": "QA",
+     "sprint": "ST",
+     "labels": [
+      "type:issue",
+      "role:QA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I23"
+     ],
+     "bidding_ref": [
+      "S10.3"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I17",
+     "title": "Dựng hiển thị JST và định dạng Nhật dùng chung",
+     "body": "**Mục tiêu:** Mọi màn hiển thị ngày giờ JST và định dạng Nhật thống nhất.\n\n**Phạm vi:**\n- Làm: thành phần ngày (2026年10月10日), giờ JST, số thập phân, nhiệt độ âm; nhận / trả ISO 8601\n- Không làm: dịch UI sang ngôn ngữ khác\n\n**Nguồn:** REQ:NFR-LOC-01; SPEC:common-ui-rules; LAB4:02-architecture §5.3\n\n**Định nghĩa xong:**\n- [ ] Thành phần dùng chung có test với giờ quanh 00:00 JST\n- [ ] API trả ISO 8601 có múi giờ\n- [ ] Màn không tự định dạng ngày\n\n**Phụ thuộc:** EP00-I09",
+     "role": "FE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I09"
+     ],
+     "bidding_ref": [
+      "S10.8"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I18",
+     "title": "Đưa kiểm WCAG 2.2 AA tự động vào CI",
+     "body": "**Mục tiêu:** Lỗi a11y bị bắt ngay khi màn được viết, không dồn tới hardening.\n\n**Phạm vi:**\n- Làm: axe chạy trong CI cho mọi màn; trạng thái luôn có chữ + biểu tượng; ngưỡng chặn merge\n- Không làm: kiểm tay (EP10-I22)\n\n**Nguồn:** REQ:NFR-ACC-01; SPEC:common-ui-rules; LAB4:01-wireframes/design-system\n\n**Định nghĩa xong:**\n- [ ] axe chạy trong CI cho mọi màn đã có\n- [ ] Lỗi mức A / AA chặn merge\n- [ ] Báo cáo axe lưu theo build\n\n**Phụ thuộc:** EP00-I03",
+     "role": "QA",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:QA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I03"
+     ],
+     "bidding_ref": [
+      "S10.8"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I22",
+     "title": "Kiểm tay WCAG 2.2 AA toàn bộ màn",
+     "body": "**Mục tiêu:** Xác nhận NFR-ACC-01 ở phần axe không bắt được.\n\n**Phạm vi:**\n- Làm: kiểm bàn phím, focus, tương phản, thông báo lỗi, đọc màn hình theo common-ui-rules cho mọi màn và 帳票\n- Không làm: thiết kế lại màn\n\n**Nguồn:** REQ:NFR-ACC-01; SPEC:common-ui-rules\n\n**Định nghĩa xong:**\n- [ ] Mọi màn có phiếu kiểm\n- [ ] Lỗi có ticket và được sửa trước ST\n- [ ] Kết quả đưa vào gói bằng chứng NFR\n\n**Phụ thuộc:** EP10-I18",
+     "role": "QA",
+     "sprint": "HARD",
+     "labels": [
+      "type:issue",
+      "role:QA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP10-I18"
+     ],
+     "bidding_ref": [
+      "S10.8"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I19",
+     "title": "Kiểm ma trận quyền toàn hệ thống",
+     "body": "**Mục tiêu:** Xác nhận NFR-SEC-02 trên toàn bộ màn và API trước ST.\n\n**Phạm vi:**\n- Làm: test tự động 8 職務 × route; tự duyệt ở mọi luồng duyệt; gọi API trực tiếp bỏ qua UI\n- Không làm: quyền theo dòng riêng từng màn (test của module)\n\n**Nguồn:** REQ:NFR-SEC-02; SPEC:screen-list ma trận; DB:COM_DB 4.4\n\n**Định nghĩa xong:**\n- [ ] Mọi route có ca cho đủ 8 職務\n- [ ] Mọi luồng duyệt có ca tự duyệt\n- [ ] Kết quả đưa vào gói bằng chứng NFR\n\n**Phụ thuộc:** EP00-I14, EP00-I15",
+     "role": "QA",
+     "sprint": "HARD",
+     "labels": [
+      "type:issue",
+      "role:QA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I14",
+      "EP00-I15"
+     ],
+     "bidding_ref": [
+      "S10.5"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I20",
+     "title": "Lập gói bằng chứng bảo mật: threat model, SBOM, quét lỗ hổng",
+     "body": "**Mục tiêu:** Có đủ bằng chứng bảo mật S3-03 yêu cầu nộp.\n\n**Phạm vi:**\n- Làm: threat model theo luồng chính; SBOM; quét lỗ hổng phụ thuộc và ứng dụng; kiểm license\n- Không làm: pentest bên thứ ba (nếu khách yêu cầu: CR)\n\n**Nguồn:** REQ:S3-03; SPEC:ARCH_system-overview §7; ISS-36 C#7\n\n**Định nghĩa xong:**\n- [ ] Threat model được review\n- [ ] SBOM sinh tự động trong CI\n- [ ] Lỗ hổng mức cao đã sửa hoặc có chấp nhận rủi ro được duyệt\n\n**Phụ thuộc:** EP00-I03",
+     "role": "SA",
+     "sprint": "HARD",
+     "labels": [
+      "type:issue",
+      "role:SA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I03"
+     ],
+     "bidding_ref": [
+      "S10.6"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP10-I21",
+     "title": "Tổng hợp bằng chứng NFR cho nghiệm thu",
+     "body": "**Mục tiêu:** Có gói ACC-NFR-01 gửi khách: hiệu năng, bảo mật, phục hồi, a11y, quan sát.\n\n**Phạm vi:**\n- Làm: gom báo cáo EP10-I11, I12, I14, I18, I22, I19, I20 và kết quả quan sát thành một gói\n- Không làm: nghiệm thu chức năng\n\n**Nguồn:** REQ:ACC-NFR-01; plan:§8.6 bước 5.6\n\n**Định nghĩa xong:**\n- [ ] Mỗi NFR có bằng chứng hoặc lý do chưa đạt + kế hoạch\n- [ ] Gói được người duyệt nội bộ xác nhận trước khi gửi khách\n\n**Phụ thuộc:** EP10-I11, EP10-I12, EP10-I14, EP10-I18, EP10-I22, EP10-I19, EP10-I20",
+     "role": "PM",
+     "sprint": "ST",
+     "labels": [
+      "type:issue",
+      "role:PM",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP10-I11",
+      "EP10-I12",
+      "EP10-I14",
+      "EP10-I18",
+      "EP10-I22",
+      "EP10-I19",
+      "EP10-I20"
+     ],
+     "bidding_ref": [
+      "S10.1",
+      "S10.2",
+      "S10.4",
+      "S10.6",
+      "S10.8"
+     ],
+     "sub_issues": []
+    }
+   ]
+  },
+  {
+   "id": "EP-08",
+   "title": "マスタ: vòng đời master, 契約, 温度ポリシー, lưu giữ và purge",
+   "body": "**Mục tiêu:** Master đúng và có duyệt làm đầu vào cho nhập, xuất, vận tải và giám sát; dữ liệu được giữ và xóa đúng chính sách.\n\n**Phạm vi:**\n- Làm: SCR-14 14-01〜14-06, M.1〜M.6, Legal hold, B-08 / B-09 purge, dữ liệu mẫu\n- Không làm: 14-05 liên kết ngoài (EP-09); migration master thật (EP-12)\n\n**Nguồn:** SPEC:SCR-14; FLOW:FLOW_master-data; DB:MST_DB; SPEC:data-lifecycle; bidding:E8\n\n**Định nghĩa xong:**\n- [ ] Mọi vùng SCR-14 có DD trước khi code\n- [ ] Master active dùng được cho module S2\n- [ ] Purge chỉ chạy khi archive khớp manifest\n\n**Phụ thuộc:** không có",
+   "labels": [
+    "type:epic"
+   ],
+   "issues": [
+    {
+     "id": "EP08-I01",
+     "title": "Dựng khung vòng đời master dùng chung",
+     "body": "**Mục tiêu:** Mọi master đi cùng một vòng đời có duyệt, hiệu lực và lịch sử.\n\n**Phạm vi:**\n- Làm: created → review → active → retired cho 10 loại master; 下書き / 提出 / 廃止申請; lý do bắt buộc khi sửa / 廃止; tự đặt effective_to bản cũ khi bản mới active; khóa sửa khi review; sự kiện master vào audit; M_MST-01〜08\n- Không làm: màn từng loại master (EP08-I02, I05, I07, I08)\n\n**Nguồn:** SPEC:SCR-14 §3, §5; FLOW:F-MST-01; DB:MST_DB 4.0, R1–R4; bidding:S8.1–S8.3\n\n**Định nghĩa xong:**\n- [ ] created → active thẳng trả M_MST-06\n- [ ] Chồng hiệu lực trả M_MST-04\n- [ ] Bản cũ giữ active tới khi bản mới được duyệt\n- [ ] Hai người duyệt cùng lúc: người sau nhận M_MST-08\n- [ ] Test cho đủ 10 loại master\n\n**Phụ thuộc:** EP00-I18, EP00-I15, EP00-I24\n\n**Spec gap:** GAP-08-01, GAP-08-04",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I18",
+      "EP00-I15",
+      "EP00-I24"
+     ],
+     "bidding_ref": [
+      "S8.1",
+      "S8.2",
+      "S8.3"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I01-S01",
+       "title": "Viết DD SCR-14 phần chung và vòng đời master",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I01-S02",
+       "title": "API vòng đời master",
+       "body": "**Mục tiêu:** Dùng khung version của EP00-I18.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I01-S03",
+       "title": "Ca kiểm thử vòng đời",
+       "body": "**Mục tiêu:** Gồm đồng thời và trạng thái sai.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I02",
+     "title": "Dựng 14-01 SKUマスタ",
+     "body": "**Mục tiêu:** マスター管理者 quản lý SKU qua vòng đời có duyệt.\n\n**Phạm vi:**\n- Làm: danh sách, lọc, chi tiết + lịch sử version chỉ đọc, form B-6.x / B-7.x, trường 要レビュー hiển thị; dữ liệu mẫu 12 SKU\n- Không làm: trường 期限種別 và lane (EP08-I03, I04 kiểm riêng)\n\n**Nguồn:** SPEC:SCR-14 §4.1 B, §5 14-01; bidding:S8.1\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe 14-01\n- [ ] Lọc / tìm / tạo / gửi review / xin 廃止 chạy được\n- [ ] 0 件 hiện đúng thông điệp\n- [ ] Test E2E vòng đời một SKU\n\n**Phụ thuộc:** EP08-I01\n\n**Spec gap:** GAP-08-01",
+     "role": "FE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP08-I01"
+     ],
+     "bidding_ref": [
+      "S8.1"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I02-S01",
+       "title": "Viết DD SCR-14 vùng 14-01",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I02-S02",
+       "title": "API SKU",
+       "body": "**Mục tiêu:** Trên khung vòng đời.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I02-S03",
+       "title": "FE 14-01",
+       "body": "**Mục tiêu:** Theo wireframe.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I02-S04",
+       "title": "Ca kiểm thử 14-01",
+       "body": "**Mục tiêu:** Validation và vòng đời.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I03",
+     "title": "Bắt buộc 期限種別 trên SKU và không suy mặc định",
+     "body": "**Mục tiêu:** Mỗi SKU khai rõ 賞味期限 hay 消費期限 vì hai loại xử lý khác nhau ở 引当 / 出荷.\n\n**Phạm vi:**\n- Làm: expiry_type bắt buộc, giá trị theo CD; là trường 要レビュー; đổi loại = version mới đi review; nhãn hiển thị tách riêng\n- Không làm: quy tắc chặn / cảnh báo theo loại hạn (EP-03)\n\n**Nguồn:** REQ:BR-EXP-01; SPEC:SCR-14 B-6.5; LAB4:02-architecture §4.2\n\n**Định nghĩa xong:**\n- [ ] Không lưu được SKU thiếu loại hạn\n- [ ] Đổi loại hạn chỉ qua review\n- [ ] Hai nhãn 賞味期限 / 消費期限 không dùng chung một chữ ở UI\n- [ ] API cho EP-03 trả loại hạn theo version hiệu lực\n\n**Phụ thuộc:** EP08-I01\n\n**Ràng buộc nghiệp vụ:** 消費期限 tới hạn chặn cứng; 賞味期限 chỉ cảnh báo. Không suy loại từ tên hay nhóm hàng.",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "domain:expiry-type"
+     ],
+     "depends_on": [
+      "EP08-I01"
+     ],
+     "bidding_ref": [
+      "S8.1"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP08-I04",
+     "title": "Quản lý traceability_lane và regulated_identifier",
+     "body": "**Mục tiêu:** SKU và 仕入先 khai lane truy xuất để luồng 牛 / 米 kiểm đúng dữ liệu bắt buộc.\n\n**Phạm vi:**\n- Làm: lane beef / rice / internal_lot ở SKU và 仕入先 theo CD; không diễn giải nghĩa; regulated_identifier cho NULL (Q-MSTDB-05); đổi lane đi review\n- Không làm: kiểm 牛個体識別番号 / 産地 khi nhập và xuất (EP-01, EP-03)\n\n**Nguồn:** SPEC:SCR-14 B-6.6 / 6.7, D-7.3; DB:MST_DB 4.1 (Q-MSTDB-05); LAB4:02-architecture §4.5\n\n**Định nghĩa xong:**\n- [ ] Lane chỉ nhận giá trị trong CD\n- [ ] Lane beef / rice được API trả cho luồng nhập / xuất\n- [ ] regulated_identifier NULL lưu được, có test\n- [ ] Đổi lane chỉ qua review\n\n**Phụ thuộc:** EP08-I01\n\n**Ràng buộc nghiệp vụ:** Truy xuất bắt buộc theo luật chỉ với 米 và 牛; lane khác chỉ khuyến khích.",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "domain:traceability-rice-beef"
+     ],
+     "depends_on": [
+      "EP08-I01"
+     ],
+     "bidding_ref": [
+      "S8.1",
+      "S8.3"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP08-I05",
+     "title": "Dựng 14-02 顧客-SKU契約 và 顧客ヘッダ",
+     "body": "**Mục tiêu:** マスター管理者 quản lý hợp đồng theo cặp 顧客×SKU và thông tin khách tối thiểu.\n\n**Phạm vi:**\n- Làm: 顧客ヘッダ 8 trường; danh sách hợp đồng + lọc 「ルール未確定のみ」; delivery_term → điền sẵn 4 cờ bằng chứng POD (sửa được); dữ liệu mẫu 15 hợp đồng\n- Không làm: màn khách hàng riêng (không có theo Q36); quy tắc 未確定 (EP08-I06)\n\n**Nguồn:** SPEC:SCR-14 §4.1 C; DB:MST_DB 4.2, 4.3; Q33; Q36; bidding:S8.2\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe 14-02\n- [ ] Đổi delivery_term điền sẵn cờ bằng chứng đúng giá trị khởi tạo\n- [ ] 連絡先 không nhận tên / số cá nhân (DR-PRIV-01)\n- [ ] Test E2E vòng đời một hợp đồng\n\n**Phụ thuộc:** EP08-I01, EP00-I21\n\n**Spec gap:** GAP-08-01",
+     "role": "FE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP08-I01",
+      "EP00-I21"
+     ],
+     "bidding_ref": [
+      "S8.2"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I05-S01",
+       "title": "Viết DD SCR-14 vùng 14-02",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I05-S02",
+       "title": "API hợp đồng và 顧客ヘッダ",
+       "body": "**Mục tiêu:** Trên khung vòng đời.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I05-S03",
+       "title": "FE 14-02",
+       "body": "**Mục tiêu:** Theo wireframe.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I05-S04",
+       "title": "Ca kiểm thử 14-02",
+       "body": "**Mục tiêu:** Gồm cờ bằng chứng POD.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I06",
+     "title": "Xử lý delivery_window_rule 未確定",
+     "body": "**Mục tiêu:** Hợp đồng chưa chốt rule bị loại khỏi 引当 mà không ảnh hưởng dòng khác.\n\n**Phạm vi:**\n- Làm: NULL = 未確定, hiện chữ + biểu tượng và M_MST-14; API cho EP-03 trả 'rule trống' để loại M_OUT-15 riêng dòng đó; không suy ONE_THIRD\n- Không làm: tính 納品期限日 (EP-03)\n\n**Nguồn:** SPEC:SCR-14 C-6.5, C-15; DB:MST_DB 4.3; LAB4:02-architecture §4.4; Q-MST-06; bidding:S8.2\n\n**Định nghĩa xong:**\n- [ ] Hai hợp đồng mẫu trống hiện 未確定, các dòng khác không đổi\n- [ ] DB không có giá trị mặc định cho rule\n- [ ] API phân biệt rule trống với không có hợp đồng\n- [ ] Chính thức hóa rule là version mới đi review\n\n**Phụ thuộc:** EP08-I05, EP00-I21\n\n**Ràng buộc nghiệp vụ:** 1/3・1/2 là thỏa thuận thương mại theo 顧客×SKU; không coi là hạn dùng, không tự áp.",
+     "role": "BE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "domain:delivery-window"
+     ],
+     "depends_on": [
+      "EP08-I05",
+      "EP00-I21"
+     ],
+     "bidding_ref": [
+      "S8.2"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP08-I07",
+     "title": "Dựng 14-03 仕入先 / 位置 / デバイス / 車両",
+     "body": "**Mục tiêu:** Quản lý master hỗ trợ vận hành kho và vận tải qua vòng đời có duyệt.\n\n**Phạm vi:**\n- Làm: 仕入先; 位置 (容量, 状態 chỉ đổi qua 依頼); デバイス (zone, operation_validity Q-MSTDB-06); 車両 (積載区分, cặp ngăn - 温度帯, 車両番号)\n- Không làm: UI zone (GAP-08-02); cột 扉数 (Q-MST-19 chờ khách); 温度ポリシー (EP08-I08)\n\n**Nguồn:** SPEC:SCR-14 §4.1 D; DB:MST_DB 4.4–4.8; Q29; Q37; bidding:S8.3\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe 14-03\n- [ ] Đổi 状態 vị trí trực tiếp bị chặn, chỉ qua 依頼\n- [ ] Xe 二温度帯 lưu được nhiều cặp ngăn - 温度帯\n- [ ] Test E2E vòng đời từng loại\n\n**Phụ thuộc:** EP08-I01\n\n**Spec gap:** GAP-08-01, GAP-08-02",
+     "role": "FE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP08-I01"
+     ],
+     "bidding_ref": [
+      "S8.3"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I07-S01",
+       "title": "Viết DD SCR-14 vùng 14-03 (4 loại master)",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I07-S02",
+       "title": "API 仕入先 / 位置 / デバイス / 車両",
+       "body": "**Mục tiêu:** Trên khung vòng đời.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I07-S03",
+       "title": "FE 14-03",
+       "body": "**Mục tiêu:** Theo wireframe.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I07-S04",
+       "title": "Ca kiểm thử 14-03",
+       "body": "**Mục tiêu:** Mỗi loại master.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I08",
+     "title": "Dựng 14-03 温度ポリシー版",
+     "body": "**Mục tiêu:** 品質管理 soạn ngưỡng 3 dải có hiệu lực tương lai, 品質管理 khác duyệt.\n\n**Phạm vi:**\n- Làm: list version; form 有効日, ngưỡng theo dải, phút alarm, khoảng データ欠落; 有効日 ≥ 00:00 JST hôm sau (M_MST-32, kiểm lúc lưu và lúc duyệt); gửi review sang 14-04; mail khi duyệt\n- Không làm: tính alarm (EP-05); đánh giá nhiệt (EP00-I19)\n\n**Nguồn:** REQ:BR-TEMP-01; SPEC:SCR-14 D-18〜D-21; FLOW:F-MST-02; DB:MST_DB 4.9, R5; Q21; bidding:S8.3\n\n**Định nghĩa xong:**\n- [ ] 有効日 sớm hơn 00:00 JST hôm sau bị chặn cả lúc lưu và lúc duyệt\n- [ ] Người duyệt là 品質管理 khác người soạn / sửa\n- [ ] Bản active giữ nguyên tới 有効日 của bản mới\n- [ ] Mail gửi 品質管理 và マスター管理者 khi duyệt\n\n**Phụ thuộc:** EP00-I19, EP08-I01\n\n**Ràng buộc nghiệp vụ:** Ngưỡng 3 dải là chính sách Yuki, có version; giao dịch đã xong giữ version đã dùng.\n\n**Spec gap:** GAP-08-01",
+     "role": "FE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no",
+      "domain:temp-band",
+      "domain:haccp",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I19",
+      "EP08-I01"
+     ],
+     "bidding_ref": [
+      "S8.3"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I08-S01",
+       "title": "Viết DD SCR-14 vùng 14-03 温度ポリシー",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no",
+        "domain:temp-band",
+        "domain:haccp"
+       ]
+      },
+      {
+       "id": "EP08-I08-S02",
+       "title": "API 温度ポリシー版",
+       "body": "**Mục tiêu:** Kiểm 有効日 và người duyệt.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no",
+        "domain:temp-band",
+        "domain:haccp"
+       ]
+      },
+      {
+       "id": "EP08-I08-S03",
+       "title": "FE 温度ポリシー版",
+       "body": "**Mục tiêu:** Theo wireframe 14-03 temperature-policy.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no",
+        "domain:temp-band",
+        "domain:haccp"
+       ]
+      },
+      {
+       "id": "EP08-I08-S04",
+       "title": "Ca kiểm thử biên 有効日 và duyệt chéo",
+       "body": "**Mục tiêu:** Quanh 00:00 JST.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no",
+        "domain:temp-band",
+        "domain:haccp"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I09",
+     "title": "Dựng 14-04 承認キュー",
+     "body": "**Mục tiêu:** Một hàng đợi duyệt chung cho master và các 依頼, chặn tự duyệt.\n\n**Phạm vi:**\n- Làm: danh sách theo loại, lọc; diff bản trước / bản mới; liệt kê người tạo / sửa; nút 承認 disabled kèm lý do; xác nhận 2 bước; 差戻し có lý do; cảnh báo M_MST-31 khi < 2 người duyệt; định tuyến loại 温度ポリシー / Legal hold tới 品質管理\n- Không làm: xử lý riêng từng loại 依頼 (EP08-I10, I11, I15)\n\n**Nguồn:** SPEC:SCR-14 §4.1 E, §5 14-04; DB:MST_DB R2, R3; Q-MST-01; ISS-36 B#20; bidding:S8.1–S8.3\n\n**Định nghĩa xong:**\n- [ ] Người từng tạo / sửa thấy nút disabled kèm lý do, gọi API trả M_MST-05\n- [ ] Duyệt đồng thời: người sau nhận M_MST-08\n- [ ] Diff nêu đủ trường 要レビュー\n- [ ] Test định tuyến theo loại\n\n**Phụ thuộc:** EP08-I01, EP00-I15\n\n**Spec gap:** GAP-08-01, GAP-00-02",
+     "role": "FE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP08-I01",
+      "EP00-I15"
+     ],
+     "bidding_ref": [
+      "S8.1",
+      "S8.2",
+      "S8.3"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I09-S01",
+       "title": "Viết DD SCR-14 vùng 14-04",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I09-S02",
+       "title": "API hàng đợi duyệt",
+       "body": "**Mục tiêu:** Định tuyến theo loại.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I09-S03",
+       "title": "FE 14-04",
+       "body": "**Mục tiêu:** Theo wireframe.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I09-S04",
+       "title": "Ca kiểm thử tự duyệt và đồng thời",
+       "body": "**Mục tiêu:** Gồm người 兼務.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I10",
+     "title": "Xử lý 依頼 閉鎖・再開 vị trí và IF設定 trong 14-04",
+     "body": "**Mục tiêu:** Đổi trạng thái vị trí và thiết lập IF chỉ có hiệu lực sau khi được duyệt.\n\n**Phạm vi:**\n- Làm: 依頼 từ SCR-02 View 3; M_MST-33 khi vị trí còn tồn; 閉鎖 chỉ chặn đưa vào, vẫn lấy ra; IF設定 → config_parameter active, bản cũ thôi hiệu lực\n- Không làm: nút gửi 依頼 ở SCR-02 (EP-02)\n\n**Nguồn:** SPEC:SCR-14 E-6, D-8.4; CR:location-close-reopen (APV-002); Q-FLW-INV-14; DB:MST_DB Q-MSTDB-03; Q-FLW-06\n\n**Định nghĩa xong:**\n- [ ] Duyệt 閉鎖 → vị trí không nhận 入庫 nhưng vẫn 出庫 được (test)\n- [ ] IF設定 chưa duyệt không áp dụng\n- [ ] Người gửi không tự duyệt\n- [ ] Mỗi lần đổi có audit\n\n**Phụ thuộc:** EP08-I09, EP00-I22\n\n**Spec gap:** GAP-08-03",
+     "role": "BE",
+     "sprint": "S3",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP08-I09",
+      "EP00-I22"
+     ],
+     "bidding_ref": [
+      "S8.3"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I10-S01",
+       "title": "Viết DD luồng 依頼 閉鎖・再開 và IF設定",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I10-S02",
+       "title": "BE áp 依頼 sau duyệt",
+       "body": "**Mục tiêu:** Hai loại 依頼.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I10-S03",
+       "title": "Ca kiểm thử 依頼",
+       "body": "**Mục tiêu:** Vị trí còn tồn, chưa duyệt.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I11",
+     "title": "Duyệt reversal dòng giao đã nhận (M.5)",
+     "body": "**Mục tiêu:** Sửa lịch sử giao bằng reversal có duyệt để mốc 日付逆転 vẫn đúng.\n\n**Phạm vi:**\n- Làm: CS gửi 依頼 từ SCR-12 H-16; マスター管理者 ≠ người gửi duyệt ở 14-04; ghi reversal event (lý do + người duyệt); dòng bị đảo loại khỏi mốc R4; trả trạng thái 依頼 về SCR-12 H-18\n- Không làm: nút gửi ở SCR-12 (EP-06); bảng shipment_line (EP-03)\n\n**Nguồn:** SPEC:SCR-14 §3 M.5, E-6; ADR-004; Q-MST-18; DB:OUT_DB shipment_line_reversal; bidding:S8.5\n\n**Định nghĩa xong:**\n- [ ] Sau duyệt, mốc 日付逆転 của cặp 顧客×SKU tính lại không gồm dòng bị đảo (test)\n- [ ] 差戻し thì mốc không đổi\n- [ ] Dòng giao gốc không bị sửa / xóa\n- [ ] 配送計画者 không gửi được 依頼\n\n**Phụ thuộc:** EP08-I09\n\n**Ràng buộc nghiệp vụ:** 日付逆転 so với lần giao 受領済 gần nhất của chính khách; reversal là cách duy nhất loại một dòng khỏi mốc. Cần bảng shipment_line của EP-03 (nhóm khác).",
+     "role": "BE",
+     "sprint": "S3",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "domain:date-reversal"
+     ],
+     "depends_on": [
+      "EP08-I09"
+     ],
+     "bidding_ref": [
+      "S8.5"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I11-S01",
+       "title": "Viết DD luồng reversal dòng giao",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no",
+        "domain:date-reversal"
+       ]
+      },
+      {
+       "id": "EP08-I11-S02",
+       "title": "BE ghi reversal và cập nhật mốc",
+       "body": "**Mục tiêu:** Cùng giao dịch với duyệt.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no",
+        "domain:date-reversal"
+       ]
+      },
+      {
+       "id": "EP08-I11-S03",
+       "title": "Ca kiểm thử reversal và 日付逆転",
+       "body": "**Mục tiêu:** Trước / sau duyệt, 差戻し.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no",
+        "domain:date-reversal"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I12",
+     "title": "Hiển thị lịch sử version và reversal chỉ đọc (M.4)",
+     "body": "**Mục tiêu:** Người dùng xem được version cũ, retired và reversal của master.\n\n**Phạm vi:**\n- Làm: B-5 / C-5 / D-6: version bất biến, người làm, thời điểm, trạng thái, retired / reversal\n- Không làm: UI tạo event (không có)\n\n**Nguồn:** SPEC:SCR-14 B-5, C-5, D-6; DB:MST_DB R4; bidding:S8.4\n\n**Định nghĩa xong:**\n- [ ] Lịch sử dựng từ event + version, không từ cột hiện hành\n- [ ] Không có nút sửa trên lịch sử\n- [ ] Test hiện đúng thứ tự thời gian\n\n**Phụ thuộc:** EP08-I01",
+     "role": "FE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP08-I01"
+     ],
+     "bidding_ref": [
+      "S8.4"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP08-I13",
+     "title": "Dựng 14-06 保持ポリシー",
+     "body": "**Mục tiêu:** マスター管理者 xem và đổi thời hạn lưu theo nhóm, có duyệt.\n\n**Phạm vi:**\n- Làm: danh sách chính sách theo nhóm và 起算日; đổi 保持期間 kèm lý do → 14-04 loại 保持期間; N-09 khi duyệt; banner M.6\n- Không làm: nhóm luật định (EP08-I14); Legal hold (EP08-I15); purge (EP08-I16, I17)\n\n**Nguồn:** SPEC:SCR-14 G-1〜G-3; SPEC:data-lifecycle §1–§2; FLOW:F-MST-04; Q-FLW-04; bidding:S8.6\n\n**Định nghĩa xong:**\n- [ ] Giá trị khởi tạo theo data-lifecycle §1, không theo bảng 36 / 12 / 36 rút gọn (GAP-08-05)\n- [ ] Đổi chưa duyệt không áp dụng\n- [ ] Người đổi không tự duyệt\n- [ ] N-09 gửi khi duyệt\n\n**Phụ thuộc:** EP08-I09\n\n**Ràng buộc nghiệp vụ:** sanitation giữ 1 năm có rủi ro với hàng đông lạnh hạn dài (Q64); để giá trị cấu hình được.\n\n**Spec gap:** GAP-08-01, GAP-08-05",
+     "role": "FE",
+     "sprint": "S4",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no",
+      "domain:haccp",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP08-I09"
+     ],
+     "bidding_ref": [
+      "S8.6"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I13-S01",
+       "title": "Viết DD SCR-14 vùng 14-06 chính sách lưu",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no",
+        "domain:haccp"
+       ]
+      },
+      {
+       "id": "EP08-I13-S02",
+       "title": "API chính sách lưu",
+       "body": "**Mục tiêu:** Có version.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no",
+        "domain:haccp"
+       ]
+      },
+      {
+       "id": "EP08-I13-S03",
+       "title": "FE 14-06 chính sách lưu",
+       "body": "**Mục tiêu:** Theo wireframe 14-06.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no",
+        "domain:haccp"
+       ]
+      },
+      {
+       "id": "EP08-I13-S04",
+       "title": "Ca kiểm thử đổi thời hạn",
+       "body": "**Mục tiêu:** Duyệt chéo.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no",
+        "domain:haccp"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I14",
+     "title": "Áp hạn lưu nhóm luật định 労働関係記録 và 米 賞味 > 3 năm",
+     "body": "**Mục tiêu:** Hai nhóm luật định không bị purge theo hạn 3 năm chung.\n\n**Phạm vi:**\n- Làm: labor_record 5 năm từ 最終記入日 / 支払期日; rice_long_shelf 5 năm cho lô gạo hạn > 3 năm; purge theo hạn của chính nhóm\n- Không làm: xác nhận pháp lý cho Yuki (法務, Q60–Q64)\n\n**Nguồn:** SPEC:data-lifecycle §1, §2 (R-RICE); DB:MST_DB R11; process-trail:legal-check-d10 §2, §4.2\n\n**Định nghĩa xong:**\n- [ ] Lô gạo hạn > 3 năm không vào danh sách purge 3 năm (test)\n- [ ] Hồ sơ giờ làm tài xế giữ 60 tháng (test)\n- [ ] Giá trị ghi rõ là giả định chờ 法務\n\n**Phụ thuộc:** EP08-I13\n\n**Ràng buộc nghiệp vụ:** Hồ sơ giờ làm theo 労基法109条; gạo theo 米トレサ省令. Chỉ áp như giả định L-1〜L-6 tới khi 法務 xác nhận.",
+     "role": "BE",
+     "sprint": "S4",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "domain:duty-hours-2024",
+      "domain:traceability-rice-beef"
+     ],
+     "depends_on": [
+      "EP08-I13"
+     ],
+     "bidding_ref": [
+      "S8.6"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP08-I15",
+     "title": "Đặt và gỡ Legal hold theo ca hoặc lô",
+     "body": "**Mục tiêu:** Đối tượng đang bị hold và mọi bảng con không bị purge.\n\n**Phạm vi:**\n- Làm: G-4〜G-8: マスター管理者 đặt trực tiếp; 品質管理 / CS / 監査者 qua 依頼 ở 14-04; gỡ bởi người khác người đặt; M_MST-24, M_MST-29; audit\n- Không làm: nút gửi 依頼 ở SCR-12 / SCR-15 (EP-06, EP-07)\n\n**Nguồn:** SPEC:SCR-14 G-4〜G-8, E-6; DB:MST_DB 4.15; SPEC:data-lifecycle §2; review-261024-step3-dr-final H-1, H-2; bidding:S8.6\n\n**Định nghĩa xong:**\n- [ ] Hold có hiệu lực loại đối tượng và bảng con khỏi purge ngay\n- [ ] Người đặt không tự gỡ\n- [ ] Định tuyến duyệt 依頼 theo người gửi khớp bản sửa của H-1 / H-2\n- [ ] Mỗi lần đặt / gỡ có audit\n\n**Phụ thuộc:** EP08-I09\n\n**Spec gap:** GAP-08-01",
+     "role": "BE",
+     "sprint": "S4",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP08-I09"
+     ],
+     "bidding_ref": [
+      "S8.6"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I15-S01",
+       "title": "Viết DD SCR-14 vùng 14-06 Legal hold",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD; viết DD vùng này một sprint trước khi code.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I15-S02",
+       "title": "BE Legal hold",
+       "body": "**Mục tiêu:** Đặt, gỡ, loại khỏi purge.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I15-S03",
+       "title": "FE Legal hold trong 14-06",
+       "body": "**Mục tiêu:** G-4〜G-8.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I15-S04",
+       "title": "Ca kiểm thử hold và purge",
+       "body": "**Mục tiêu:** Hold sau khi lập danh sách purge.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I16",
+     "title": "Chạy B-08 lập danh sách purge hằng tháng và duyệt",
+     "body": "**Mục tiêu:** Mỗi tháng có danh sách bản ghi hết hạn để マスター管理者 duyệt trước khi xóa.\n\n**Phạm vi:**\n- Làm: ngày 1 lúc 01:00; purge_run pending với số hết hạn / bị hold; duyệt G-10 đặt planned_date = đêm sau ngày duyệt; 却下 G-11; N-09; chưa duyệt thì không chạy\n- Không làm: thực thi xóa (EP08-I17)\n\n**Nguồn:** SPEC:BATCH_LIST B-08; SEQ:SEQ_purge-archive; DB:MST_DB 4.16, R7, R12; bidding:S8.6\n\n**Định nghĩa xong:**\n- [ ] Một purge_run cho mỗi (chính sách, cutoff)\n- [ ] planned_date đặt lúc duyệt, không lúc lập\n- [ ] Chưa duyệt tới ngày dự kiến → không chạy\n- [ ] Lỗi lập danh sách cảnh báo tới IT\n\n**Phụ thuộc:** EP08-I13, EP08-I15, EP00-I27",
+     "role": "BE",
+     "sprint": "S5",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP08-I13",
+      "EP08-I15",
+      "EP00-I27"
+     ],
+     "bidding_ref": [
+      "S8.6"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I16-S01",
+       "title": "Viết DD luồng lập và duyệt purge",
+       "body": "**Mục tiêu:** Luồng batch chưa có DD.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I16-S02",
+       "title": "BE batch B-08 và duyệt",
+       "body": "**Mục tiêu:** Trên khung batch.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I16-S03",
+       "title": "FE purge 予定 trong 14-06",
+       "body": "**Mục tiêu:** G-9〜G-13.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I16-S04",
+       "title": "Ca kiểm thử B-08",
+       "body": "**Mục tiêu:** Hết hạn, bị hold, chưa duyệt.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I17",
+     "title": "Chạy B-09 purge sau archive và so manifest",
+     "body": "**Mục tiêu:** Chỉ xóa khi archive đã khớp manifest; lệch thì dừng toàn bộ.\n\n**Phạm vi:**\n- Làm: 01:00〜04:00 đêm sau duyệt; archive trước (EP09-I12); manifest lệch → aborted + N-09; tới 04:00 dừng sau giao dịch đang chạy; detach partition; master version theo R10; xét lại hold lúc chạy; audit_log không bao giờ purge\n- Không làm: xóa blob đã sao lưu ngoài hệ thống (Q-LC-04)\n\n**Nguồn:** SPEC:BATCH_LIST B-09; SEQ:SEQ_purge-archive; DB:MST_DB R7, R10, R12; review-261024-step3-dr-final M-6; bidding:S8.6\n\n**Định nghĩa xong:**\n- [ ] Manifest lệch → không xóa gì (test)\n- [ ] Hold đặt sau khi duyệt vẫn loại đối tượng (test)\n- [ ] audit_log không có trong bất kỳ purge_run nào\n- [ ] Chạy lại không xóa trùng\n- [ ] Tệp đính kèm của bản ghi bị purge được xóa cùng\n\n**Phụ thuộc:** EP08-I16, EP09-I12, EP00-I26",
+     "role": "BE",
+     "sprint": "S5",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP08-I16",
+      "EP09-I12",
+      "EP00-I26"
+     ],
+     "bidding_ref": [
+      "S8.6"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP08-I17-S01",
+       "title": "BE batch B-09",
+       "body": "**Mục tiêu:** Theo planned_date.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP08-I17-S02",
+       "title": "Ca kiểm thử purge an toàn",
+       "body": "**Mục tiêu:** Manifest lệch, quá 04:00, hold mới.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S5",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP08-I18",
+     "title": "Kiểm phân quyền SCR-14 theo 職務",
+     "body": "**Mục tiêu:** SCR-14 chỉ mở đúng vùng cho đúng 職務.\n\n**Phạm vi:**\n- Làm: 品質管理 chỉ 14-03 温度ポリシー, 14-04 lọc loại, 14-06 G-4 / G-8 / G-12 / G-13; CS, 監査者 → COM-04; gọi trực tiếp → M_MST-11\n- Không làm: quyền các màn khác\n\n**Nguồn:** SPEC:SCR-14 §3 権限, §5 初期処理; SPEC:screen-list ma trận\n\n**Định nghĩa xong:**\n- [ ] Mỗi vùng có ca cho 8 職務\n- [ ] Gọi API trực tiếp trái quyền trả M_MST-11\n- [ ] Kết quả đưa vào EP10-I19\n\n**Phụ thuộc:** EP08-I02, EP08-I05, EP08-I07, EP08-I08, EP08-I09",
+     "role": "QA",
+     "sprint": "S3",
+     "labels": [
+      "type:issue",
+      "role:QA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP08-I02",
+      "EP08-I05",
+      "EP08-I07",
+      "EP08-I08",
+      "EP08-I09"
+     ],
+     "bidding_ref": [
+      "S8.1",
+      "S8.2",
+      "S8.3"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP08-I19",
+     "title": "Nạp dữ liệu master mẫu cho dev và test",
+     "body": "**Mục tiêu:** Đội có master giả lập ổn định để phát triển và kiểm thử các module.\n\n**Phạm vi:**\n- Làm: 12 SKU, 15 hợp đồng (2 dòng 未確定), vị trí seed 入荷エリア và 隔離, zone A / C / F nạp qua release có người duyệt\n- Không làm: migration dữ liệu thật (EP-12)\n\n**Nguồn:** SPEC:SCR-14 §3 (Q37), §6 dữ liệu cực đoan; DB:MST_DB 4.0 (đổi qua release); REQ:R-01, R-02, R-04\n\n**Định nghĩa xong:**\n- [ ] Seed chạy lại được, không trùng\n- [ ] Chỉ dữ liệu giả lập, không dữ liệu thật\n- [ ] Zone nạp qua release có người duyệt khác người nạp\n\n**Phụ thuộc:** EP00-I18\n\n**Spec gap:** GAP-08-02",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I18"
+     ],
+     "bidding_ref": [
+      "S8.1",
+      "S8.2",
+      "S8.3"
+     ],
+     "sub_issues": []
+    }
+   ]
+  },
+  {
+   "id": "EP-09",
+   "title": "外部IF: ERP, logger, bản đồ, IdP, mail, archive",
+   "body": "**Mục tiêu:** Sáu liên kết ngoài chạy đúng quy tắc: nhận nguyên tệp hoặc từ chối, không lỗi âm thầm, có lịch sử và chạy lại.\n\n**Phạm vi:**\n- Làm: IF-ERP-01 (B-01, B-02, B-03, SFTP), IF-LOG-01 cổng nhận tệp, IF-MAP-01, IF-IDP-01, IF-MAIL-01 (B-10), IF-ARCH-01 (RPT-14), màn 14-05, kiểm thử tích hợp\n- Không làm: parse / đánh giá nhiệt (EP-05); chặn 公開 route (EP-04); đối soát migration B-13 (EP-12)\n\n**Nguồn:** REQ:IF-*; SPEC:BATCH_LIST; SPEC:SCR-14 14-05; ISS-11; bidding:E9\n\n**Định nghĩa xong:**\n- [ ] 6 IF có test với mock và kết quả với hệ thật (hoặc lý do)\n- [ ] Không nạp một phần ở bất kỳ IF tệp nào\n- [ ] Mail lỗi luôn hiện ở F-18\n\n**Phụ thuộc:** không có",
+   "labels": [
+    "type:epic"
+   ],
+   "issues": [
+    {
+     "id": "EP09-I01",
+     "title": "Dựng điểm nhận tệp SFTP managed cho ERP",
+     "body": "**Mục tiêu:** ERP đặt và lấy tệp qua SFTP managed, batch đọc được, tệp gốc giữ kèm SHA-256.\n\n**Phạm vi:**\n- Làm: endpoint SFTP; tài khoản ERP; thư mục vào / ra; tệp gốc lưu Blob kèm SHA-256; giới hạn nguồn truy cập; nhật ký truy cập\n- Không làm: nội dung từng tệp (EP09-I02〜I04)\n\n**Nguồn:** SPEC:BATCH_LIST B-01〜B-03; REQ:IF-ERP-01; plan:§0 D-1; ISS-30\n\n**Định nghĩa xong:**\n- [ ] ERP test đặt tệp vào thư mục vào, batch đọc được\n- [ ] Khóa / mật khẩu SFTP nằm ở Key Vault\n- [ ] Có nhật ký truy cập SFTP\n- [ ] Thành phần SFTP có trong ADR hạ tầng (GAP-09-01)\n\n**Phụ thuộc:** EP00-I02\n\n**Spec gap:** GAP-09-01",
+     "role": "Infra",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:Infra",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I02"
+     ],
+     "bidding_ref": [
+      "S9.1"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I01-S01",
+       "title": "Viết DD điểm nhận SFTP",
+       "body": "**Mục tiêu:** Chọn cách dựng SFTP trên Azure.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I01-S02",
+       "title": "IaC điểm nhận SFTP",
+       "body": "**Mục tiêu:** Theo DD.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I02",
+     "title": "Chạy B-01 nhập 入荷予定 từ ERP",
+     "body": "**Mục tiêu:** Tệp 入荷予定 hằng ngày vào WMS nguyên tệp hoặc không vào gì.\n\n**Phạm vi:**\n- Làm: 06:00 JST; một tệp một giao dịch; checksum / schema / khóa trùng → rejected cả tệp (M_MST-16 / 17 / 18); trùng 仕入先 + 参照コード hoặc dòng sai → từ chối cả tệp (M_MST-34 / 35); không có tệp → error 「ファイル未着」 + N-06, không chạy bù; mỗi dòng → inbound_appointment planned có cột nguồn\n- Không làm: màn SCR-01 (EP-01)\n\n**Nguồn:** SPEC:BATCH_LIST B-01; SEQ:SEQ_erp-inbound-import; DB:MST_DB 4.12; review-261024-step3-dr-final M-3; bidding:S9.1\n\n**Định nghĩa xong:**\n- [ ] Tệp lỗi một dòng → không có 予定 nào được tạo (test)\n- [ ] Gửi lại cùng tệp đã nhận → rejected duplicate_key\n- [ ] Không có tệp đúng giờ → dòng error + N-06\n- [ ] Lỗi tạm giữa chừng rollback, 再実行 không tạo trùng\n\n**Phụ thuộc:** EP09-I01, EP00-I27, EP00-I17\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp. Bảng inbound_appointment thuộc EP-01 (nhóm khác).",
+     "role": "BE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP09-I01",
+      "EP00-I27",
+      "EP00-I17"
+     ],
+     "bidding_ref": [
+      "S9.1"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I02-S01",
+       "title": "Viết DD B-01",
+       "body": "**Mục tiêu:** Luồng batch chưa có DD.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I02-S02",
+       "title": "BE batch B-01",
+       "body": "**Mục tiêu:** Trên khung batch.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I02-S03",
+       "title": "Ca kiểm thử B-01",
+       "body": "**Mục tiêu:** Checksum, trùng, dòng sai, không tệp.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I03",
+     "title": "Chạy B-02 nhập 受注 hai tệp delta 10:30 và 13:30",
+     "body": "**Mục tiêu:** Hai tệp đơn hàng mỗi ngày vào WMS độc lập, nguyên tệp hoặc không.\n\n**Phạm vi:**\n- Làm: tệp -1 lúc 10:30, -2 lúc 13:30, độc lập; trùng 顧客 + 参照 (gồm đơn cancelled, nhập tay) hoặc trùng trong tệp → từ chối cả tệp + N-06; một tệp một giao dịch; order_import_row + delivery_order unconfirmed\n- Không làm: 受注確定 và 引当 (EP-03)\n\n**Nguồn:** SPEC:BATCH_LIST B-02; SEQ:SEQ_erp-order-import; DB:MST_DB R13; ISS-33; review-261024-step3-dr-final H-4; bidding:S9.1\n\n**Định nghĩa xong:**\n- [ ] Tệp -1 bị từ chối không chặn tệp -2 (test)\n- [ ] Một dòng trùng 顧客 + 参照 → không dòng nào của tệp được nạp\n- [ ] Lỗi tạm giữa chừng rollback toàn tệp\n- [ ] Tệp gửi lại nạp bằng 再実行 ở 14-05\n\n**Phụ thuộc:** EP09-I01, EP00-I27, EP00-I17\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp. Bảng delivery_order thuộc EP-03 (nhóm khác).",
+     "role": "BE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP09-I01",
+      "EP00-I27",
+      "EP00-I17"
+     ],
+     "bidding_ref": [
+      "S9.1"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I03-S01",
+       "title": "Viết DD B-02",
+       "body": "**Mục tiêu:** Gồm quy tắc hai tệp độc lập.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I03-S02",
+       "title": "BE batch B-02",
+       "body": "**Mục tiêu:** Một tệp một giao dịch.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I03-S03",
+       "title": "Ca kiểm thử B-02",
+       "body": "**Mục tiêu:** Trùng trong tệp, trùng với WMS, tệp -1 lỗi.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I04",
+     "title": "Chạy B-03 xuất 入出庫・在庫結果 sang ERP lúc 23:30",
+     "body": "**Mục tiêu:** ERP nhận kết quả nhập / xuất / tồn trong ngày đúng một lần mỗi ngày nghiệp vụ.\n\n**Phạm vi:**\n- Làm: stock_event trong ngày JST (出荷 ghi ở 出荷確認) + tồn cuối ngày theo lô; gửi lỗi → error + N-06; 再実行 → dòng resent cùng nội dung\n- Không làm: nhận phản hồi từ ERP\n\n**Nguồn:** SPEC:BATCH_LIST B-03; DB:MST_DB 4.12; ADR-005; Q4; bidding:S9.1\n\n**Định nghĩa xong:**\n- [ ] Nội dung tệp khớp stock_event trong ngày (test đối soát)\n- [ ] Gửi lại tạo dòng resent, nội dung không đổi\n- [ ] Khóa ngày + schema version 【仮】 (ISS-31) ghi trong DD\n\n**Phụ thuộc:** EP09-I01, EP00-I27\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp. Cần stock_event 出荷 của EP-03 (D-A).",
+     "role": "BE",
+     "sprint": "S4",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP09-I01",
+      "EP00-I27"
+     ],
+     "bidding_ref": [
+      "S9.1"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I04-S01",
+       "title": "Viết DD B-03",
+       "body": "**Mục tiêu:** Nội dung tệp và khóa ngày.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I04-S02",
+       "title": "BE batch B-03",
+       "body": "**Mục tiêu:** Xuất lên SFTP.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I04-S03",
+       "title": "Ca kiểm thử B-03",
+       "body": "**Mục tiêu:** Đối soát và gửi lại.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I05",
+     "title": "Dựng 14-05 外部IF連携状態",
+     "body": "**Mục tiêu:** マスター管理者 thấy trạng thái 6 IF, lịch sử, lỗi và chạy lại đúng quy tắc.\n\n**Phạm vi:**\n- Làm: F-1 6 IF; F-3 thiết lập không bí mật; F-4 lịch sử có chiều; F-5 chi tiết lỗi; F-8 再実行 cho error hoặc rejected đã có tệp gửi lại; disabled kèm lý do; M_MST-19 / 21; F-11〜13 thiết lập gửi review\n- Không làm: RPT-15 (EP-12); F-18 / F-21 mail (EP09-I09, I11); RPT-14 (EP09-I12)\n\n**Nguồn:** SPEC:SCR-14 §4.1 F, §5 14-05; FLOW:F-MST-05; DB:MST_DB 4.12; bidding:S9.1–S9.6\n\n**Định nghĩa xong:**\n- [ ] Không hiện secret / token / khóa ở F-3\n- [ ] 再実行 bị chặn đúng 3 trường hợp kèm chữ lý do\n- [ ] 再実行 tạo dòng mới rerun_of_id, dòng cũ không đổi\n- [ ] Thiết lập chỉ áp dụng sau duyệt ở 14-04 (GAP-08-03)\n\n**Phụ thuộc:** EP09-I02, EP09-I03, EP08-I09\n\n**Spec gap:** GAP-08-01, GAP-08-03",
+     "role": "FE",
+     "sprint": "S3",
+     "labels": [
+      "type:issue",
+      "role:FE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP09-I02",
+      "EP09-I03",
+      "EP08-I09"
+     ],
+     "bidding_ref": [
+      "S9.1",
+      "S9.2",
+      "S9.3",
+      "S9.4",
+      "S9.5",
+      "S9.6"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I05-S01",
+       "title": "Viết DD SCR-14 vùng 14-05",
+       "body": "**Mục tiêu:** SCR-14 chưa có DD.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I05-S02",
+       "title": "API trạng thái IF và 再実行",
+       "body": "**Mục tiêu:** Theo interface_run.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I05-S03",
+       "title": "FE 14-05",
+       "body": "**Mục tiêu:** Theo wireframe 14-05.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Màn khớp spec và wireframe đã duyệt\n- [ ] Thông điệp lấy từ catalog mã, không chữ tự đặt\n- [ ] Kiểm axe không lỗi WCAG 2.2 AA",
+       "role": "FE",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:FE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I05-S04",
+       "title": "Ca kiểm thử 14-05",
+       "body": "**Mục tiêu:** 再実行 hợp lệ / bị chặn.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I06",
+     "title": "Dựng cổng nhận tệp datalogger (IF-LOG-01)",
+     "body": "**Mục tiêu:** Tệp logger tải lên có kiểm soát, giữ tệp gốc và SHA-256, không nạp trùng.\n\n**Phạm vi:**\n- Làm: nhận tệp từ SCR-09 View 2; lưu tệp gốc ở Blob + SHA-256; trùng hash → từ chối; ánh xạ trạng thái temperature_import_file → interface_run (failed → rejected); adapter để mở rộng IoT sau\n- Không làm: parse dòng, đánh giá, alarm (EP-05); kết nối IoT trực tiếp (ngoài gói)\n\n**Nguồn:** SPEC:BATCH_LIST B-04; SPEC:SCR-14 F-4; REQ:IF-LOG-01; ISS-36 B#29; bidding:S9.2\n\n**Định nghĩa xong:**\n- [ ] Tệp trùng hash bị từ chối (test)\n- [ ] Tệp gốc tải lại được và hash khớp\n- [ ] Trạng thái hiện ở 14-05 đúng ánh xạ\n- [ ] Ranh giới với EP-05 ghi trong DD (B#29)\n\n**Phụ thuộc:** EP00-I28, EP00-I08\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp.",
+     "role": "BE",
+     "sprint": "S3",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I28",
+      "EP00-I08"
+     ],
+     "bidding_ref": [
+      "S9.2"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I06-S01",
+       "title": "Viết DD cổng nhận tệp logger",
+       "body": "**Mục tiêu:** Chốt ranh giới với EP-05.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I06-S02",
+       "title": "BE cổng nhận tệp",
+       "body": "**Mục tiêu:** Blob + hash.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I07",
+     "title": "Dựng adapter bản đồ IF-MAP-01",
+     "body": "**Mục tiêu:** Lập route lấy được thời gian di chuyển ổn định, có cache và báo lỗi rõ.\n\n**Phạm vi:**\n- Làm: MapPort cho Azure Maps; timeout 10 giây, thử lại 1 lần; cache 24 giờ theo cặp điểm; interface_run; tuổi cache cho 14-05 F-3; lỗi không có cache → báo để SCR-07 trả M_DSP-09\n- Không làm: chặn 公開 khi ước tính cũ hơn 24 giờ (EP-04)\n\n**Nguồn:** SPEC:BATCH_LIST B-12; Q45; SPEC:ARCH_system-overview §2 (Maps); bidding:S9.3\n\n**Định nghĩa xong:**\n- [ ] Timeout và thử lại theo đúng tham số (test với adapter giả)\n- [ ] Cache trả kết quả trong 24 giờ, quá hạn gọi lại\n- [ ] Mỗi lần gọi có interface_run\n- [ ] Khóa Maps nằm ở Key Vault\n\n**Phụ thuộc:** EP00-I08\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp.",
+     "role": "BE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I08"
+     ],
+     "bidding_ref": [
+      "S9.3"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I07-S01",
+       "title": "Viết DD adapter bản đồ",
+       "body": "**Mục tiêu:** Khóa cache, xử lý lỗi.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I07-S02",
+       "title": "BE adapter Maps và cache",
+       "body": "**Mục tiêu:** Qua MapPort.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I07-S03",
+       "title": "Cấp tài nguyên Azure Maps",
+       "body": "**Mục tiêu:** Theo IaC.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I08",
+     "title": "Kết nối Entra ID (IF-IDP-01)",
+     "body": "**Mục tiêu:** SSO OIDC với Entra ID, token hết hạn thì buộc đăng nhập lại, không để phiên treo.\n\n**Phạm vi:**\n- Làm: app registration; App roles ↔ role_code (Q-CD-02); OIDC qua AuthPort; đồng bộ user_role mỗi lần đăng nhập; token hết hạn → đăng nhập lại; tablet chung kết thúc phiên IdP khi đăng xuất\n- Không làm: chọn 職務 và phiên (EP00-I11, I12); MFA (EP00-I13)\n\n**Nguồn:** REQ:IF-IDP-01; SEQ:SEQ_login-sso; FLOW:F-COM-01 bước 6; DB:COM_DB 4.1–4.3; bidding:S9.4\n\n**Định nghĩa xong:**\n- [ ] Đăng nhập OIDC chạy trên dev với tenant test\n- [ ] Token hết hạn → về COM-01, không còn phiên\n- [ ] Vai bị thu hồi ở Entra không dùng được tới hết phiên (GAP-09-03)\n- [ ] Đổi 職務 nhận được ghi audit role_change\n\n**Phụ thuộc:** EP00-I08\n\n**Spec gap:** GAP-09-03",
+     "role": "BE",
+     "sprint": "S1",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I08"
+     ],
+     "bidding_ref": [
+      "S9.4"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I08-S01",
+       "title": "Viết DD luồng SSO và đồng bộ vai",
+       "body": "**Mục tiêu:** SEQ_login-sso chưa có DD.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S0",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I08-S02",
+       "title": "App registration và App roles",
+       "body": "**Mục tiêu:** Theo IaC, không khóa trong repo.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] IaC / cấu hình được review và chạy lại được\n- [ ] Không có bí mật trong mã, dùng Key Vault",
+       "role": "Infra",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:Infra",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I08-S03",
+       "title": "BE adapter OIDC",
+       "body": "**Mục tiêu:** Qua AuthPort.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I08-S04",
+       "title": "Ca kiểm thử token hết hạn và thu hồi vai",
+       "body": "**Mục tiêu:** Không còn phiên treo.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I09",
+     "title": "Dựng hàng đợi mail và worker gửi lại (IF-MAIL-01)",
+     "body": "**Mục tiêu:** Mọi thông báo đi qua hàng đợi, thử lại theo lịch và không lỗi âm thầm.\n\n**Phạm vi:**\n- Làm: mail_outbox; dedupe_key; giành dòng bằng row_version; lần đầu + 3 lần thử lại sau 5 / 15 / 60 phút; failed hiện ở F-18 và COM-02 D-1; nhóm chưa có địa chỉ → failed ngay; Message-ID theo dedupe_key; không SMS\n- Không làm: nội dung từng N-xx (EP09-I10)\n\n**Nguồn:** SPEC:BATCH_LIST B-10; SEQ:SEQ_mail-retry; DB:COM_DB 4.7; FLOW:F-COM-05; bidding:S9.5\n\n**Định nghĩa xong:**\n- [ ] Hai worker không gửi cùng một dòng (test)\n- [ ] Relay lỗi 4 lần → failed, không tự gửi lại\n- [ ] Gửi lặp cùng sự kiện không tạo mail thứ hai\n- [ ] Cơ chế chạy (Service Bus hay quét bảng) chốt trong DD (GAP-09-02)\n\n**Phụ thuộc:** EP00-I08, EP00-I27\n\n**Ràng buộc nghiệp vụ:** Layout tệp / nhà cung cấp chưa có (ISS-11): làm theo mock từ quy tắc S3-02, đổi khi khách cấp.\n\n**Spec gap:** GAP-09-02",
+     "role": "BE",
+     "sprint": "S2",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no",
+      "spec-gap"
+     ],
+     "depends_on": [
+      "EP00-I08",
+      "EP00-I27"
+     ],
+     "bidding_ref": [
+      "S9.5"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I09-S01",
+       "title": "Viết DD hàng đợi mail",
+       "body": "**Mục tiêu:** Chốt cơ chế worker.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S1",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I09-S02",
+       "title": "BE mail_outbox và worker",
+       "body": "**Mục tiêu:** Qua MailPort.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I09-S03",
+       "title": "Ca kiểm thử thử lại và failed",
+       "body": "**Mục tiêu:** Relay giả lỗi.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S2",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I10",
+     "title": "Dựng bộ phân giải người nhận và mẫu thông báo N-01〜N-16",
+     "body": "**Mục tiêu:** Module chỉ phát sự kiện; người nhận và nội dung lấy từ một chỗ.\n\n**Phạm vi:**\n- Làm: nhóm nhận theo config_parameter (không theo 職務); mẫu chữ từng N; API phát sự kiện cho module\n- Không làm: sự kiện nghiệp vụ của từng module\n\n**Nguồn:** SPEC:notification-list; DB:COM_DB 4.7; Q-COMDB-05; Q-COMDB-06; bidding:S9.5\n\n**Định nghĩa xong:**\n- [ ] 16 N-xx có mẫu và nhóm nhận\n- [ ] Nhóm nhận đổi qua cấu hình có version\n- [ ] Không lưu email cá nhân trong user_profile (DR-PRIV-01)\n\n**Phụ thuộc:** EP09-I09, EP00-I22",
+     "role": "BE",
+     "sprint": "S3",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP09-I09",
+      "EP00-I22"
+     ],
+     "bidding_ref": [
+      "S9.5"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP09-I11",
+     "title": "Dựng gửi lại mail failed từ 14-05 (F-21)",
+     "body": "**Mục tiêu:** マスター管理者 gửi lại được thông báo đã failed, có ghi vết.\n\n**Phạm vi:**\n- Làm: chỉ dòng failed chưa 再送; tạo dòng mới queued, dòng gốc giữ; N-05 / N-15 (recall) disabled; M_MST-39 / 40; audit\n- Không làm: liên hệ tay của CS cho recall (EP-06)\n\n**Nguồn:** SPEC:SCR-14 F-18, F-21; SPEC:BATCH_LIST B-10; Q-FLW-03; bidding:S9.5\n\n**Định nghĩa xong:**\n- [ ] Dòng không phải failed hoặc đã 再送 → disabled kèm lý do, API trả M_MST-06\n- [ ] Dòng gốc không đổi sau 再送\n- [ ] Mỗi lần 再送 có audit\n\n**Phụ thuộc:** EP09-I09, EP09-I05",
+     "role": "BE",
+     "sprint": "S3",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP09-I09",
+      "EP09-I05"
+     ],
+     "bidding_ref": [
+      "S9.5"
+     ],
+     "sub_issues": []
+    },
+    {
+     "id": "EP09-I12",
+     "title": "Xuất archive RPT-14 (IF-ARCH-01)",
+     "body": "**Mục tiêu:** Archive có manifest SHA-256 khớp mới được phát hành và mới cho purge.\n\n**Phạm vi:**\n- Làm: gói theo quyền nguồn; loại trường nhạy cảm, manifest ghi mục bị che; băm lại sau ghi; lệch → rejected M_MST-22; lưu container WORM; chạy trước purge, theo アーカイブ依頼 của 監査者, thủ công F-15; PDF + CSV\n- Không làm: gói kiểm toán RPT-13 (EP-07)\n\n**Nguồn:** SPEC:SCR-14 F-15〜F-17; SPEC:BATCH_LIST B-09; SEQ:SEQ_purge-archive; DB:COM_DB 4.8; bidding:S9.6\n\n**Định nghĩa xong:**\n- [ ] Hash lệch → rejected, không phát hành (test)\n- [ ] Trường nhạy cảm không có trong gói, manifest ghi mục bị che\n- [ ] Gói lưu ở container WORM\n- [ ] Tái tạo sau purge trả source_missing\n\n**Phụ thuộc:** EP00-I25, EP00-I28, EP09-I05",
+     "role": "BE",
+     "sprint": "S4",
+     "labels": [
+      "type:issue",
+      "role:BE",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP00-I25",
+      "EP00-I28",
+      "EP09-I05"
+     ],
+     "bidding_ref": [
+      "S9.6"
+     ],
+     "sub_issues": [
+      {
+       "id": "EP09-I12-S01",
+       "title": "Viết DD archive RPT-14",
+       "body": "**Mục tiêu:** Luồng xuất chưa có DD.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] DD theo khuôn BM-2-901-53: xử lý server, lỗi, khóa, điểm kiểm thử biên\n- [ ] Người review khác người viết đã duyệt, câu hỏi mở có ID và người hỏi",
+       "role": "SA",
+       "sprint": "S3",
+       "labels": [
+        "type:sub-issue",
+        "role:SA",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I12-S02",
+       "title": "BE xuất archive",
+       "body": "**Mục tiêu:** Dùng thư viện EP00-I25.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Code kèm unit test, CI xanh\n- [ ] Phần chạm DB có test trên PostgreSQL thật\n- [ ] PR được người khác review",
+       "role": "BE",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:BE",
+        "dd:no"
+       ]
+      },
+      {
+       "id": "EP09-I12-S03",
+       "title": "Ca kiểm thử archive",
+       "body": "**Mục tiêu:** Hash lệch, PII, tái tạo.\n\n**Nguồn:** như issue cha\n\n**Định nghĩa xong:**\n- [ ] Ca kiểm thử có biên, lỗi và phân quyền, truy về spec / DD\n- [ ] Ca đã chạy, kết quả và lỗi ghi lại có ticket",
+       "role": "QA",
+       "sprint": "S4",
+       "labels": [
+        "type:sub-issue",
+        "role:QA",
+        "dd:no"
+       ]
+      }
+     ]
+    },
+    {
+     "id": "EP09-I13",
+     "title": "Kiểm thử tích hợp IF với mock và hệ thật",
+     "body": "**Mục tiêu:** 6 IF được kiểm đầu cuối, trước với mock, sau với môi trường test của khách.\n\n**Phạm vi:**\n- Làm: mock theo layout tạm (ISS-11); chạy lại khi khách cấp ERP / relay / IdP test; ghi kết quả\n- Không làm: kiểm thử hệ thống của khách\n\n**Nguồn:** REQ:IF-ERP-01, IF-LOG-01, IF-MAP-01, IF-IDP-01, IF-MAIL-01, IF-ARCH-01; ISS-11; ISS-36 (E9 không có QA)\n\n**Định nghĩa xong:**\n- [ ] Mỗi IF có ca thành công, lỗi tệp, lỗi tạm thời\n- [ ] Kết quả với hệ thật hoặc lý do chưa chạy được ghi lại\n- [ ] Lỗi có ticket\n\n**Phụ thuộc:** EP09-I02, EP09-I03, EP09-I04, EP09-I06, EP09-I07, EP09-I08, EP09-I09, EP09-I12",
+     "role": "QA",
+     "sprint": "ST",
+     "labels": [
+      "type:issue",
+      "role:QA",
+      "dd:no"
+     ],
+     "depends_on": [
+      "EP09-I02",
+      "EP09-I03",
+      "EP09-I04",
+      "EP09-I06",
+      "EP09-I07",
+      "EP09-I08",
+      "EP09-I09",
+      "EP09-I12"
+     ],
+     "bidding_ref": [
+      "S9.1",
+      "S9.2",
+      "S9.3",
+      "S9.4",
+      "S9.5",
+      "S9.6"
+     ],
+     "sub_issues": []
+    }
+   ]
+  }
+ ],
+ "spec_gaps": [
+  {
+   "id": "GAP-00-01",
+   "where": "yuki-wms-prototype/docs/lab4/04-adr/ADR-008-one-active-role-session-and-mfa-by-assigned-role.md:12 ↔ yuki-cold-chain-wms-2360-management/specs/system-design/database-design/common/COM_DB.md:68",
+   "evidence": "ADR-008 giữ 職務 đang dùng trong bảng app_sessions theo JWT session_id; COM_DB ghi phiên là trạng thái runtime, không phải bảng (Q-COMDB-03); 05-database/design-vs-prototype-diff.md:177 lại đề xuất thêm app_session vào COM_DB (L5-DOC-02).",
+   "desc": "Ba tài liệu nói ba cách về nơi giữ phiên một 職務. Trên Azure không còn JWT Supabase nên phải chọn lại; ảnh hưởng acting_role_id, buộc đăng xuất và thu hồi vai.",
+   "severity": "med",
+   "proposal": "Sửa DD: chốt trong ADR mới (EP00-I01), cập nhật COM_DB qua CR",
+   "issues": [
+    "EP00-I01",
+    "EP00-I12",
+    "EP10-I03"
+   ]
+  },
+  {
+   "id": "GAP-00-02",
+   "where": "yuki-cold-chain-wms-2360-management/specs/system-design/database-design/inventory/INV_DB.md:162 ↔ yuki-cold-chain-wms-2360-management/specs/system-design/database-design/master-data/MST_DB.md (4.11 change_request, 4.12 interface_run) ↔ yuki-cold-chain-wms-2360-management/specs/system-design/database-design/common/COM_DB.md:436",
+   "evidence": "INV dùng request_id UUID + UNIQUE; MST change_request không có request_id (chỉ row_version / M_MST-08); IF dùng idempotency_key + file_sha256; mail dùng dedupe_key.",
+   "desc": "Không có hợp đồng chung cho thao tác ghi lặp: khi trùng thì trả kết quả lần đầu hay báo lỗi chưa định nghĩa; màn duyệt SCR-14 bấm lặp chỉ dựa vào row_version.",
+   "severity": "low",
+   "proposal": "Sửa DD: viết hợp đồng idempotency chung ở EP00-I17, giữ cột riêng từng bảng",
+   "issues": [
+    "EP00-I17",
+    "EP08-I09"
+   ]
+  },
+  {
+   "id": "GAP-00-03",
+   "where": "yuki-cold-chain-wms-2360-management/specs/_common/error-codes.md:17, :376 ↔ yuki-cold-chain-wms-2360-management/specs/_common/api-list.md (bảng rỗng)",
+   "evidence": "Cột HTTP status của mọi mã là 「TBD (Step 4)」; danh mục API chưa có dòng nào.",
+   "desc": "Catalog mã dựng ở S1 nhưng chưa biết mã nào trả HTTP gì; FE / BE / test phải tự đoán.",
+   "severity": "med",
+   "proposal": "Sửa DD: chốt bảng HTTP theo nhóm mã ở Step 4 (plan bước 1.6) trước S1",
+   "issues": [
+    "EP00-I23",
+    "EP10-I01"
+   ]
+  },
+  {
+   "id": "GAP-00-04",
+   "where": "yuki-wms-prototype/docs/lab4/04-adr/ADR-003-atomic-allocation-lock-order.md:13 ↔ yuki-wms-prototype/docs/lab4/02-architecture.md:475",
+   "evidence": "ADR-003 chỉ định thứ tự khóa cho 引当 / タスク; 02-architecture ghi A-02 (bảng khóa chung cho delivery_order) chưa sửa; 隔離 nhả 引当, recall tự 隔離, 逸脱 → 隔離 cùng chạm lot / allocation.",
+   "desc": "Các luồng ngoài 引当 chưa có thứ tự khóa ghi rõ, dễ deadlock khi chạy song song với 引当.",
+   "severity": "med",
+   "proposal": "Sửa DD: mở rộng ADR-003 thành bảng khóa cho mọi luồng ghi tồn (sub-issue EP00-I16-S01)",
+   "issues": [
+    "EP00-I16"
+   ]
+  },
+  {
+   "id": "GAP-00-05",
+   "where": "yuki-wms-prototype/docs/lab4/04-adr/ADR-010-monthly-partitioning-for-high-volume-tables.md:22 ↔ yuki-cold-chain-wms-2360-management/specs/system-design/database-design/common/COM_DB.md (4.5 audit_log, Index: PRIMARY id) và inventory/INV_DB.md:247",
+   "evidence": "ADR-010 ghi khóa chính / unique phải chứa cột partition; audit_log có PK chỉ là id; stock_event có uq_stock_event_event_code không chứa occurred_at.",
+   "desc": "PostgreSQL không cho PK / UNIQUE thiếu cột partition trên bảng phân vùng: DB design hiện tại không cài được như viết.",
+   "severity": "med",
+   "proposal": "Sửa DD (DB design): thêm cột partition vào PK / UNIQUE hoặc dùng bảng tra mã riêng",
+   "issues": [
+    "EP00-I26",
+    "EP00-I24"
+   ]
+  },
+  {
+   "id": "GAP-08-01",
+   "where": "yuki-wms-prototype/docs/lab4/PREMISE.md §4 (SCR-14 nằm trong danh sách màn không chọn DD) ↔ yuki-cold-chain-wms-2360-management/specs/master-data/screen-specification/SCR-14_SPEC.md (chỉ có spec BM-2-901-51)",
+   "evidence": "Bộ DD LAB-4 chỉ có 6 màn; SCR-14 có 6 vùng 14-01〜14-06 với duyệt hai người, purge, archive nhưng chưa có DD.",
+   "desc": "Thiếu DD: xử lý server, khóa, máy trạng thái, điểm kiểm thử biên của SCR-14 chưa được viết.",
+   "severity": "med",
+   "proposal": "Sửa DD: viết DD theo vùng ở sprint trước khi code (sub-issue 'Viết DD SCR-14' trong từng issue)",
+   "issues": [
+    "EP08-I01",
+    "EP08-I02",
+    "EP08-I05",
+    "EP08-I07",
+    "EP08-I08",
+    "EP08-I09",
+    "EP08-I13",
+    "EP08-I15",
+    "EP09-I05"
+   ]
+  },
+  {
+   "id": "GAP-08-02",
+   "where": "yuki-cold-chain-wms-2360-management/specs/master-data/screen-specification/SCR-14_SPEC.md:170 ↔ yuki-cold-chain-wms-2360-management/specs/master-data/screen-specification/SCR-14_SPEC.md:160 và yuki-cold-chain-wms-2360-management/specs/system-design/database-design/master-data/MST_DB.md:257",
+   "evidence": "D-8.2 cho nhập 温度band của zone trong form 位置 (要レビュー); D-1 và MST_DB 4.5 ghi zone không có UI, chỉ đổi qua release (Q-MSTDB-04).",
+   "desc": "Không rõ 温度band của zone đổi ở màn hay qua release; hai đường cho cùng một dữ liệu ảnh hưởng kiểm dải nhiệt ở SCR-01.",
+   "severity": "med",
+   "proposal": "Hỏi khách / CR: chốt Q-MSTDB-04, bỏ D-8.2 khỏi form hoặc thêm UI zone",
+   "issues": [
+    "EP08-I07",
+    "EP08-I19"
+   ]
+  },
+  {
+   "id": "GAP-08-03",
+   "where": "yuki-cold-chain-wms-2360-management/specs/master-data/screen-specification/SCR-14_SPEC.md:467 ↔ yuki-cold-chain-wms-2360-management/specs/master-data/screen-specification/SCR-14_SPEC.md:222",
+   "evidence": "§6 ghi lịch batch, cache / timeout bản đồ, danh sách mail đổi qua release, không có UI, F-3 chỉ hiển thị; F-13 lại cho lưu config_parameter và duyệt ở 14-04 (loại IF設定). Q-MST-08 chưa có danh sách mục được sửa ở màn.",
+   "desc": "Hai đường đổi tham số IF mâu thuẫn; không biết mục nào được sửa qua màn.",
+   "severity": "med",
+   "proposal": "Hỏi khách (Q-MST-08): lập danh sách tham số theo đường đổi, sửa §6 hoặc F-11〜13",
+   "issues": [
+    "EP00-I22",
+    "EP08-I10",
+    "EP09-I05"
+   ]
+  },
+  {
+   "id": "GAP-08-04",
+   "where": "yuki-cold-chain-wms-2360-management/specs/master-data/README.md:26 (B-32) và SCR-14_SPEC.md:22",
+   "evidence": "Q-S1-08 tách SCR-14 thành 6 màn con chưa quyết; spec giữ một file, mục chữ theo vùng.",
+   "desc": "Chưa rõ 14-01〜14-06 là 6 route hay một màn có tab; ảnh hưởng điều hướng và phân quyền theo vùng.",
+   "severity": "low",
+   "proposal": "Chấp nhận: break theo vùng 14-0x, giữ ID; chốt Q-S1-08 trong DD phần chung",
+   "issues": [
+    "EP08-I01"
+   ]
+  },
+  {
+   "id": "GAP-08-05",
+   "where": "yuki-cold-chain-wms-2360-management/specs/master-data/screen-specification/SCR-14_SPEC.md:472 ↔ yuki-cold-chain-wms-2360-management/specs/master-data/screen-specification/SCR-14_SPEC.md:233 và specs/_common/data-lifecycle.md §1",
+   "evidence": "Bảng tham số §6 ghi 保持期間 mặc định 「36 / 12 / 36 tháng」; G-1 và data-lifecycle §1 có thêm nhóm luật định 5 năm (労働関係記録, 米 賞味 > 3 năm) và nhóm mặc định D-7.",
+   "desc": "Giá trị khởi tạo ở hai chỗ không cùng danh sách nhóm; dễ nạp thiếu nhóm 5 năm.",
+   "severity": "low",
+   "proposal": "Sửa DD: lấy data-lifecycle §1 làm nguồn duy nhất, sửa bảng §6 qua CR",
+   "issues": [
+    "EP08-I13",
+    "EP08-I14"
+   ]
+  },
+  {
+   "id": "GAP-09-01",
+   "where": "yuki-cold-chain-wms-2360-management/process-trail/plans/plan-261024-dev-phase-wbs.md §0 D-1 và yuki-cold-chain-wms-2360-management/specs/system-design/architecture-design/ARCH_system-overview.md:68 ↔ yuki-cold-chain-wms-2360-management/business-flows/BATCH_LIST.md B-01〜B-03",
+   "evidence": "D-1 và ARCH §2 liệt kê thành phần Azure nhưng không có SFTP; B-01〜B-03 đều dựa vào managed SFTP.",
+   "desc": "Chưa chọn cách dựng SFTP trên Azure (dịch vụ, mạng, khóa), chặn IaC cho IF-ERP-01.",
+   "severity": "med",
+   "proposal": "Sửa DD: thêm thành phần SFTP vào ADR hạ tầng (EP00-I01)",
+   "issues": [
+    "EP09-I01",
+    "EP00-I01",
+    "EP00-I02"
+   ]
+  },
+  {
+   "id": "GAP-09-02",
+   "where": "yuki-cold-chain-wms-2360-management/specs/system-design/architecture-design/ARCH_system-overview.md:83 ↔ yuki-cold-chain-wms-2360-management/business-flows/BATCH_LIST.md:195 và business-flows/SEQ_mail-retry.md bước 6–7",
+   "evidence": "ARCH xếp B-10 vào nhóm chạy theo sự kiện Service Bus; BATCH_LIST và SEQ_mail-retry mô tả worker quét mail_outbox theo next_attempt_at, giành dòng bằng row_version.",
+   "desc": "Hai cơ chế chạy cho cùng batch; ảnh hưởng hạ tầng và cách thử lại.",
+   "severity": "low",
+   "proposal": "Sửa DD: chọn một cơ chế trong DD hàng đợi mail, sửa ARCH §2.1",
+   "issues": [
+    "EP09-I09"
+   ]
+  },
+  {
+   "id": "GAP-09-03",
+   "where": "yuki-cold-chain-wms-2360-management/inputs/customer/breakdown/breakdown-v2.json S9.4 (tiêu chí nhận) ↔ yuki-cold-chain-wms-2360-management/business-flows/FLOW_common.md:103",
+   "evidence": "S9.4 đòi token hết hạn phải đăng nhập lại, không để phiên treo; F-COM-01 chỉ đồng bộ App roles vào user_role lúc đăng nhập.",
+   "desc": "Vai bị thu hồi ở Entra giữa phiên vẫn dùng được tới khi phiên hết; thời hạn token chưa có (Q-COM-07).",
+   "severity": "med",
+   "proposal": "Sửa DD + hỏi khách: kiểm lại vai khi làm mới token, chốt Q-COM-07",
+   "issues": [
+    "EP09-I08",
+    "EP00-I12"
+   ]
+  },
+  {
+   "id": "GAP-10-01",
+   "where": "yuki-cold-chain-wms-2360-management/specs/_common/log-convention.md:27 ↔ yuki-cold-chain-wms-2360-management/business-flows/BATCH_LIST.md:24",
+   "evidence": "log-convention chỉ có 4 trường (ngày giờ, loại, category, message), chưa chốt múi giờ, chưa có correlation_id; BATCH_LIST và NFR-OPS-01 đòi tìm log theo correlation_id.",
+   "desc": "Quy ước log hiện tại không đáp ứng tra cứu theo correlation ID và log có cấu trúc.",
+   "severity": "med",
+   "proposal": "Sửa DD (log-convention) và hỏi chuyên gia mục §3",
+   "issues": [
+    "EP10-I07"
+   ]
+  },
+  {
+   "id": "GAP-10-02",
+   "where": "yuki-cold-chain-wms-2360-management/specs/_common/data-lifecycle.md:160 ↔ yuki-cold-chain-wms-2360-management/specs/system-design/database-design/common/COM_DB.md:202",
+   "evidence": "data-lifecycle §4 ghi 「Mã hóa」 cho nhiều cột cá nhân; COM_DB để ngỏ chọn TDE hay mã hóa cột ở ứng dụng (Q-COMDB-10).",
+   "desc": "Chưa chốt cách mã hóa cột cá nhân; ảnh hưởng tra cứu, chỉ mục và effort SEC-03.",
+   "severity": "med",
+   "proposal": "Hỏi khách (セキュリティオーナー) Q-COMDB-10",
+   "issues": [
+    "EP10-I05"
+   ]
+  },
+  {
+   "id": "GAP-10-03",
+   "where": "yuki-cold-chain-wms-2360-management/specs/system-design/architecture-design/ARCH_system-overview.md:75 ↔ yuki-cold-chain-wms-2360-management/specs/system-design/architecture-design/ARCH_system-overview.md:69",
+   "evidence": "DR chỉ có read replica PostgreSQL ở Japan West; Blob WORM giữ archive / bằng chứng POD nhưng không có sao chép sang vùng DR, Key Vault cũng không nêu. Khác điểm với review M-4 (restore mất POD / mail).",
+   "desc": "Failover sang Japan West có DB nhưng thiếu tệp và bí mật, không đạt RTO 4 giờ cho luồng có đính kèm.",
+   "severity": "med",
+   "proposal": "Sửa DD (Step 5 BACKUP_MONITORING): thêm sao chép Blob / Key Vault vào thiết kế DR",
+   "issues": [
+    "EP00-I05",
+    "EP10-I13",
+    "EP10-I14"
+   ]
+  }
+ ],
+ "differences": [
+  {
+   "lab4_ref": "ADR-002 (logic ghi trong hàm rpc_* SECURITY DEFINER)",
+   "change": "Logic nghiệp vụ nằm ở service của App Service (modular monolith); PostgreSQL chỉ giữ CHECK / FK / khóa / transaction",
+   "reason": "D-1, D-3, breakdown-conventions §2",
+   "impact": "EP00-I01, EP00-I07, EP00-I16, EP00-I24: không có task viết RPC; mọi kiểm lại quy tắc ở service"
+  },
+  {
+   "lab4_ref": "ADR-002 + 0002_rls.sql:41 (RLS SELECT using(true)); L5-DB-01 = SEC-02",
+   "change": "Không dùng RLS làm cơ chế quyền; kiểm quyền ở lớp API theo role_permission và 職務 của phiên; user DB của app theo quyền tối thiểu",
+   "reason": "D-1, conventions §2",
+   "impact": "EP00-I14 thay L5-DB-01 / SEC-02"
+  },
+  {
+   "lab4_ref": "ADR-012 (prototype Vercel + Supabase, cổng AuthPort / StoragePort / MailPort / MapPort)",
+   "change": "Hệ đích viết mới trên Azure; cổng thành interface trong code mới, không tách cổng khỏi prototype",
+   "reason": "D-1, D-3",
+   "impact": "EP00-I08; ADR mới ở EP00-I01 thay ADR-012"
+  },
+  {
+   "lab4_ref": "0610_mfa_by_assigned_role.sql (rpc_mfa_stub_verify, aal2 của Supabase)",
+   "change": "MFA do Entra ID + Conditional Access; server đọc amr trong token",
+   "reason": "D-1",
+   "impact": "EP00-I13"
+  },
+  {
+   "lab4_ref": "0600_active_role_session.sql (app_sessions theo JWT session_id của Supabase)",
+   "change": "Phiên một 職務 lưu phía server App Service, nơi lưu chốt ở ADR mới",
+   "reason": "D-1; GAP-00-01",
+   "impact": "EP00-I12"
+  },
+  {
+   "lab4_ref": "0002_rls.sql:8-11 (auth.uid() trong app_user_id())",
+   "change": "Định danh lấy từ OIDC subject, ánh xạ user_profile.idp_subject",
+   "reason": "D-1",
+   "impact": "EP09-I08, EP00-I11"
+  },
+  {
+   "lab4_ref": "PostgREST Data API của Supabase (gọi thẳng rpc_route_save_draft / publish G-12; rpc_audit_append grant authenticated SEC-AUD-01)",
+   "change": "DB không phơi ra ngoài; chỉ App API; audit chỉ ghi từ code server trong cùng transaction",
+   "reason": "D-1",
+   "impact": "EP00-I24, EP00-I14; lỗ hổng G-12 không còn đường Data API nhưng EP-04 vẫn phải tính lại khi 公開"
+  },
+  {
+   "lab4_ref": "0620 service_role cho script; DEPLOY.md biến NEXT_PUBLIC_SUPABASE_URL / ANON_KEY",
+   "change": "Managed identity + Key Vault, không khóa trong env hay shell",
+   "reason": "D-1",
+   "impact": "EP10-I06"
+  },
+  {
+   "lab4_ref": "0002_rls.sql:54-70 (trigger append-only, TRUNCATE chỉ chặn ở audit_log)",
+   "change": "Trigger + grant trên Azure PostgreSQL cho audit_log, stock_event, lot_status_event ngay từ đầu",
+   "reason": "D-3 (viết mới), ADR-011 giữ nguyên",
+   "impact": "EP00-I24"
+  },
+  {
+   "lab4_ref": "L5-DB-02 (migration giá trị JA → ASCII trên dữ liệu prototype)",
+   "change": "Schema mới dùng ASCII từ đầu, không migrate dữ liệu prototype",
+   "reason": "D-3",
+   "impact": "EP00-I10"
+  },
+  {
+   "lab4_ref": "seed.sql:10 (ruleVersion JSON trong system_settings) + hằng TS trong dispatch-route-plan.ts; T07-01",
+   "change": "Bảng duty_rule_version nạp qua release có người duyệt",
+   "reason": "D-3, ADR-007 giữ nguyên",
+   "impact": "EP00-I20"
+  },
+  {
+   "lab4_ref": "0001_schema.sql:20-24 (temperature_bands không version); L5-DB-06 = REC-TMP-01 = TMP-DB-01",
+   "change": "Dựng mới temperature_policy_version theo MST_DB 4.9",
+   "reason": "D-3",
+   "impact": "EP00-I19, EP08-I08"
+  },
+  {
+   "lab4_ref": "Bảng mails mô phỏng (app_mail, 0002 / 0003)",
+   "change": "mail_outbox + worker trên Functions + relay qua MailPort",
+   "reason": "D-1",
+   "impact": "EP09-I09"
+  },
+  {
+   "lab4_ref": "Batch chạy bằng nút trên màn (feature-list.md:180)",
+   "change": "Functions cron JST + Service Bus, khung batch chung",
+   "reason": "D-1",
+   "impact": "EP00-I27"
+  },
+  {
+   "lab4_ref": "IF-ERP-01 [SIM]: dòng có sẵn trong imported_orders, không SFTP, không lịch",
+   "change": "SFTP managed + B-01 / B-02 / B-03 chạy theo lịch APV-014",
+   "reason": "D-1",
+   "impact": "EP09-I01〜I04"
+  },
+  {
+   "lab4_ref": "IF-MAP-01 [SIM]: phút cố định customers.depot_min",
+   "change": "Azure Maps qua MapPort, cache 24 giờ",
+   "reason": "D-1",
+   "impact": "EP09-I07"
+  },
+  {
+   "lab4_ref": "Archive không WORM, không PDF (feature-list.md:143); rpc_archive_audit_rows (0510)",
+   "change": "Blob container WORM + job xuất trên Functions",
+   "reason": "D-1",
+   "impact": "EP00-I28, EP09-I12"
+  },
+  {
+   "lab4_ref": "Supabase Storage",
+   "change": "Blob Storage qua StoragePort",
+   "reason": "D-1",
+   "impact": "EP00-I28"
+  },
+  {
+   "lab4_ref": "Test SQL / RLS / RPC chỉ chạy trên PGlite (ISS-22)",
+   "change": "Test DB chạy trên PostgreSQL thật trong CI",
+   "reason": "D-1, D-3",
+   "impact": "EP00-I03"
+  },
+  {
+   "lab4_ref": "0001_schema.sql:8 (timestamp không TZ), PK text + id_counters",
+   "change": "TIMESTAMPTZ, BIGINT identity + *_code UNIQUE theo DB design",
+   "reason": "D-3",
+   "impact": "EP00-I09"
+  },
+  {
+   "lab4_ref": "OUT-ALLOC-02 (đảo thứ tự khóa trong rpc_allocate_line, 0511:18-36)",
+   "change": "Helper khóa ở tầng service gọi advisory lock + FOR UPDATE theo ADR-003 trong cùng transaction",
+   "reason": "D-3, ADR-003 giữ nguyên",
+   "impact": "EP00-I16"
+  },
+  {
+   "lab4_ref": "COM-MSG-01 (npm run gen:messages, messages-data.json 334 mã)",
+   "change": "Bộ sinh catalog mới từ error-codes 1.6.0 trong repo code mới",
+   "reason": "D-3",
+   "impact": "EP00-I23"
+  },
+  {
+   "lab4_ref": "Thiết bị lấy từ cookie yuki_device (ISS-21, SEC-01)",
+   "change": "Claim thiết bị / compliance từ Conditional Access, kiểm ở server",
+   "reason": "D-1",
+   "impact": "EP10-I04"
+  },
+  {
+   "lab4_ref": "Quan sát: log server Vercel + correlation ID ở API",
+   "change": "App Insights + Log Analytics, correlation ID UI → API → job",
+   "reason": "D-1",
+   "impact": "EP10-I07"
+  },
+  {
+   "lab4_ref": "Prototype không partition (ADR-010 Consequences)",
+   "change": "Partition gốc trên Azure PostgreSQL từ đầu",
+   "reason": "D-3, ADR-010 giữ nguyên",
+   "impact": "EP00-I26"
+  },
+  {
+   "lab4_ref": "ADR-002 Consequences: engine TS chỉ đề xuất, 3 ngoại lệ RPC tin dữ liệu client",
+   "change": "Service luôn kiểm lại từ dữ liệu server, không nhận trạng thái / kết quả kiểm từ client (quy ước khung)",
+   "reason": "D-3",
+   "impact": "EP00-I07, EP00-I17"
+  },
+  {
+   "lab4_ref": "L5-DOC-01 (master = bảng hiện hành + master_versions JSONB chung)",
+   "change": "Bảng master có version theo MST_DB 4.0 (1 dòng = 1 version)",
+   "reason": "D-3",
+   "impact": "EP08-I01, EP00-I18"
+  }
+ ]
+}

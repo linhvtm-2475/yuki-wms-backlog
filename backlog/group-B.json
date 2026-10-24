@@ -1,0 +1,2632 @@
+{
+  "group": "B",
+  "epics": [
+    {
+      "id": "EP-01",
+      "title": "入荷・検査・保管 — nhập hàng, kiểm, tạo lô",
+      "labels": [
+        "type:epic"
+      ],
+      "body": "**Mục tiêu:** Nhận hàng theo 3 dải nhiệt có version, tách hai loại hạn, truy xuất 米 / 牛, tạo lô bất biến và cách ly ngay khi kiểm NG.\n\n**Phạm vi:** Làm: SCR-01 (View 1〜4, modal C), RPT-16, 返品入荷 theo D-B. Không làm: nạp tệp ERP B-01 (EP-09), xử lý lô 隔離 sau tạo (EP-02), điều tra ca (EP-05).\n\n**Nguồn:** DD:SCR-01; SPEC:SCR-01, RPT-16; DB:REC_DB; bidding:E1 (S1.1〜S1.5)\n\n**Định nghĩa xong:**\n- [ ] Mọi issue EP01-* đóng\n- [ ] TP-01〜32 xanh trên test\n- [ ] Không còn tham chiếu RPC / RLS / prototype trong code\n\n**Phụ thuộc:** EP-00, EP-08 (master), EP-02 (schema INV), EP-03 (返品)",
+      "issues": [
+        {
+          "id": "EP01-I01",
+          "title": "Rà lại DD SCR-01 入荷検品 theo kiến trúc Azure",
+          "body": "**Mục tiêu:** Đưa SCR-01_DETAIL về tiền đề Azure (D-1) và viết mới (D-3) để làm DoR cho các story nhập hàng ở S2.\n\n**Phạm vi:** Làm: sửa §4 (xử lý server), §3.6 (quyền, thiết bị), §5 (bỏ bảng gap prototype, giữ điểm kiểm thử), chốt câu hỏi mở của DD. Không làm: đổi giá trị nghiệp vụ đã duyệt trong SCR-01_SPEC; viết DD màn khác.\n\n**Nguồn:** DD:SCR-01 §3.4, §3.6, §4, §5.1, §5.2, §5.4; ADR-002 (không dùng), ADR-003, ADR-012 (không dùng); plan-261024-dev-phase-wbs §0 D-1/D-3, §8.3\n\n**Định nghĩa xong:**\n- [ ] §4 mô tả xử lý ở module receiving của App Service, mỗi lệnh một giao dịch PostgreSQL, không còn rpc_rcv_* / SECURITY DEFINER\n- [ ] §3.6 và §4.6 lấy 職務, thiết bị, MFA từ phiên Entra ID do server xác lập\n- [ ] Bảng §5.1 thay bằng mục 'Khác biệt đã xử lý' trỏ danh sách differences\n- [ ] Mọi câu hỏi Q-DTL-REC-01〜05 có trạng thái (đã chốt / giữ đề xuất có nhãn 【仮】)\n- [ ] Review DD đạt, không còn finding Critical\n\n**Phụ thuộc:** ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp)",
+          "role": "SA",
+          "sprint": "S1",
+          "labels": [
+            "type:issue",
+            "role:SA",
+            "dd:yes"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S1.1",
+            "S1.2",
+            "S1.3",
+            "S1.4",
+            "S1.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I01-S01",
+              "title": "Viết lại §4 SCR-01 theo service + transaction trên App Service",
+              "body": "**Mục tiêu:** Thay mô tả RPC bằng service module receiving, giữ thứ tự khóa và mã M_*.\n\n**Nguồn:** DD:SCR-01 §4 (mở đầu, 4.1〜4.7); ADR-003\n\n**Định nghĩa xong:**\n- [ ] Mỗi mục 4.x có input / output / lỗi / bước theo service\n- [ ] Thứ tự khóa §4 đối chiếu ADR-003\n- [ ] Ánh xạ mã M_* → HTTP trỏ Step 4 (bước 1.6)",
+              "role": "SA",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP01-I01-S02",
+              "title": "Cập nhật ma trận quyền và thiết bị theo Entra ID",
+              "body": "**Mục tiêu:** Bỏ giả định cookie thiết bị và MFA stub; mô tả claim cần kiểm.\n\n**Nguồn:** DD:SCR-01 §3.6, §4.6; LAB4:SEC-01; ADR-008\n\n**Định nghĩa xong:**\n- [ ] Nêu claim / thuộc tính phiên dùng để kiểm PC + MFA\n- [ ] Kiểm maker ≠ checker theo user id ghi rõ\n- [ ] Không còn tham chiếu RLS / PostgREST",
+              "role": "SA",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP01-I01-S03",
+              "title": "Chuyển điểm kiểm thử §5.2 thành checklist test case",
+              "body": "**Mục tiêu:** Biến TP-01〜32 thành danh sách case đầu vào cho QA ở S2.\n\n**Nguồn:** DD:SCR-01 §5.2\n\n**Định nghĩa xong:**\n- [ ] 32 TP có ID case tương ứng\n- [ ] TP dựa vào code prototype được viết lại theo hành vi",
+              "role": "QA",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I01-S04",
+              "title": "Chốt câu hỏi mở nhập hàng với PO / 品質オーナー",
+              "body": "**Mục tiêu:** Lấy đáp án hoặc xác nhận mặc định cho các câu ảnh hưởng S2.\n\n**Nguồn:** DD:SCR-01 §5.4; REC_DB §5 Q-RECDB-02, Q-RECDB-06; Q-REC-04; ISS-10\n\n**Định nghĩa xong:**\n- [ ] Gửi Q-DTL-REC-01〜05, Q-RECDB-02, Q-RECDB-06, Q-REC-04, danh mục 理由コード\n- [ ] Đáp án ghi vào qa / register\n- [ ] Câu chưa trả lời có mặc định 【仮】 và tác động ghi rõ",
+              "role": "BrSE",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            },
+            {
+              "id": "EP01-I01-S05",
+              "title": "Review DD SCR-01 bản Azure",
+              "body": "**Mục tiêu:** Review độc lập trước khi đưa story vào S2.\n\n**Nguồn:** plan-261024-dev-phase-wbs §8.3 (review-detail-design)\n\n**Định nghĩa xong:**\n- [ ] Biên bản review lưu repo\n- [ ] Finding Critical / High đã đóng\n- [ ] DoR của S2 đạt cho SCR-01",
+              "role": "SA",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I02",
+          "title": "Tạo schema REC cho 入荷予定, dòng kiểm và 判定",
+          "body": "**Mục tiêu:** Có bảng REC đúng REC_DB 1.1.0 để các API nhập hàng dùng.\n\n**Phạm vi:** Làm: migration inbound_appointment, inbound_inspection_line, receiving_judgment (request_id UNIQUE, partial unique 1 判定 hiện hành), temporary_band_ticket, index, CHECK. Không làm: bảng disposal_request (EP02-I11); nạp tệp B-01.\n\n**Nguồn:** DB:REC_DB 4.1〜4.4, 4.7 R1〜R6, R9; LAB4:REC-DB-01; DD:SCR-01 §5.1 G-09\n\n**Định nghĩa xong:**\n- [ ] Migration chạy được trên dev + test và rollback được\n- [ ] CHECK tổng 受入+拒否+保留 = reported_qty khi confirmed / approved\n- [ ] UNIQUE partial chặn 2 判定 hiện hành trên một dòng\n- [ ] decided_by ≠ requested_by có CHECK\n- [ ] Test DB cho R1, R3〜R5 xanh\n\n**Phụ thuộc:** EP01-I01, EP02-I01; ngoài nhóm: EP-00 (khung migration, khối cột T)",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP01-I01",
+            "EP02-I01"
+          ],
+          "bidding_ref": [
+            "S1.3",
+            "S1.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I02-S01",
+              "title": "Viết migration bảng REC + index",
+              "body": "**Mục tiêu:** Tạo 4 bảng REC theo thiết kế.\n\n**Nguồn:** DB:REC_DB 4.1〜4.4\n\n**Định nghĩa xong:**\n- [ ] Kiểu cột, NOT NULL, FK khớp REC_DB\n- [ ] Index idx_inbound_appointment_supplier_ref_code, idx_receiving_judgment_status_requested_at",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I02-S02",
+              "title": "Test ràng buộc DB của REC",
+              "body": "**Mục tiêu:** Chứng minh CHECK / UNIQUE chặn dữ liệu sai.\n\n**Nguồn:** DB:REC_DB 4.7 R1〜R6\n\n**Định nghĩa xong:**\n- [ ] Case cho từng R\n- [ ] Chạy trong CI",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I03",
+          "title": "Đăng ký 入荷予定 và xem danh sách 予定",
+          "body": "**Mục tiêu:** 入荷担当者 tạo 予定 thủ công và thấy danh sách 予定 kèm nguồn nhập.\n\n**Phạm vi:** Làm: API tạo 予定 (通常 / 返品), cảnh báo trùng 仕入先参照コード (cả nguồn tệp), View 1 B-1〜B-7 + modal C, cột 取込元. Không làm: batch B-01 nạp tệp ERP (EP-09); đổi trạng thái 予定 ngoài 予定 (chờ Q-RECDB-06).\n\n**Nguồn:** DD:SCR-01 §3.3.B, §3.3.C, §4.1; SPEC:SCR-01; LAB4:REC-FEAT-02 (phần hiển thị)\n\n**Định nghĩa xong:**\n- [ ] Thiếu trường theo 入荷種別 trả M_REC-01 với ID ô\n- [ ] Trùng tham chiếu chỉ cảnh báo, lưu sau xác nhận\n- [ ] Danh sách sắp theo ETA, có 取込元 và 0件\n- [ ] Unit test service + test API xanh\n- [ ] audit_log ghi khi tạo 予定\n\n**Phụ thuộc:** EP01-I02; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp); EP-08 (master 仕入先 / 顧客 có version)\n\n**Spec gap:** GAP-01-03, GAP-01-04 — trạng thái 予定 chưa đủ để theo dõi",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP01-I02"
+          ],
+          "bidding_ref": [
+            "S1.1"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I03-S01",
+              "title": "Test case 入荷予定登録 và View 1",
+              "body": "**Mục tiêu:** Case cho modal C và danh sách.\n\n**Nguồn:** DD:SCR-01 §3.3.B, §3.3.C, §4.1\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I03-S02",
+              "title": "API tạo 入荷予定 + cảnh báo trùng",
+              "body": "**Mục tiêu:** Service tạo 予定 theo 入荷種別.\n\n**Nguồn:** DD:SCR-01 §4.1\n\n**Định nghĩa xong:**\n- [ ] Kiểm master version hiệu lực\n- [ ] confirm_duplicate hoạt động như mô tả\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I03-S03",
+              "title": "Màn View 1 và modal C",
+              "body": "**Mục tiêu:** Danh sách 予定 và form đăng ký trên tablet / PC.\n\n**Nguồn:** DD:SCR-01 §3.3.B, §3.3.C; wireframe SCR-01 view1\n\n**Định nghĩa xong:**\n- [ ] Bố cục modal theo bảng §3.3.C (chưa có wireframe)\n- [ ] Nhãn C-1 đổi theo C-9\n- [ ] Vùng chạm ≥ 48 px",
+              "role": "FE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I04",
+          "title": "Lưu nháp 検査入力 với kiểm đủ trường P0",
+          "body": "**Mục tiêu:** 入荷担当者 ghi kiểm từng dòng; thiếu P0 thì bị chặn và thấy đủ danh sách ô thiếu.\n\n**Phạm vi:** Làm: API lưu nháp (UPSERT dòng), gom mọi ô P0 thiếu, kiểm kiểu / khoảng, đọc GS1-128 / JAN / ITF-14, upload ảnh D-15, View 2 tablet. Không làm: kiểm dải nhiệt, loại hạn, truy xuất (EP01-I05〜I07); tạo lô.\n\n**Nguồn:** DD:SCR-01 §3.3.D, §4.2; DB:REC_DB R2; LAB4:REC-FEAT-04\n\n**Định nghĩa xong:**\n- [ ] Thiếu nhiều P0 cùng lúc trả đủ danh sách (TP-11)\n- [ ] Sai kiểu / khoảng trả M_REC-15 (TP-12)\n- [ ] Ảnh lưu thật vào kho tệp, không chuỗi giả\n- [ ] Dòng đã có 判定 hiện hành không sửa được (M_REC-10)\n- [ ] Test unit + API xanh\n\n**Phụ thuộc:** EP01-I02; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp); EP-00 (lưu tệp đính kèm trên Blob, ghi COM attachment)",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP01-I02"
+          ],
+          "bidding_ref": [
+            "S1.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I04-S01",
+              "title": "Test case lưu nháp 検査入力",
+              "body": "**Mục tiêu:** Case cho P0, kiểu, quét mã.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-06, TP-11, TP-12\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I04-S02",
+              "title": "API lưu nháp dòng kiểm",
+              "body": "**Mục tiêu:** Service UPSERT dòng + ticket nháp.\n\n**Nguồn:** DD:SCR-01 §4.2\n\n**Định nghĩa xong:**\n- [ ] Trim chuỗi, gom đủ ô thiếu\n- [ ] Ticket nháp xóa được khi tắt công tắc\n- [ ] audit_log không chứa giá trị đo",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I04-S03",
+              "title": "Màn View 2 trên tablet + quét mã",
+              "body": "**Mục tiêu:** Form kiểm dòng, điều hướng dòng n / N.\n\n**Nguồn:** DD:SCR-01 §3.3.D; wireframe SCR-01 view2\n\n**Định nghĩa xong:**\n- [ ] Số lượng và nhiệt độ cỡ chữ ≥ 32 px\n- [ ] GS1 AI 01 / 10 / 15 / 17 điền đúng ô\n- [ ] D-21 liệt kê ô thiếu",
+              "role": "FE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP01-I04-S04",
+              "title": "Upload ảnh kiểm hàng",
+              "body": "**Mục tiêu:** Ảnh D-15 lưu kho tệp, gắn attachment của dòng.\n\n**Nguồn:** DD:SCR-01 §3.3.D D-15; LAB4:REC-FEAT-04\n\n**Định nghĩa xong:**\n- [ ] Upload qua URL ký hạn ngắn\n- [ ] 0 ảnh → M_REC-01\n- [ ] Loại / cỡ tệp đọc từ cấu hình",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I05",
+          "title": "Kiểm dải nhiệt lúc nhập theo 版 ngưỡng hiệu lực và 一時温度帯",
+          "body": "**Mục tiêu:** Phép so BR-TEMP-02 lúc nhập dùng đúng ngưỡng có version và dải áp dụng, kể cả khi ticket 一時温度帯 còn hạn.\n\n**Phạm vi:** Làm: module đánh giá dải thuần (biên bao gồm, không làm tròn), chọn dải áp dụng, chọn vị trí 入荷エリア theo dải áp dụng, tính lại ở lúc 判定 với 版 của ngày đó, lưu FK 版. Không làm: tạo 逸脱 (EP01-I09); đánh giá logger (EP05-I05 dùng lại module này).\n\n**Nguồn:** DD:SCR-01 §3.4.1〜3.4.5; LAB4:REC-FIX-01, REC-FIX-03, REC-TMP-01 = L5-DB-06; DB:MST_DB 4.9; ADR-007\n\n**Định nghĩa xong:**\n- [ ] Biên 冷蔵 5.0 / 5.1 / 0.0 / -0.1, 冷凍 -18.0 / -17.9, 常温 15.0 / 25.0 / 14.9 / 25.1 đúng (TP-01〜03)\n- [ ] Ticket còn hạn đổi dải áp dụng và vị trí, không NG giả (TP-04)\n- [ ] 版 đổi qua đêm thì 判定 dùng 版 mới (TP-29)\n- [ ] Không có ngưỡng hard-code trong code\n- [ ] Không có 版 hiệu lực xử lý theo đáp án Q-DTL-REC-02\n\n**Phụ thuộc:** EP01-I04; ngoài nhóm: EP-00 (bảng quy tắc có version cho temperature_policy_version), EP-08 (kích hoạt 版 ở SCR-14 14-03); EP-08 (location.is_receiving_area, zone.temperature_band)\n\n**Ràng buộc nghiệp vụ:** Ngưỡng 3 dải lấy từ policy có version theo ngày JST; giá trị đúng bằng ngưỡng là trong ngưỡng; SKU chỉ ảnh hưởng qua dải của nó.",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:temp-band"
+          ],
+          "depends_on": [
+            "EP01-I04"
+          ],
+          "bidding_ref": [
+            "S1.2",
+            "S1.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I05-S01",
+              "title": "Test case biên dải nhiệt lúc nhập",
+              "body": "**Mục tiêu:** Bộ biên + ticket + đổi 版.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-01〜05, TP-29\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I05-S02",
+              "title": "Module đánh giá dải và chọn dải áp dụng",
+              "body": "**Mục tiêu:** Hàm thuần dùng chung REC / TMP / OUT.\n\n**Nguồn:** DD:SCR-01 §3.4.1, §3.4.2; DD:SCR-09 §3.4.1\n\n**Định nghĩa xong:**\n- [ ] So trên NUMERIC(4,1), biên bao gồm\n- [ ] Test bảng biên đỏ → xanh\n- [ ] Đặt ở module dùng chung, có tài liệu API",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I05-S03",
+              "title": "Chọn 版 theo ngày và vị trí 入荷エリア",
+              "body": "**Mục tiêu:** Tính lại ở 判定 / 承認 và lưu FK 版.\n\n**Nguồn:** DD:SCR-01 §3.4.3〜3.4.5\n\n**Định nghĩa xong:**\n- [ ] Vị trí theo dải áp dụng\n- [ ] Không tìm thấy vị trí → lỗi cấu hình theo đáp án Q-DTL-REC-04\n- [ ] FK 版 lưu trên dòng",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I05-S04",
+              "title": "Hiển thị D-13 / D-14 và ticket D-18〜D-24",
+              "body": "**Mục tiêu:** OK / NG bằng chữ + màu + biểu tượng.\n\n**Nguồn:** DD:SCR-01 §3.3.D\n\n**Định nghĩa xong:**\n- [ ] NG chỉ cảnh báo ở bước nháp\n- [ ] Ticket thiếu trường → M_REC-01 dưới ô",
+              "role": "FE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I06",
+          "title": "Phân biệt 消費期限 và 賞味期限 khi nhập hạn",
+          "body": "**Mục tiêu:** Hai loại hạn được hiển thị và đánh giá theo hai đường khác nhau ngay từ lúc nhận hàng.\n\n**Phạm vi:** Làm: đọc loại hạn từ master SKU, nhãn riêng cho từng loại, 消費期限 ≤ ngày nhận JST → kiểm NG chặn 受入, 賞味期限 < ngày nhận → chỉ cảnh báo, ánh xạ GS1 AI 15 / 17. Không làm: quy tắc 1/3・1/2 và 日付逆転 khi 引当 (EP-03); 訂正 hạn (EP02-I09).\n\n**Nguồn:** DD:SCR-01 §3.3.D D-6, D-9, §3.4.6; Q28b; BR-EXP-01; DB:REC_DB 4.2\n\n**Định nghĩa xong:**\n- [ ] 消費期限 hôm nay → NG M_REC-18, ngày mai → OK (TP-07)\n- [ ] 賞味期限 hôm qua → cảnh báo, vẫn 受入 được (TP-08)\n- [ ] Không có nhãn gộp 「期限」 ở View 2 / 3 / 4\n- [ ] Master thiếu loại hạn → chặn lưu\n- [ ] Lệch AI GS1 với loại hạn master xử lý theo GAP-01-02\n\n**Phụ thuộc:** EP01-I04; ngoài nhóm: EP-08 (sku.expiry_type CD-MST-02)\n\n**Ràng buộc nghiệp vụ:** 消費期限 là hạn an toàn: chặn cứng; 賞味期限 là hạn ngon nhất: chỉ cảnh báo lúc nhập. Không nhầm với hạn giao theo tập quán thương mại.\n\n**Spec gap:** GAP-01-02",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:expiry-type",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP01-I04"
+          ],
+          "bidding_ref": [
+            "S1.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I06-S01",
+              "title": "Test case hai loại hạn lúc nhập",
+              "body": "**Mục tiêu:** Case cho cả hai loại + GS1.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-07, TP-08\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue\n- [ ] Có case AI 17 trên SKU 賞味 và ngược lại",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I06-S02",
+              "title": "Kiểm loại hạn ở service nhập",
+              "body": "**Mục tiêu:** use_by_check_result và cảnh báo best_before.\n\n**Nguồn:** DD:SCR-01 §3.4.6\n\n**Định nghĩa xong:**\n- [ ] Tính theo ngày nhận JST, tính lại lúc 判定\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I06-S03",
+              "title": "Nhãn và biểu tượng riêng cho loại hạn",
+              "body": "**Mục tiêu:** D-6, D-9, F-2 hiện đúng loại hạn.\n\n**Nguồn:** DD:SCR-01 §3.3.D, §3.3.F; SPEC-COM-006 §4.2\n\n**Định nghĩa xong:**\n- [ ] Hai biểu tượng khác nhau\n- [ ] Kiểm a11y: không chỉ dựa vào màu",
+              "role": "FE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I07",
+          "title": "Kiểm truy xuất bắt buộc 米 / 牛 lúc nhập",
+          "body": "**Mục tiêu:** Lô gạo và bò thiếu / sai dữ liệu truy xuất không vào được tồn khả dụng.\n\n**Phạm vi:** Làm: kiểm theo lane SKU: gạo cần 産地 và các trường giao dịch theo BR-TRACE-01, bò cần số cá thể đúng 10 chữ số; NG → chặn 受入, lô vào 隔離 起因 trace_check_ng; lưu nguyên giá trị sai để làm bằng chứng. Không làm: áp truy xuất bắt buộc cho SKU lane khác; chặn 引当 / xuất lô bò 確認待ち (EP-03).\n\n**Nguồn:** DD:SCR-01 §3.3.D D-16, D-17, §3.4.6; BR-TRACE-01, BR-TRACE-02; DB:REC_DB 4.2 #19〜20; 02-architecture G-11\n\n**Định nghĩa xong:**\n- [ ] Bò 9 / 10 / 11 chữ số / có chữ → NG / OK / NG / NG (TP-09)\n- [ ] Gạo thiếu 産地 → NG (TP-10)\n- [ ] Trường BR-TRACE-01 của gạo được ánh xạ hoặc nhập theo kết luận GAP-01-01\n- [ ] Ô chỉ hiện với lane tương ứng\n- [ ] Log vận hành không ghi đủ số cá thể\n\n**Phụ thuộc:** EP01-I04; ngoài nhóm: EP-08 (sku lane)\n\n**Ràng buộc nghiệp vụ:** Chỉ 米 và 牛 là bắt buộc theo luật; lane khác chỉ khuyến khích.\n\n**Spec gap:** GAP-01-01",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:traceability-rice-beef",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP01-I04"
+          ],
+          "bidding_ref": [
+            "S1.2",
+            "S1.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I07-S01",
+              "title": "Test case truy xuất 米 / 牛",
+              "body": "**Mục tiêu:** Case theo lane.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-09, TP-10\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I07-S02",
+              "title": "Kiểm truy xuất ở service nhập",
+              "body": "**Mục tiêu:** traceability_check_result theo lane.\n\n**Nguồn:** DD:SCR-01 §3.4.6\n\n**Định nghĩa xong:**\n- [ ] Regex 10 chữ số kiểm ở server\n- [ ] Kết quả lưu và tính lại lúc 判定",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I07-S03",
+              "title": "Ô 米産地 / 牛個体識別番号 theo lane",
+              "body": "**Mục tiêu:** Ô điều kiện trên View 2.\n\n**Nguồn:** DD:SCR-01 §3.3.D\n\n**Định nghĩa xong:**\n- [ ] Ô ẩn với lane khác\n- [ ] Thông báo NG nêu rõ trường thiếu",
+              "role": "FE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I08",
+          "title": "Xác nhận 判定 idempotent theo request_id",
+          "body": "**Mục tiêu:** Bấm 判定を確定 nhiều lần hoặc từ hai tablet không sinh lô trùng hay 判定 chồng.\n\n**Phạm vi:** Làm: API 判定確定: tra request_id trước khi khóa, khóa theo thứ tự chung, tính lại mọi kiểm, chặn 受入 > 0 khi NG / 返品, tổng phải bằng 報告数, View 3 + hộp xác nhận + thử lại cùng request_id. Không làm: tạo lô (EP01-I09); 分散承認 (EP01-I10).\n\n**Nguồn:** DD:SCR-01 §3.3.E, §3.5.1, §4.3; LAB4:REC-FIX-06; FR-REC-04\n\n**Định nghĩa xong:**\n- [ ] Gửi lại cùng request_id trả lô cũ M_REC-13 (TP-18)\n- [ ] Hai phiên khác request_id: phiên sau M_REC-14 (TP-19)\n- [ ] Cùng request_id khác số lượng → M_REC-07 (TP-20)\n- [ ] NG + 受入 > 0 qua API trực tiếp bị chặn, không ghi gì (TP-14)\n- [ ] Mất mạng giữ dữ liệu, thử lại cùng request_id (TP-30)\n\n**Phụ thuộc:** EP01-I05, EP01-I06, EP01-I07; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp); EP-00 (thứ tự khóa chung ADR-003: cặp 顧客×SKU → lot → stock_unit → allocation)",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP01-I05",
+            "EP01-I06",
+            "EP01-I07"
+          ],
+          "bidding_ref": [
+            "S1.3",
+            "S1.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I08-S01",
+              "title": "Test case 判定確定 và idempotency",
+              "body": "**Mục tiêu:** Case retry, đồng thời, NG.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-13, TP-14, TP-18〜20, TP-30\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue\n- [ ] Có test đồng thời 2 phiên",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I08-S02",
+              "title": "API 判定確定 + thứ tự khóa",
+              "body": "**Mục tiêu:** Service xác nhận trong một giao dịch.\n\n**Nguồn:** DD:SCR-01 §4.3; ADR-003\n\n**Định nghĩa xong:**\n- [ ] Thứ tự khóa không đảo\n- [ ] Lỗi giữa chừng rollback toàn bộ\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I08-S03",
+              "title": "Màn View 3 判定 + hộp xác nhận",
+              "body": "**Mục tiêu:** Nhập 受入 / 拒否 / 保留 và xác nhận 2 bước.\n\n**Nguồn:** DD:SCR-01 §3.3.E; wireframe view3, dialog-e9\n\n**Định nghĩa xong:**\n- [ ] E-2 khóa = 0 khi NG / 返品\n- [ ] request_id sinh một lần khi mở View 3\n- [ ] E-16 nêu hành động tiếp theo",
+              "role": "FE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I09",
+          "title": "Tạo lô bất biến, cách ly lúc nhập và ca 逸脱 nhập hàng",
+          "body": "**Mục tiêu:** Sau 判定, lô và sự kiện tồn sinh trong cùng giao dịch; kiểm NG / 保留 / 返品 vào 隔離 và nhiệt NG mở ca 逸脱 thật.\n\n**Phạm vi:** Làm: tạo lot, lot_version v1, stock_unit, stock_event, lot_status_event (mỗi 起因 một sự kiện), tách 2 lô khi có cả 受入 và 保留, helper tạo deviation_case dùng chung, migration bảng ca. Không làm: mail khi lô vào 隔離 lúc nhập; điều tra / đóng ca (EP05-I15).\n\n**Nguồn:** DD:SCR-01 §3.5.2, §4.4; DB:REC_DB R6; DB:INV_DB 4.1〜4.5, R15; DB:TMP_DB 4.7〜4.9; LAB4:REC-FIX-02, REC-FIX-04, L5-DB-04\n\n**Định nghĩa xong:**\n- [ ] NG nhiệt + 保留 → lô 隔離 未記録 + ca origin receiving thấy được ở danh sách ca (TP-15)\n- [ ] 受入 100 + 保留 20 → 2 lô (TP-16)\n- [ ] 拒否 hết → không lô (TP-17)\n- [ ] 返品 + nhiệt NG → 2 起因 + có ca (TP-27)\n- [ ] Một INSERT lỗi thì không còn lô / 判定 nửa vời\n\n**Phụ thuộc:** EP01-I08, EP02-I01; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp)\n\n**Ràng buộc nghiệp vụ:** Nhiệt NG lúc nhập là hồ sơ HACCP: ca 逸脱 tạo cùng giao dịch, không có đồng hồ 15 phút, đóng ca không gỡ chặn giao dịch.",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:haccp"
+          ],
+          "depends_on": [
+            "EP01-I08",
+            "EP02-I01"
+          ],
+          "bidding_ref": [
+            "S1.4",
+            "S1.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I09-S01",
+              "title": "Test case tạo lô và cách ly lúc nhập",
+              "body": "**Mục tiêu:** Case tách lô, nhiều 起因, rollback.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-15〜17, TP-27\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I09-S02",
+              "title": "Migration bảng deviation_case / _lot / _entry",
+              "body": "**Mục tiêu:** Bảng ca dùng chung cho REC, OUT, TMP.\n\n**Nguồn:** DB:TMP_DB 4.7〜4.9\n\n**Định nghĩa xong:**\n- [ ] UNIQUE temperature_alarm_id cho phép NULL\n- [ ] Cột origin_* đủ cho receiving",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I09-S03",
+              "title": "Service tạo lô và sự kiện tồn",
+              "body": "**Mục tiêu:** Bước 4.4.1〜4.4.3, 4.4.5〜4.4.7.\n\n**Nguồn:** DD:SCR-01 §4.4\n\n**Định nghĩa xong:**\n- [ ] lot_code WMS sinh, bất biến\n- [ ] Mỗi 起因 một lot_status_event\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I09-S04",
+              "title": "Helper tạo ca 逸脱 dùng chung",
+              "body": "**Mục tiêu:** Một hàm tạo ca + lô của ca + entry open.\n\n**Nguồn:** DD:SCR-01 §4.4.4; LAB4:REC-FIX-02 (OUT-DEV-01 và luồng TMP dùng lại)\n\n**Định nghĩa xong:**\n- [ ] API nội bộ có tài liệu\n- [ ] Gọi được trong giao dịch của bên gọi",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I10",
+          "title": "分散承認 khi tổng lệch 報告数, maker ≠ checker trên PC",
+          "body": "**Mục tiêu:** Dòng có tổng lệch chỉ tạo lô sau khi một 品質管理 khác người ghi duyệt trên PC.\n\n**Phạm vi:** Làm: lưu 承認待ち (không lô) + N-07 vào outbox, View 4 danh sách / chi tiết, 承認 (tạo lô cùng giao dịch, tính lại kiểm), 差戻し có lý do (dòng mở khóa, nộp lại = 判定 mới). Không làm: batch nhắc khi chờ quá hạn (ngưỡng trống, chưa có job); mail cho 差戻し.\n\n**Nguồn:** DD:SCR-01 §3.3.F, §3.6, §4.5, §4.6; DB:REC_DB R5; NFR-SEC-02\n\n**Định nghĩa xong:**\n- [ ] Tổng ≠ E-1 → 承認待ち, không lô, N-07 trong outbox (TP-21)\n- [ ] Một người có 2 職務 tự duyệt bị chặn M_REC-17 (TP-22)\n- [ ] Duyệt trên tablet bị chặn (TP-23)\n- [ ] Hai người duyệt cùng lúc: người sau M_REC-14 (TP-24)\n- [ ] 差戻し không lý do bị chặn; có lý do → returned (TP-25)\n\n**Phụ thuộc:** EP01-I09; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp); EP-00 / EP-09 (mail_outbox và tiến trình gửi B-10)",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP01-I09"
+          ],
+          "bidding_ref": [
+            "S1.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I10-S01",
+              "title": "Test case 分散承認",
+              "body": "**Mục tiêu:** Case maker ≠ checker, thiết bị, đồng thời.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-21〜25\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I10-S02",
+              "title": "API lưu 承認待ち + outbox N-07",
+              "body": "**Mục tiêu:** Bước 4.5.\n\n**Nguồn:** DD:SCR-01 §4.5\n\n**Định nghĩa xong:**\n- [ ] Không tạo lô\n- [ ] Outbox ghi cùng giao dịch",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I10-S03",
+              "title": "API 承認 / 差戻し",
+              "body": "**Mục tiêu:** Bước 4.6, kiểm row_version.\n\n**Nguồn:** DD:SCR-01 §4.6\n\n**Định nghĩa xong:**\n- [ ] Thiết bị PC + MFA lấy từ phiên\n- [ ] 承認 tạo lô qua service EP01-I09",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I10-S04",
+              "title": "Màn View 4 trên PC",
+              "body": "**Mục tiêu:** Danh sách, chi tiết, nút 承認 / 差戻し.\n\n**Nguồn:** DD:SCR-01 §3.3.F; wireframe view4\n\n**Định nghĩa xong:**\n- [ ] Ẩn nút khi cùng người ghi\n- [ ] 監査者 chỉ xem",
+              "role": "FE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I11",
+          "title": "Nhập 返品 theo dòng giao vào 隔離",
+          "body": "**Mục tiêu:** Hàng 持戻り / 受領拒否 / 顧客返品 vào lại kho qua 返品入荷 và luôn thành lô 隔離, không vượt số đã giao.\n\n**Phạm vi:** Làm: khung G-1 / G-2 hàng chờ 返品, ô 元ロット / 返品起因 / 元配送履歴行, kiểm Σ 返品 ≤ số giao (khóa shipment_line), lô 返品 lấy 仕入先 của lô gốc. Không làm: POD và 出荷確認 (EP-03); hạn nhắc 返品 (Q68 trống).\n\n**Nguồn:** DD:SCR-01 §3.3.B G-1/G-2, §3.3.D D-25〜D-28, §4.2; DB:REC_DB R10; ADR-006; LAB4:REC-FEAT-01, REC-FIX-05; SEQ_return-into-quarantine\n\n**Định nghĩa xong:**\n- [ ] 返品 + E-2 > 0 / E-3 > 0 → M_REC-23 / M_REC-24 (TP-26)\n- [ ] Vượt số giao → M_REC-33 với số giao / đã nhập (TP-28)\n- [ ] Lô 返品 có original_lot_id và 仕入先 lô gốc\n- [ ] G-1 chỉ hiện dòng đã đồng bộ POD\n- [ ] Không đếm tồn hai lần với D-A\n\n**Phụ thuộc:** EP01-I09, EP02-I15; ngoài nhóm: EP-03 (出荷確認 trừ tồn một lần D-A, shipment_line, POD 持戻り / 受領拒否)\n\n**Spec gap:** GAP-01-05",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP01-I09",
+            "EP02-I15"
+          ],
+          "bidding_ref": [
+            "S1.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I11-S01",
+              "title": "Test case 返品入荷",
+              "body": "**Mục tiêu:** Case theo dòng giao.\n\n**Nguồn:** DD:SCR-01 §5.2 TP-26〜28\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I11-S02",
+              "title": "Kiểm 返品 theo dòng giao ở service",
+              "body": "**Mục tiêu:** R10 + khóa shipment_line.\n\n**Nguồn:** DD:SCR-01 §4.2; DB:REC_DB R10\n\n**Định nghĩa xong:**\n- [ ] Kiểm lúc lưu nháp và lúc 判定\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP01-I11-S03",
+              "title": "Khung G-1 / G-2 và ô 返品 trên View 2",
+              "body": "**Mục tiêu:** Điền sẵn từ dòng giao.\n\n**Nguồn:** DD:SCR-01 §3.3.B, §3.3.D\n\n**Định nghĩa xong:**\n- [ ] Chỉ 入荷担当者 thấy G-2\n- [ ] Quá hạn nhắc nổi bật khi có giá trị",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I12",
+          "title": "Xuất RPT-16 受入票 PDF",
+          "body": "**Mục tiêu:** In phiếu nhận hàng từ giá trị đã lưu lúc 判定, có vết xuất.\n\n**Phạm vi:** Làm: sinh PDF theo RPT-16_SPEC từ dữ liệu đã lưu, export_manifest + audit_log, chặn khi chưa 判定, chặn 監査者. Không làm: tính lại kiểm khi in; máy in vật lý (Q-RPT-16-01).\n\n**Nguồn:** DD:SCR-01 §4.7; SPEC:RPT-16; LAB4:REC-FEAT-03; gap-261024-wbs-summary A#8\n\n**Định nghĩa xong:**\n- [ ] PDF đúng layout RPT-16\n- [ ] Chưa 判定 → M_REC-25\n- [ ] 監査者 gọi → M_REC-09\n- [ ] export_manifest có SHA-256\n\n**Phụ thuộc:** EP01-I09; ngoài nhóm: EP-00 (export_manifest, dịch vụ sinh PDF)\n\n**Ràng buộc nghiệp vụ:** Ứng viên cắt đầu tiên nếu thu hẹp phạm vi (Q-RPT-16-04) — PO quyết trước S3.",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP01-I09"
+          ],
+          "bidding_ref": [
+            "S1.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I12-S01",
+              "title": "Test case RPT-16",
+              "body": "**Mục tiêu:** Case nội dung và quyền.\n\n**Nguồn:** SPEC:RPT-16; DD:SCR-01 §4.7\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I12-S02",
+              "title": "Sinh PDF RPT-16 + manifest",
+              "body": "**Mục tiêu:** Đọc giá trị đã lưu, không tính lại.\n\n**Nguồn:** SPEC:RPT-16 §4\n\n**Định nghĩa xong:**\n- [ ] Cột cố định in 「—」 khi không có\n- [ ] Trạng thái lô in theo đáp án Q-RPT-16-02",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP01-I13",
+          "title": "Chạy kiểm thử SCR-01 trên môi trường test",
+          "body": "**Mục tiêu:** Toàn bộ điểm kiểm thử SCR-01 chạy xanh trên test trước khi sang E2.\n\n**Phạm vi:** Làm: chạy bộ case TP-01〜32, ghi TR, triage bug, kiểm quyền và khóa phiên. Không làm: kiểm thử hiệu năng (hardening).\n\n**Nguồn:** DD:SCR-01 §5.2; plan-261024-dev-phase-wbs §5 T7\n\n**Định nghĩa xong:**\n- [ ] TR có kết quả từng case\n- [ ] Không còn bug Sev1 / Sev2 mở\n- [ ] Quyền 監査者 / センター作業者 đúng (TP-31)\n- [ ] Khóa 5 phút tablet chung đúng (TP-32)\n\n**Phụ thuộc:** EP01-I03, EP01-I04, EP01-I08, EP01-I09, EP01-I10; ngoài nhóm: EP-00 (môi trường test Azure)",
+          "role": "QA",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:QA",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP01-I03",
+            "EP01-I04",
+            "EP01-I08",
+            "EP01-I09",
+            "EP01-I10"
+          ],
+          "bidding_ref": [
+            "S1.1",
+            "S1.2",
+            "S1.3",
+            "S1.4",
+            "S1.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP01-I13-S01",
+              "title": "Chạy bộ case chức năng SCR-01",
+              "body": "**Mục tiêu:** TP-01〜30.\n\n**Nguồn:** DD:SCR-01 §5.2\n\n**Định nghĩa xong:**\n- [ ] TR lưu repo\n- [ ] Bug có link case",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP01-I13-S02",
+              "title": "Chạy case quyền và phiên SCR-01",
+              "body": "**Mục tiêu:** TP-31, TP-32 + gọi API trực tiếp.\n\n**Nguồn:** DD:SCR-01 §3.6, §5.2\n\n**Định nghĩa xong:**\n- [ ] Mỗi hành động trong ma trận §3.6 có case\n- [ ] Gọi API thiếu quyền trả M_REC-09",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EP-02",
+      "title": "在庫・ロット・三温度帯 — tồn kho, lô, vị trí theo dải nhiệt",
+      "labels": [
+        "type:epic"
+      ],
+      "body": "**Mục tiêu:** Giữ tồn theo lô × vị trí bất biến, chặn di chuyển sai dải / đóng / đầy, vòng đời 隔離 có duyệt, kiểm kê blind và 訂正 có phiên bản.\n\n**Phạm vi:** Làm: SCR-02, SCR-03, SCR-16, dịch vụ cách ly dùng chung, 返品 vào qua 隔離 (D-B). Không làm: nhập lô (EP-01), 引当 (EP-03), master vị trí (EP-08).\n\n**Nguồn:** SPEC:SCR-02, SCR-03, SCR-16; DB:INV_DB, REC_DB 4.5〜4.6; bidding:E2 (S2.1〜S2.6)\n\n**Định nghĩa xong:**\n- [ ] Mọi issue EP02-* đóng\n- [ ] 3 DD (SCR-02, 03, 16) đã review\n- [ ] Không có đường ghi đè dữ liệu lô / sự kiện\n\n**Phụ thuộc:** EP-00, EP-01, EP-03, EP-08",
+      "issues": [
+        {
+          "id": "EP02-I01",
+          "title": "Tạo schema INV lõi: lô, phiên bản lô, tồn theo vị trí, sự kiện",
+          "body": "**Mục tiêu:** Có bảng INV bất biến để nhập hàng (S2) và các màn tồn kho (S3) dùng chung.\n\n**Phạm vi:** Làm: migration lot, lot_version, stock_unit, stock_event, lot_status_event, CHECK beef 10 chữ số ở lot_version, chặn UPDATE / DELETE bảng sự kiện. Không làm: bảng 訂正 / 棚卸し (EP02-I07, I13); partition (đánh giá ở hardening).\n\n**Nguồn:** DB:INV_DB 4.1〜4.5, R1〜R3, R5; ADR-005\n\n**Định nghĩa xong:**\n- [ ] Migration chạy trên dev + test\n- [ ] stock_unit.qty không âm có CHECK\n- [ ] Bảng sự kiện không UPDATE / DELETE được bằng quyền ứng dụng\n- [ ] Test bất biến xanh\n\n**Phụ thuộc:** ngoài nhóm: EP-00 (khung migration)",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S2.3",
+            "S2.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I01-S01",
+              "title": "Migration bảng INV lõi",
+              "body": "**Mục tiêu:** Tạo 5 bảng INV.\n\n**Nguồn:** DB:INV_DB 4.1〜4.5\n\n**Định nghĩa xong:**\n- [ ] Khớp kiểu / FK\n- [ ] Cột *_location_id + *_location_code (Q-INVDB-03)",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP02-I01-S02",
+              "title": "Test bất biến INV",
+              "body": "**Mục tiêu:** R1〜R3 có test.\n\n**Nguồn:** DB:INV_DB 4.10 R1〜R3\n\n**Định nghĩa xong:**\n- [ ] Thử UPDATE sự kiện bị từ chối\n- [ ] Tồn âm bị chặn",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I02",
+          "title": "Tra cứu tồn / lô đa điều kiện và chi tiết lô (SCR-02 View 1–2)",
+          "body": "**Mục tiêu:** Người dùng tìm lô theo 8 điều kiện trong phạm vi quyền kho và xem lịch sử bất biến của lô.\n\n**Phạm vi:** Làm: View 1 tìm kiếm + phân trang, View 2 chi tiết (tồn theo vị trí, 一時温度帯, lịch sử trạng thái / di chuyển / 訂正), lọc quyền kho ở server. Không làm: 訂正 (EP02-I07〜I09); di chuyển (EP02-I03).\n\n**Nguồn:** SPEC:SCR-02 §3, §4, §5; FR-INV-06; DB:INV_DB\n\n**Định nghĩa xong:**\n- [ ] Kết quả gồm cả lô 隔離, không lộ lô ngoài quyền kho\n- [ ] 賞味期限 / 消費期限 hai nhãn riêng\n- [ ] Lịch sử chỉ đọc\n- [ ] Tải > 1 giây có chỉ báo\n- [ ] Test API + màn xanh\n\n**Phụ thuộc:** EP02-I01; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp) (quyền kho site_scope, Q-INV-07)",
+          "role": "FE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I01"
+          ],
+          "bidding_ref": [
+            "S2.6"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I02-S01",
+              "title": "Viết DD SCR-02 (cả 3 view)",
+              "body": "**Mục tiêu:** DD BM-53 cho SCR-02 theo Azure.\n\n**Nguồn:** SPEC:SCR-02; DB:INV_DB\n\n**Định nghĩa xong:**\n- [ ] Đủ §2〜§5 theo khuôn\n- [ ] Có điểm kiểm thử biên cho di chuyển / dải / dung lượng\n- [ ] Review đạt",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP02-I02-S02",
+              "title": "Test case tra cứu và chi tiết lô",
+              "body": "**Mục tiêu:** Case lọc, quyền kho, 0件.\n\n**Nguồn:** SPEC:SCR-02 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP02-I02-S03",
+              "title": "API tìm kiếm + chi tiết lô",
+              "body": "**Mục tiêu:** Đọc theo quyền kho ở server.\n\n**Nguồn:** SPEC:SCR-02 §4.3\n\n**Định nghĩa xong:**\n- [ ] Index cho 8 điều kiện\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I03",
+          "title": "Ghi 移動 bất biến, idempotent, chặn tồn âm",
+          "body": "**Mục tiêu:** Mọi lần chuyển hàng được ghi đủ nguồn / đích / người / thiết bị / giờ và không bao giờ làm tồn âm.\n\n**Phạm vi:** Làm: API 移動登録 với request_id, sự kiện bất biến, di chuyển ngược có lý do (G-16), quy tắc -Q cho lô 隔離 / 廃棄, View 3 G-1〜G-15 trên ハンディ. Không làm: kiểm dải nhiệt (EP02-I05); dung lượng / 閉鎖 (EP02-I06); offline.\n\n**Nguồn:** SPEC:SCR-02 §5 G-13, G-16; FR-INV-03; DB:INV_DB R1, R5, R6\n\n**Định nghĩa xong:**\n- [ ] Retry cùng request_id không sinh bản ghi 2 (M_INV-08)\n- [ ] Vượt tồn nguồn → M_INV-05, không ghi\n- [ ] Lô 隔離 ra ngoài -Q / lô thường vào -Q bị chặn\n- [ ] Sửa nhầm = di chuyển ngược, bản cũ giữ nguyên\n- [ ] Test đồng thời 2 thiết bị xanh\n\n**Phụ thuộc:** EP02-I02; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp)",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I02"
+          ],
+          "bidding_ref": [
+            "S2.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I03-S01",
+              "title": "Test case 移動",
+              "body": "**Mục tiêu:** Case tồn âm, -Q, retry, ngược.\n\n**Nguồn:** SPEC:SCR-02 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP02-I03-S02",
+              "title": "Màn View 3 trên ハンディ",
+              "body": "**Mục tiêu:** Quét lô / vị trí, 1 cột 360 px.\n\n**Nguồn:** SPEC:SCR-02 §2 View 3\n\n**Định nghĩa xong:**\n- [ ] Ô quét luôn có focus\n- [ ] Vùng chạm ≥ 48 px",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I04",
+          "title": "Đề xuất vị trí lưu kho hợp lệ (FEFO, cùng SKU khác hạn)",
+          "body": "**Mục tiêu:** Hệ thống chỉ đề xuất vị trí hợp lệ; chọn vị trí khác ngoài đề xuất phải có lý do.\n\n**Phạm vi:** Làm: tính top-N vị trí theo dải áp dụng, trạng thái, dung lượng, loại vị trí chứa cùng SKU khác hạn, ưu tiên trống / cùng hạn; cảnh báo + lý do khi chọn vị trí cùng SKU khác hạn. Không làm: tối ưu đường đi picking.\n\n**Nguồn:** SPEC:SCR-02 §5 G-5〜G-9; FR-INV-02; Q12\n\n**Định nghĩa xong:**\n- [ ] Không đề xuất vị trí không hợp lệ\n- [ ] Không có vị trí hợp lệ → M_INV-10\n- [ ] Chọn ngoài đề xuất mà thiếu lý do bị chặn\n- [ ] Test xanh\n\n**Phụ thuộc:** EP02-I03, EP02-I05, EP02-I06",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I03",
+            "EP02-I05",
+            "EP02-I06"
+          ],
+          "bidding_ref": [
+            "S2.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I04-S01",
+              "title": "Test case đề xuất vị trí",
+              "body": "**Mục tiêu:** Case FEFO, khác hạn, đầy.\n\n**Nguồn:** SPEC:SCR-02 §5 G-5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I05",
+          "title": "Chặn put-away / 移動 sai dải áp dụng, không tạo 逸脱",
+          "body": "**Mục tiêu:** Di chuyển sang vị trí khác dải áp dụng luôn bị từ chối ở server, không biến thành ca 逸脱.\n\n**Phạm vi:** Làm: dải áp dụng = 一時温度帯 còn hạn (ngày JST) hoặc dải SKU, so với dải zone đích; dùng lại module đánh giá dải của EP01-I05. Không làm: đánh giá nhiệt đo (không có số đo khi di chuyển).\n\n**Nguồn:** SPEC:SCR-02 §3 (一時温度帯), §5 G-13 M_INV-02; FR-INV-03; BR-TEMP-02; DB:INV_DB R6; DB:REC_DB R9\n\n**Định nghĩa xong:**\n- [ ] Sai dải → M_INV-02 nêu dải áp dụng / dải đích\n- [ ] Không có deviation_case nào sinh ra\n- [ ] Ticket hết hạn → quay về dải SKU\n- [ ] Cách đọc FR-INV-03 theo đáp án Q-INV-18\n\n**Phụ thuộc:** EP02-I03, EP01-I05; ngoài nhóm: EP-08 (zone.temperature_band)\n\n**Ràng buộc nghiệp vụ:** Khác nhập / xuất (BR-TEMP-02 tạo 逸脱), di chuyển sai dải chỉ từ chối.\n\n**Spec gap:** GAP-02-04",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "domain:temp-band",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP02-I03",
+            "EP01-I05"
+          ],
+          "bidding_ref": [
+            "S2.1",
+            "S2.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I05-S01",
+              "title": "Test case dải áp dụng khi di chuyển",
+              "body": "**Mục tiêu:** Case ticket còn hạn / hết hạn.\n\n**Nguồn:** SPEC:SCR-02 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I06",
+          "title": "Giữ dung lượng / 閉鎖 vị trí và gửi 閉鎖・再開依頼",
+          "body": "**Mục tiêu:** Không đưa hàng vào vị trí đóng hoặc đầy; センター作業者 đề xuất đóng / mở để người khác duyệt.\n\n**Phạm vi:** Làm: chặn đưa vào vị trí 閉鎖 (vẫn cho lấy ra), chặn vượt dung lượng pallet, View G-10 tình trạng vị trí, G-17〜G-19 gửi 依頼 vào hàng đợi duyệt. Không làm: màn duyệt ở SCR-14 14-04 (EP-08); sửa master vị trí.\n\n**Nguồn:** SPEC:SCR-02 §3 (FR-INV-01), §5 G-13, G-17; CR-202610-location-close-reopen-request (APV-002); DB:INV_DB R6; Q-INVDB-04\n\n**Định nghĩa xong:**\n- [ ] Vị trí 閉鎖 → M_INV-03 khi đưa vào, lấy ra vẫn được\n- [ ] Vượt dung lượng → M_INV-04\n- [ ] Đã có 依頼 chờ → M_INV-34\n- [ ] Trạng thái vị trí chỉ đổi sau khi người khác duyệt\n\n**Phụ thuộc:** EP02-I02; ngoài nhóm: EP-08 (hàng đợi 14-04, master vị trí / dung lượng)",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I02"
+          ],
+          "bidding_ref": [
+            "S2.1"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I06-S01",
+              "title": "Test case dung lượng và 閉鎖",
+              "body": "**Mục tiêu:** Case đóng / đầy / 依頼.\n\n**Nguồn:** SPEC:SCR-02 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I07",
+          "title": "訂正 lô có phiên bản và duyệt người thứ hai",
+          "body": "**Mục tiêu:** Sửa thuộc tính lô đã nhận chỉ bằng phiên bản mới có lý do; trường nhạy cảm cần 品質管理 thứ hai duyệt.\n\n**Phạm vi:** Làm: bảng lot_correction_request, 仕入先ロット một người, 受入数量 hai người (stock_event 訂正 theo chênh lệch), một 依頼 chờ / lô, hủy / từ chối / 取下げ, dialog F + E-16 trên PC. Không làm: 訂正 有効期限 (EP02-I09), 牛個体識別番号 (EP02-I08); 製造日.\n\n**Nguồn:** SPEC:SCR-02 §5 E-11, F-8〜F-15; DB:INV_DB 4.6, R7〜R9; Q-REC-06; gap-261024-wbs-summary A#5\n\n**Định nghĩa xong:**\n- [ ] Không có đường ghi đè giá trị lô (M_REC-07)\n- [ ] Người xin tự duyệt bị chặn M_INV-31\n- [ ] 受入数量 < đã xuất → M_INV-16\n- [ ] Lô đổi sau khi xin → M_INV-11\n- [ ] Retry cùng request_id trả kết quả lần đầu\n\n**Phụ thuộc:** EP02-I02; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp); EP-03 (dịch vụ 解放 引当 + đánh dấu 再引当 của SCR-05 §4.5)\n\n**Spec gap:** 訂正 受入数量 khi lô ở nhiều vị trí còn trống (Q-INVDB-06)",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I02"
+          ],
+          "bidding_ref": [],
+          "sub_issues": [
+            {
+              "id": "EP02-I07-S01",
+              "title": "Test case 訂正 lô",
+              "body": "**Mục tiêu:** Case 1 người / 2 người.\n\n**Nguồn:** SPEC:SCR-02 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP02-I07-S02",
+              "title": "Dialog 訂正 và khối 承認待ち",
+              "body": "**Mục tiêu:** F-1〜F-15, E-16 chỉ trên PC.\n\n**Nguồn:** SPEC:SCR-02 §2 Dialog F\n\n**Định nghĩa xong:**\n- [ ] Ẩn trên tablet / ハンディ\n- [ ] F-5 hiện số dòng đơn bị giải phóng",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I08",
+          "title": "訂正 牛個体識別番号 cho lô lane 牛",
+          "body": "**Mục tiêu:** Số cá thể bò sai (thường từ migration) được sửa có duyệt và gỡ trạng thái 確認待ち của lô.\n\n**Phạm vi:** Làm: chỉ lô lane 牛, đúng 10 chữ số, 品質管理 thứ hai duyệt, sau 承認 lô hết 確認待ち. Không làm: chặn 引当 / 出荷 lô 確認待ち (EP-03, M_OUT-65 / 66); 訂正 米産地 (Q-INV-01a còn mở).\n\n**Nguồn:** SPEC:SCR-02 §4.2 F-1, F-3, §5 F-12; DB:INV_DB R13; CR-202610-step3-apply-fixups F-18 (APV-017); BR-TRACE-02\n\n**Định nghĩa xong:**\n- [ ] Lô lane khác gửi trực tiếp → M_REC-15\n- [ ] Sai 10 chữ số → M_REC-15\n- [ ] Sau 承認 lô thoát 確認待ち, có sự kiện + phiên bản mới\n- [ ] Tự duyệt bị chặn\n\n**Phụ thuộc:** EP02-I07\n\n**Ràng buộc nghiệp vụ:** Truy xuất bò là nghĩa vụ luật: giá trị cũ giữ trong lịch sử, không ghi đè.",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "domain:traceability-rice-beef"
+          ],
+          "depends_on": [
+            "EP02-I07"
+          ],
+          "bidding_ref": [],
+          "sub_issues": [
+            {
+              "id": "EP02-I08-S01",
+              "title": "Test case 訂正 số cá thể bò",
+              "body": "**Mục tiêu:** Case lane, độ dài, duyệt.\n\n**Nguồn:** SPEC:SCR-02 §4.2, §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I09",
+          "title": "訂正 有効期限: duyệt hai người, giải phóng 引当, giữ loại hạn",
+          "body": "**Mục tiêu:** Đổi hạn dùng của lô luôn qua người thứ hai và làm mọi 引当 của lô phải 再引当.\n\n**Phạm vi:** Làm: 訂正 有効期限 hai người trên PC, khi 承認 giải phóng toàn bộ 引当 của lô (dịch vụ OUT), hiện danh sách dòng đơn trước khi xin / duyệt, giữ nguyên loại hạn của lô. Không làm: đổi loại hạn (xem GAP-02-01); cập nhật mốc 日付逆転 của lô đã giao (DR-final M-5, nhóm EP-03).\n\n**Nguồn:** SPEC:SCR-02 §5 F-12; DB:INV_DB R9; review-261024-step3-dr-final M-5 (B M-12)\n\n**Định nghĩa xong:**\n- [ ] 承認 → mọi 引当 của lô released + 再引当が必要 (M_INV-29)\n- [ ] Danh sách dòng đơn hiện trước khi gửi và trước khi duyệt\n- [ ] Nhãn loại hạn không đổi sau 訂正\n- [ ] Hành vi khi hạn mới làm 消費期限 đã qua theo kết luận GAP-02-02\n\n**Phụ thuộc:** EP02-I07; ngoài nhóm: EP-03 (dịch vụ 解放 引当 + đánh dấu 再引当 của SCR-05 §4.5)\n\n**Ràng buộc nghiệp vụ:** 消費期限 và 賞味期限 vẫn đi hai đường đánh giá sau 訂正.\n\n**Spec gap:** GAP-02-01, GAP-02-02",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "domain:expiry-type",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP02-I07"
+          ],
+          "bidding_ref": [],
+          "sub_issues": [
+            {
+              "id": "EP02-I09-S01",
+              "title": "Test case 訂正 有効期限",
+              "body": "**Mục tiêu:** Case giải phóng 引当, loại hạn.\n\n**Nguồn:** SPEC:SCR-02 §5 F-12\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I10",
+          "title": "Máy trạng thái 隔離: 隔離へ, 記録, リリース (SCR-03)",
+          "body": "**Mục tiêu:** Lô chỉ đi theo các chuyển hợp lệ; リリース chỉ khi mọi 起因 đã xử lý và không bao giờ tự động.\n\n**Phạm vi:** Làm: 4 trạng thái + 3 giai đoạn 隔離, 隔離へ (cảnh báo dòng đã 引当), 記録 bắt buộc lý do + chứng cứ, リリース (再判定OK) kiểm mọi 起因, リリース nhanh cho lô ngoài phạm vi recall, quyền theo 職務, màn danh sách + chi tiết. Không làm: 廃棄 (EP02-I11); tự cách ly từ hệ thống (EP02-I12); quyết định ca (EP05-I15).\n\n**Nguồn:** SPEC:SCR-03 §3, §5, §6 (máy trạng thái); DB:INV_DB R4, R15; FR-INV-05; FR-REC-05\n\n**Định nghĩa xong:**\n- [ ] 利用可能 → 廃棄 thẳng bị chặn M_REC-10\n- [ ] 未記録 → リリース bị chặn M_REC-19 (trừ recall thu hẹp)\n- [ ] Còn 起因 mở → M_REC-34 liệt kê 起因\n- [ ] 入荷担当者 / センター作業者 không có リリース (M_REC-09)\n- [ ] Mọi chuyển ghi sự kiện chỉ thêm, có người / giờ / lý do\n\n**Phụ thuộc:** EP02-I01; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp); EP-00 (lưu tệp đính kèm trên Blob, ghi COM attachment)",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I01"
+          ],
+          "bidding_ref": [
+            "S1.5",
+            "S2.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I10-S01",
+              "title": "Viết DD SCR-03",
+              "body": "**Mục tiêu:** DD BM-53 cho SCR-03 theo Azure.\n\n**Nguồn:** SPEC:SCR-03; DB:INV_DB R4, R15; DB:REC_DB 4.5〜4.6\n\n**Định nghĩa xong:**\n- [ ] Máy trạng thái + bảng điều kiện 起因 đã xử lý\n- [ ] Điểm kiểm thử chuyển hợp lệ / không hợp lệ\n- [ ] Review đạt",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP02-I10-S02",
+              "title": "Test case máy trạng thái 隔離",
+              "body": "**Mục tiêu:** Mọi cặp trạng thái trong bảng §6.\n\n**Nguồn:** SPEC:SCR-03 §6\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP02-I10-S03",
+              "title": "Màn SCR-03 danh sách + chi tiết",
+              "body": "**Mục tiêu:** B, C, D, E theo 職務.\n\n**Nguồn:** SPEC:SCR-03 §2, §4\n\n**Định nghĩa xong:**\n- [ ] Chỉ hiện chuyển hợp lệ\n- [ ] Xác nhận 2 bước cho リリース / 隔離",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I11",
+          "title": "廃棄依頼 và duyệt người thứ hai theo 位置 × ロット",
+          "body": "**Mục tiêu:** Hủy hàng chỉ xảy ra sau khi 品質管理 thứ hai duyệt và số hủy không vượt tồn thật lúc duyệt.\n\n**Phạm vi:** Làm: bảng disposal_request / _line, 依頼 theo từng 位置 × ロット, giai đoạn 廃棄承認待ち, 承認 kiểm lại (tồn, người, trạng thái) hoặc 失効, 却下 có lý do, 廃棄 một phần giữ 隔離 phần còn lại. Không làm: purge dữ liệu.\n\n**Nguồn:** SPEC:SCR-03 §3 (廃棄), §5; DB:REC_DB 4.5, 4.6, R7; Q-REC-18〜20\n\n**Định nghĩa xong:**\n- [ ] Một lô chỉ một 依頼 chờ (M_REC-31)\n- [ ] 承認者 = 記録 actor hoặc 依頼者 → M_REC-17\n- [ ] Tồn đổi sau 依頼 → 失効 M_REC-30\n- [ ] 廃棄 một phần → M_REC-32, lô giữ 記録済\n- [ ] stock_event 廃棄 theo vị trí\n\n**Phụ thuộc:** EP02-I10; ngoài nhóm: EP-00 / EP-09 (mail_outbox và tiến trình gửi B-10) (N-08)",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I10"
+          ],
+          "bidding_ref": [
+            "S2.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I11-S01",
+              "title": "Migration disposal_request / _line",
+              "body": "**Mục tiêu:** Bảng 依頼 hủy.\n\n**Nguồn:** DB:REC_DB 4.5, 4.6\n\n**Định nghĩa xong:**\n- [ ] UNIQUE 1 依頼 chờ / lô",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP02-I11-S02",
+              "title": "Test case 廃棄 hai người",
+              "body": "**Mục tiêu:** Case 失効, một phần, tự duyệt.\n\n**Nguồn:** SPEC:SCR-03 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I12",
+          "title": "Dịch vụ cách ly dùng chung: nhiều 起因, giải phóng 引当 theo thứ tự khóa",
+          "body": "**Mục tiêu:** Mọi nguồn (nhiệt độ, recall, thủ công) đưa lô vào 隔離 qua một dịch vụ nhất quán, không deadlock với 引当.\n\n**Phạm vi:** Làm: đọc tập cặp 顧客×SKU không khóa → khóa cặp tăng dần → khóa lô tăng dần → kiểm lại (savepoint, thử lại có giới hạn) → đổi trạng thái hoặc thêm 起因 (cause_link) → gọi dịch vụ 解放 của OUT. Không làm: tạo ca (EP01-I09, EP05-I07); 再引当.\n\n**Nguồn:** DB:INV_DB R4, R15; SPEC:SCR-03 §5 D-3; ADR-003; DD:SCR-09 §4 (thứ tự khóa), §4.5 bước 5; LAB4:TMP-FIX-11, TMP-FIX-08\n\n**Định nghĩa xong:**\n- [ ] Lô available / released → 隔離 未記録, qty_available = 0\n- [ ] Lô đã 隔離 chỉ thêm 起因, không đổi giai đoạn\n- [ ] Test song song 隔離 + 引当 cùng cặp không deadlock\n- [ ] 引当 chen vào giữa lúc đọc cặp → thử lại và khóa đủ cặp\n\n**Phụ thuộc:** EP02-I10; ngoài nhóm: EP-00 (thứ tự khóa chung ADR-003: cặp 顧客×SKU → lot → stock_unit → allocation); EP-03 (dịch vụ 解放 引当 + đánh dấu 再引当 của SCR-05 §4.5)",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I10"
+          ],
+          "bidding_ref": [
+            "S1.5",
+            "S2.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I12-S01",
+              "title": "Viết DD luồng cách ly dùng chung",
+              "body": "**Mục tiêu:** Mô tả API nội bộ + thứ tự khóa.\n\n**Nguồn:** ADR-003; DD:SCR-09 §4; SEQ_allocation-atomic\n\n**Định nghĩa xong:**\n- [ ] Trình tự khóa + thử lại ghi rõ\n- [ ] Ánh xạ bên gọi: TMP, recall, SCR-03\n- [ ] Review đạt",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP02-I12-S02",
+              "title": "Test đồng thời cách ly và 引当",
+              "body": "**Mục tiêu:** Chứng minh không deadlock.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-31\n\n**Định nghĩa xong:**\n- [ ] Chạy lặp ≥ 100 lần không lỗi\n- [ ] Có biến thể 引当 chen vào",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I13",
+          "title": "Kiểm kê blind count: tạo task, đếm, nộp (SCR-16)",
+          "body": "**Mục tiêu:** Người đếm không thấy số hệ thống cho tới khi nộp; số hệ thống chỉ ghi một lần lúc nộp.\n\n**Phạm vi:** Làm: tạo task theo phạm vi (khóa phạm vi, snapshot dòng không số lượng), đếm từng dòng trên ハンディ, リスト外発見, 再カウント do người khác và vẫn blind, nộp 2 bước, cảnh báo có 入出庫 sau khi bắt đầu đếm. Không làm: điều chỉnh (EP02-I14); tạo lô cho hàng ngoài danh sách (Q-INV-16).\n\n**Nguồn:** SPEC:SCR-16 §3, §5; DB:INV_DB 4.7, 4.8, R10, R17; FR-INV-04\n\n**Định nghĩa xong:**\n- [ ] API đếm không trả system_qty / qty_available trước khi nộp\n- [ ] Trùng phạm vi đang chạy → M_INV-27\n- [ ] 再カウント bởi người đếm vòng 1 → M_INV-32\n- [ ] Có 入出庫 sau khi bắt đầu → M_INV-36\n- [ ] Cơ sở so sánh là tồn theo 位置 × ロット, không phải qty_available\n\n**Phụ thuộc:** EP02-I01; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp)\n\n**Spec gap:** GAP-02-03",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP02-I01"
+          ],
+          "bidding_ref": [
+            "S2.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I13-S01",
+              "title": "Viết DD SCR-16",
+              "body": "**Mục tiêu:** DD BM-53 cho SCR-16 theo Azure.\n\n**Nguồn:** SPEC:SCR-16; DB:INV_DB 4.7〜4.9, R7, R8, R10, R16, R17\n\n**Định nghĩa xong:**\n- [ ] Vòng đời task + dòng\n- [ ] Điểm kiểm thử blind ở mức API\n- [ ] Review đạt",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP02-I13-S02",
+              "title": "Test case blind count",
+              "body": "**Mục tiêu:** Case không lộ số, 再カウント.\n\n**Nguồn:** SPEC:SCR-16 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue\n- [ ] Kiểm response API, không chỉ UI",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP02-I13-S03",
+              "title": "Màn đếm trên ハンディ",
+              "body": "**Mục tiêu:** View 1〜2, quét vị trí / lô.\n\n**Nguồn:** SPEC:SCR-16 §2\n\n**Định nghĩa xong:**\n- [ ] Không có số hệ thống trong DOM\n- [ ] 1 cột 360 px",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I14",
+          "title": "Điều chỉnh chênh lệch kiểm kê: lý do, ngưỡng có version, maker–checker",
+          "body": "**Mục tiêu:** Chênh lệch chỉ thành điều chỉnh tồn khi có lý do; vượt ngưỡng cần マスター管理者 khác người duyệt.\n\n**Phạm vi:** Làm: View 3 đối chiếu sau nộp, điều chỉnh dưới ngưỡng (lý do), 承認申請 / 承認 / 却下 / 取下げ, ngưỡng theo dòng có version (= 0 lúc Go-Live), giải phóng 引当 khi tồn < 引当, hủy task chưa 完了. Không làm: báo cáo KPI 未説明差異 (Q-INV-17).\n\n**Nguồn:** SPEC:SCR-16 §5 F-4〜F-12, C-7, §6 (ngưỡng); DB:INV_DB 4.9, R7〜R9, R16; Q17\n\n**Định nghĩa xong:**\n- [ ] Vượt ngưỡng mà không duyệt (gọi trực tiếp) → M_REC-09\n- [ ] Tự duyệt → M_MST-05\n- [ ] Lô đổi sau khi nộp → M_INV-11, yêu cầu đếm lại\n- [ ] Hủy task: dòng chờ đóng như 却下, điều chỉnh đã áp giữ nguyên\n- [ ] Retry cùng request_id không điều chỉnh hai lần\n\n**Phụ thuộc:** EP02-I13; ngoài nhóm: EP-00 (bảng quy tắc có version cho ngưỡng 棚卸し), EP-08 (kích hoạt 版 ở SCR-14 14-03); EP-03 (dịch vụ 解放 引当 + đánh dấu 再引当 của SCR-05 §4.5)\n\n**Ràng buộc nghiệp vụ:** Lane 米 / 牛 luôn ngưỡng 0 (mọi chênh lệch cần duyệt).\n\n**Spec gap:** GAP-02-03",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP02-I13"
+          ],
+          "bidding_ref": [
+            "S2.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I14-S01",
+              "title": "Test case điều chỉnh kiểm kê",
+              "body": "**Mục tiêu:** Case ngưỡng, duyệt, hủy.\n\n**Nguồn:** SPEC:SCR-16 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP02-I14-S02",
+              "title": "Màn View 3 đối chiếu + duyệt",
+              "body": "**Mục tiêu:** Dùng được trên PC.\n\n**Nguồn:** SPEC:SCR-16 §2 View 3\n\n**Định nghĩa xong:**\n- [ ] Hiện 「提出後の移動あり」\n- [ ] Ẩn nút duyệt khi cùng người",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I15",
+          "title": "返品 vào kho qua 隔離 (D-B) phía tồn kho",
+          "body": "**Mục tiêu:** Hàng trả về chỉ vào kho bằng lô mới ở 隔離, có liên kết lô gốc, không cộng lại tồn của lô gốc.\n\n**Phạm vi:** Làm: lô 返品: original_lot_id, 仕入先 = lô gốc, stock_event 戻入 tới vị trí nhập, 起因 return; chặn mọi đường cộng tồn trực tiếp vào lô gốc; khớp với trừ tồn một lần ở 出荷確認. Không làm: màn 返品入荷 (EP01-I11); POD (EP-03).\n\n**Nguồn:** DB:INV_DB R14; ADR-006; PREMISE §3 Đ-5 (D-B); SEQ_return-into-quarantine; Q-INVDB-07\n\n**Định nghĩa xong:**\n- [ ] Không có API nào cộng tồn vào lô gốc khi trả hàng\n- [ ] Lô 返品 luôn sinh ở 隔離 未記録\n- [ ] Tổng tồn sau 出荷確認 + 返品 khớp đối soát\n- [ ] Test xanh\n\n**Phụ thuộc:** EP02-I12, EP01-I09; ngoài nhóm: EP-03 (出荷確認 trừ tồn một lần D-A, shipment_line, POD 持戻り / 受領拒否)",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I12",
+            "EP01-I09"
+          ],
+          "bidding_ref": [
+            "S2.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP02-I15-S01",
+              "title": "Viết DD luồng 返品 vào 隔離",
+              "body": "**Mục tiêu:** Từ SEQ_return-into-quarantine sang DD theo Azure.\n\n**Nguồn:** SEQ_return-into-quarantine; DB:INV_DB R14; DB:REC_DB R10\n\n**Định nghĩa xong:**\n- [ ] Ranh giới giao dịch rõ\n- [ ] Điểm đối soát với D-A\n- [ ] Review đạt",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP02-I15-S02",
+              "title": "Test case 返品 phía tồn kho",
+              "body": "**Mục tiêu:** Case đối soát tồn.\n\n**Nguồn:** DB:INV_DB R14\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP02-I16",
+          "title": "Chốt câu hỏi mở tồn kho / kiểm kê với PO",
+          "body": "**Mục tiêu:** Có đáp án hoặc mặc định đã xác nhận cho các câu chặn DD SCR-02 / 03 / 16.\n\n**Phạm vi:** Làm: gửi và theo dõi Q-INV-07, Q-INV-12〜14, Q-INV-16〜18, Q-INVDB-04〜06, ISS-19 và các GAP-02-*. Không làm: quyết thay khách.\n\n**Nguồn:** SPEC:SCR-02 §6, SPEC:SCR-16 §6; DB:INV_DB §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi câu có trạng thái + người trả lời\n- [ ] Đáp án phản ánh vào DD trước khi DD review\n- [ ] Câu còn mở có mặc định 【仮】 và tác động ghi rõ\n\n**Phụ thuộc:** —\n\n**Spec gap:** GAP-02-01, GAP-02-03, GAP-02-04",
+          "role": "BrSE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BrSE",
+            "dd:no",
+            "spec-gap"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S2.1",
+            "S2.4",
+            "S2.6"
+          ],
+          "sub_issues": []
+        },
+        {
+          "id": "EP02-I17",
+          "title": "Chạy kiểm thử SCR-02 / 03 / 16 trên môi trường test",
+          "body": "**Mục tiêu:** Các màn tồn kho chạy xanh trên test trước hardening.\n\n**Phạm vi:** Làm: chạy case của EP02-I02〜I15, TR, triage. Không làm: hiệu năng.\n\n**Nguồn:** plan-261024-dev-phase-wbs §5 T7\n\n**Định nghĩa xong:**\n- [ ] TR có kết quả từng case\n- [ ] Không còn Sev1 / Sev2 mở\n- [ ] Truy vết FR-INV ↔ TC hai chiều\n\n**Phụ thuộc:** EP02-I03, EP02-I10, EP02-I11, EP02-I12, EP02-I14",
+          "role": "QA",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:QA",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP02-I03",
+            "EP02-I10",
+            "EP02-I11",
+            "EP02-I12",
+            "EP02-I14"
+          ],
+          "bidding_ref": [
+            "S2.1",
+            "S2.2",
+            "S2.3",
+            "S2.4",
+            "S2.5",
+            "S2.6"
+          ],
+          "sub_issues": []
+        }
+      ]
+    },
+    {
+      "id": "EP-05",
+      "title": "温度監視・逸脱・HACCP — giám sát nhiệt, ca 逸脱, hồ sơ HACCP",
+      "labels": [
+        "type:epic"
+      ],
+      "body": "**Mục tiêu:** Nhập logger CSV idempotent, đánh giá ngưỡng có version, alarm theo thời lượng với SLA review 15 phút, cách ly lô ảnh hưởng, quản lý ca và hàng đợi hồ sơ HACCP.\n\n**Phạm vi:** Làm: SCR-09, SCR-10, RPT-17, RPT-18, batch B-04 / B-05 / B-07. Không làm: kích hoạt 版 ngưỡng (EP-08), RPT-04〜06 (EP-07), kết nối live.\n\n**Nguồn:** DD:SCR-09; SPEC:SCR-10, RPT-17, RPT-18; DB:TMP_DB; bidding:E5 (S5.1〜S5.5)\n\n**Định nghĩa xong:**\n- [ ] Mọi issue EP05-* đóng (trừ EP05-I12 nếu khách chọn chỉ cảnh báo)\n- [ ] TP-01〜41 xanh trên test\n- [ ] DD SCR-09 bản Azure + DD SCR-10 đã review\n\n**Phụ thuộc:** EP-00, EP-01 (module dải, helper ca), EP-02 (dịch vụ cách ly), EP-03, EP-08, EP-09",
+      "issues": [
+        {
+          "id": "EP05-I01",
+          "title": "Rà lại DD SCR-09 温度監視 theo kiến trúc Azure",
+          "body": "**Mục tiêu:** Đưa SCR-09_DETAIL về tiền đề Azure, nhất là nhập CSV chạy nền thay cho xử lý trong request.\n\n**Phạm vi:** Làm: sửa §4 (service + worker), §3.6 (quyền đọc theo 職務 ở API), §5 (bỏ gap prototype, giữ TP), chốt Q-DTL-TMP-*. Không làm: đổi giá trị nghiệp vụ đã duyệt.\n\n**Nguồn:** DD:SCR-09 §3.4, §3.6, §4, §5.1, §5.2, §5.4, §5.5; ADR-002, ADR-012 (không dùng); review-261024-step3-dr-final M-6\n\n**Định nghĩa xong:**\n- [ ] §4.2〜4.5 mô tả tệp lên kho tệp → hàng đợi → worker xử lý một giao dịch / tệp\n- [ ] Khóa theo SHA-256 và theo device giữ nguyên trên PostgreSQL\n- [ ] Lỗi tạm thời của worker ánh xạ interface_run = error\n- [ ] Review đạt\n\n**Phụ thuộc:** ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp)",
+          "role": "SA",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:SA",
+            "dd:yes"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S5.1",
+            "S5.2",
+            "S5.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I01-S01",
+              "title": "Viết lại §4 SCR-09 theo worker bất đồng bộ",
+              "body": "**Mục tiêu:** Tách nhận tệp (API) và xử lý (worker).\n\n**Nguồn:** DD:SCR-09 §4.2〜4.5; review-261024-step3-dr-final M-6\n\n**Định nghĩa xong:**\n- [ ] Nêu trạng thái tệp khi đang chờ worker\n- [ ] Chính sách thử lại / dead-letter không chạy lại tệp đã failed vì hash\n- [ ] M_TMP-38 vẫn đúng",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP05-I01-S02",
+              "title": "Cập nhật quyền đọc theo 職務 ở API",
+              "body": "**Mục tiêu:** Bỏ giả định RLS.\n\n**Nguồn:** DD:SCR-09 §3.6, §4.1; LAB4:SEC-02 = L5-DB-01\n\n**Định nghĩa xong:**\n- [ ] センター作業者 chỉ nhận dữ liệu View 2 + A-8\n- [ ] Không còn tham chiếu PostgREST",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP05-I01-S03",
+              "title": "Chuyển TP SCR-09 thành checklist test case",
+              "body": "**Mục tiêu:** TP-01〜41 → case.\n\n**Nguồn:** DD:SCR-09 §5.2, §5.6\n\n**Định nghĩa xong:**\n- [ ] 41 TP có ID case",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I01-S04",
+              "title": "Review DD SCR-09 bản Azure",
+              "body": "**Mục tiêu:** Review độc lập.\n\n**Nguồn:** plan-261024-dev-phase-wbs §8.3\n\n**Định nghĩa xong:**\n- [ ] Biên bản review lưu repo\n- [ ] DoR S4 đạt",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I02",
+          "title": "Chốt câu hỏi khách về logger CSV và mức HACCP",
+          "body": "**Mục tiêu:** Có mẫu CSV logger và các quyết định HACCP của khách trước khi DD / code nhập CSV (S3–S4).\n\n**Phạm vi:** Làm: gửi và theo dõi Q-TMP-03 (mẫu cột, mã hóa, timezone, cỡ tối đa), Q-DTL-TMP-04, 05, 07, 09, Q-DTL-HACCP-01〜03, Q-TMP-09 / 10 (RPT-17), Q-TMP-24 (nguồn lượt khách). Không làm: quyết thay khách.\n\n**Nguồn:** DD:SCR-09 §3.3 (CSV), §5.4, §5.6; PREMISE §5\n\n**Định nghĩa xong:**\n- [ ] Có tệp CSV mẫu thật hoặc mặc định 【仮】 được khách chấp nhận\n- [ ] Q-DTL-TMP-09 có quyết định chặn / chỉ cảnh báo\n- [ ] Mức HACCP và danh sách ca vệ sinh có câu trả lời hoặc mặc định ghi rõ\n- [ ] Đáp án vào DD trước review S3\n\n**Phụ thuộc:** —\n\n**Spec gap:** GAP-05-01, GAP-05-02",
+          "role": "BrSE",
+          "sprint": "S1",
+          "labels": [
+            "type:issue",
+            "role:BrSE",
+            "dd:no",
+            "spec-gap"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S5.1",
+            "S5.5"
+          ],
+          "sub_issues": []
+        },
+        {
+          "id": "EP05-I03",
+          "title": "Tạo schema TMP: tệp nhập, reading, event, alarm, haccp_task",
+          "body": "**Mục tiêu:** Có bảng TMP đúng TMP_DB để nhập CSV và đánh giá ngưỡng.\n\n**Phạm vi:** Làm: migration temperature_import_file, _import_error, temperature_reading (partition tháng), temperature_event, temperature_alarm, temperature_alarm_lot, haccp_task (UNIQUE chống sinh trùng). Không làm: bảng ca (đã ở EP01-I09); sanitation / visitor / review (EP05-I18, I19).\n\n**Nguồn:** DB:TMP_DB 4.1〜4.6, 4.10, R1, R7〜R9; ADR-010; LAB4:TMP-DB-02, L5-DB-04\n\n**Định nghĩa xong:**\n- [ ] Partition theo tháng cho reading\n- [ ] UNIQUE (device_code, measured_at) giữ bản cũ\n- [ ] UNIQUE haccp_task (task_type, đối tượng, expected_from)\n- [ ] Migration chạy trên dev + test\n\n**Phụ thuộc:** EP05-I01, EP01-I09; ngoài nhóm: EP-00 (khung migration)",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP05-I01",
+            "EP01-I09"
+          ],
+          "bidding_ref": [
+            "S5.1",
+            "S5.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I03-S01",
+              "title": "Migration bảng TMP + partition",
+              "body": "**Mục tiêu:** Tạo bảng và partition.\n\n**Nguồn:** DB:TMP_DB 4.1〜4.6, 4.10; ADR-010\n\n**Định nghĩa xong:**\n- [ ] Index theo zone + measured_at\n- [ ] Script tạo partition tháng tiếp theo",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I03-S02",
+              "title": "Test ràng buộc TMP",
+              "body": "**Mục tiêu:** UNIQUE / CHECK chặn đúng.\n\n**Nguồn:** DB:TMP_DB 4.14\n\n**Định nghĩa xong:**\n- [ ] Case cho R1, R7, R9",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I04",
+          "title": "Nhập CSV logger idempotent theo SHA-256 (SCR-09 View 2)",
+          "body": "**Mục tiêu:** Nhập lại cùng tệp không sinh dữ liệu trùng; dòng lỗi được báo đúng số dòng và không đánh giá.\n\n**Phạm vi:** Làm: API nhận tệp (kiểm đuôi / cỡ, SHA-256 trên byte gốc so với client), lưu tệp gốc, xếp hàng; worker khóa theo hash, ghi tệp / interface_run theo bảng ánh xạ, kiểm từng dòng (giờ, tz, số, device, tương lai, trùng); View 2 PC + tablet. Không làm: đánh giá ngưỡng (EP05-I05); kết nối live.\n\n**Nguồn:** DD:SCR-09 §3.3.G, §4.2, §4.3; DB:TMP_DB 4.1〜4.3; LAB4:TMP-FIX-04, TMP-FIX-05, TMP-FIX-06; FR-TEMP-01\n\n**Định nghĩa xong:**\n- [ ] Cùng hash → 処理済(重複) + M_TMP-04, không reading mới (TP-13)\n- [ ] Nhập đồng thời cùng tệp → M_TMP-38 (TP-14)\n- [ ] Hash client sai → 失敗 (TP-15); thiếu cột → 失敗 (TP-16)\n- [ ] 5 loại dòng lỗi có đúng số dòng + lý do (TP-17)\n- [ ] 6 tệp TP-30 ra đúng interface_run (error cho lỗi tạm thời)\n\n**Phụ thuộc:** EP05-I03; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp); EP-00 (lưu tệp đính kèm trên Blob, ghi COM attachment); EP-09 (interface_run IF-LOG-01)\n\n**Spec gap:** nhánh tệp trùng khi đang xử lý theo Q-DTL-TMP-01 / CR-Q-DTL-TMP-01",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP05-I03"
+          ],
+          "bidding_ref": [
+            "S5.1"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I04-S01",
+              "title": "Test case nhập CSV",
+              "body": "**Mục tiêu:** Case hash, dòng lỗi, ánh xạ trạng thái.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-13〜17, TP-27, TP-30\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I04-S02",
+              "title": "API nhận tệp + SHA-256 + xếp hàng",
+              "body": "**Mục tiêu:** Bước 4.2.1〜4.2.5 phía API.\n\n**Nguồn:** DD:SCR-09 §4.2\n\n**Định nghĩa xong:**\n- [ ] Hash tính trên byte gốc\n- [ ] Tệp gốc lưu kho tệp",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I04-S03",
+              "title": "Worker xử lý tệp + kiểm dòng",
+              "body": "**Mục tiêu:** Bước 4.3 và ánh xạ trạng thái.\n\n**Nguồn:** DD:SCR-09 §4.2 (ánh xạ), §4.3\n\n**Định nghĩa xong:**\n- [ ] Một giao dịch / tệp\n- [ ] Lỗi tạm thời ghi failed 一時エラー + interface_run error ở giao dịch thứ hai\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I04-S04",
+              "title": "Hàng đợi và worker trên Azure",
+              "body": "**Mục tiêu:** Service Bus + Functions cho nhập CSV.\n\n**Nguồn:** plan-261024-dev-phase-wbs §0 D-1\n\n**Định nghĩa xong:**\n- [ ] IaC cho dev / test\n- [ ] Giới hạn thời gian worker đủ cho tệp lớn nhất theo Q-TMP-03\n- [ ] Dead-letter có cảnh báo",
+              "role": "Infra",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:Infra"
+              ]
+            },
+            {
+              "id": "EP05-I04-S05",
+              "title": "Màn View 2 kết quả nhập (PC + tablet)",
+              "body": "**Mục tiêu:** G-1〜G-10.\n\n**Nguồn:** DD:SCR-09 §3.3.G; wireframe view2, view2-tablet\n\n**Định nghĩa xong:**\n- [ ] SHA-256 sao chép được\n- [ ] Bảng dòng lỗi phân trang\n- [ ] Tablet 1 cột",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I05",
+          "title": "Đánh giá ngưỡng theo 版 và phạm vi zone / lô có ticket",
+          "body": "**Mục tiêu:** Mỗi reading được đánh giá theo 版 của ngày đo, cho cả dải zone và lô có 一時温度帯 còn hạn.\n\n**Phạm vi:** Làm: chọn 版 theo ngày đo JST, phạm vi (a) zone và (b) lô có ticket còn hạn (phát lại stock_event), ghi temperature_event, reading không có 版 → 未評価 + haccp_task unevaluated_reading; dùng module đánh giá dải của EP01-I05. Không làm: đợt / alarm (EP05-I06).\n\n**Nguồn:** DD:SCR-09 §3.4.1, §3.4.3, §3.4.4, §4.4 bước 1〜3; DB:TMP_DB 4.4; LAB4:TMP-DB-01 = L5-DB-06, TMP-DB-02, TMP-FEAT-01\n\n**Định nghĩa xong:**\n- [ ] Biên 3 dải đúng (TP-01〜03)\n- [ ] Không có 版 → 未評価, có mục haccp_task (TP-18)\n- [ ] Reading lưu FK 版 của chính nó (TP-19)\n- [ ] Phạm vi (b) theo kết luận Q-DTL-TMP-03 (TP-20)\n- [ ] Không hard-code ngưỡng\n\n**Phụ thuộc:** EP05-I04, EP01-I05; ngoài nhóm: EP-00 (bảng quy tắc có version cho temperature_policy_version), EP-08 (kích hoạt 版 ở SCR-14 14-03)\n\n**Ràng buộc nghiệp vụ:** Ngưỡng 3 dải có version, biên là bình thường; không có ngưỡng riêng theo SKU (Q-TMPDB-04 còn mở).",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:temp-band"
+          ],
+          "depends_on": [
+            "EP05-I04",
+            "EP01-I05"
+          ],
+          "bidding_ref": [
+            "S5.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I05-S01",
+              "title": "Test case đánh giá ngưỡng",
+              "body": "**Mục tiêu:** Biên, 版, ticket.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-01〜03, TP-18〜20\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I05-S02",
+              "title": "Service đánh giá reading theo phạm vi",
+              "body": "**Mục tiêu:** Bước 4.4.2〜4.4.3.\n\n**Nguồn:** DD:SCR-09 §4.4\n\n**Định nghĩa xong:**\n- [ ] Chỉ đánh giá reading của tệp + ngữ cảnh liền trước\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I06",
+          "title": "Đợt lệch và alarm theo thời lượng, khoảng trống không cắt đợt",
+          "body": "**Mục tiêu:** Alarm chỉ bật khi đợt lệch liên tục đủ 30 phút (冷蔵 / 冷凍) hoặc 60 phút (常温); thiếu dữ liệu không làm mất đợt.\n\n**Phạm vi:** Làm: mở / nối / đóng đợt theo device × phạm vi, duration = last − first + chu kỳ, ngưỡng thời lượng theo 版 lúc bắt đầu đợt, đợt kéo sang tệp sau, tệp sửa lỗi không sửa alarm đã confirmed, mốc SLA = giờ nhập tệp làm đợt thành alarm, ロガー欠落 (> 30 phút) + 記録到着. Không làm: lô ảnh hưởng / ca (EP05-I07); cờ chặn khi mất dữ liệu (EP05-I12).\n\n**Nguồn:** DD:SCR-09 §3.4.1, §3.4.2, §3.5.1, §4.4 bước 4〜9, §4.5 bước 1; DB:TMP_DB 4.5, R9; LAB4:TMP-FIX-01, TMP-FIX-02\n\n**Định nghĩa xong:**\n- [ ] Một reading lệch đơn lẻ → record_only, không alarm (TP-04)\n- [ ] 冷蔵 2 lần lệch 30 phút → alarm; 常温 3 lần → không, 4 lần → có (TP-05, TP-06)\n- [ ] Lệch – thiếu – lệch nối thành 1 đợt + ロガー欠落 (TP-07, TP-08)\n- [ ] Alarm ở tệp sau lấy mốc SLA = giờ nhập tệp sau (TP-09)\n- [ ] Nối không giới hạn theo mặc định, đổi được khi Q-DTL-TMP-07 có giá trị (TP-33)\n\n**Phụ thuộc:** EP05-I05\n\n**Ràng buộc nghiệp vụ:** Không có luật '2 trong 4 lần đọc'; điều kiện là thời lượng liên tục. Thiếu dữ liệu không được coi là đạt.\n\n**Spec gap:** GAP-05-03",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:haccp",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP05-I05"
+          ],
+          "bidding_ref": [
+            "S5.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I06-S01",
+              "title": "Test case đợt lệch / alarm",
+              "body": "**Mục tiêu:** Case thời lượng, khoảng trống, qua tệp.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-04〜09, TP-19, TP-28, TP-33\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I06-S02",
+              "title": "Engine đợt lệch theo thời lượng",
+              "body": "**Mục tiêu:** Bước 4.4.4〜4.4.6, 4.4.9, 4.5.1.\n\n**Nguồn:** DD:SCR-09 §3.4.2, §4.4\n\n**Định nghĩa xong:**\n- [ ] Ngưỡng theo 版 lúc bắt đầu đợt\n- [ ] peak theo phía bị vượt\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I06-S03",
+              "title": "Phát hiện ロガー欠落 và 記録到着",
+              "body": "**Mục tiêu:** Bước 4.4.7〜4.4.8 (phần haccp_task).\n\n**Nguồn:** DD:SCR-09 §4.4\n\n**Định nghĩa xong:**\n- [ ] 30 phút không phải 欠落, 31 phút là 欠落\n- [ ] Mục không tự đóng",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I07",
+          "title": "Lô ảnh hưởng của alarm, ca 逸脱 và cách ly theo thứ tự khóa",
+          "body": "**Mục tiêu:** Alarm mới tạo ca 逸脱 và đưa mọi lô có mặt trong zone suốt đợt lệch vào 隔離 trong cùng giao dịch nhập.\n\n**Phạm vi:** Làm: phát lại stock_event để lấy lô có mặt trong cửa sổ đợt, ghi temperature_alarm_lot, tạo ca qua helper chung, haccp_task alarm_review, gọi dịch vụ cách ly dùng chung (lô đã 隔離 → thêm 起因, lô đã xuất → chỉ ghi vào ca, zone không lô → vẫn có ca). Không làm: リリース tự động; 再引当; chặn lô đã 出荷確認 chưa 出発 (chờ ISS-35 H-5).\n\n**Nguồn:** DD:SCR-09 §3.5.2, §4.5 bước 2〜5; DB:TMP_DB 4.6〜4.8, R1, R4; LAB4:TMP-FIX-03, TMP-FIX-11; review-261024-step3-dr-final M-5 (B M-07)\n\n**Định nghĩa xong:**\n- [ ] Lô đã 隔離 vì 返品 thêm cause_link, không đổi giai đoạn (TP-21)\n- [ ] Lô đã xuất hết có trong ca, không 隔離 (TP-22)\n- [ ] Lô có 引当 → 隔離, 引当 released, N-11 (TP-23)\n- [ ] Ép lỗi khi tạo ca → không còn reading / alarm (TP-27)\n- [ ] Song song 引当 hàng loạt không deadlock (TP-31)\n\n**Phụ thuộc:** EP05-I06, EP02-I12, EP01-I09; ngoài nhóm: EP-03 (出荷確認 trừ tồn một lần D-A, shipment_line, POD 持戻り / 受領拒否); EP-03 (dịch vụ 解放 引当 + đánh dấu 再引当 của SCR-05 §4.5)\n\n**Ràng buộc nghiệp vụ:** Alarm nhiệt độ khóa lô ngay ở 隔離 giai đoạn 1; không có リリース tự động.\n\n**Spec gap:** cửa sổ lô ảnh hưởng: trỏ DR-final M-5 (B M-07), không lập gap mới",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:haccp",
+            "blocked:ISS-35"
+          ],
+          "depends_on": [
+            "EP05-I06",
+            "EP02-I12",
+            "EP01-I09"
+          ],
+          "bidding_ref": [
+            "S5.2",
+            "S5.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I07-S01",
+              "title": "Test case lô ảnh hưởng và cách ly",
+              "body": "**Mục tiêu:** Ba nhánh lô + rollback + đồng thời.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-21〜23, TP-27, TP-31\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I07-S02",
+              "title": "Phát lại stock_event lấy lô trong cửa sổ đợt",
+              "body": "**Mục tiêu:** Bước 4.5.2.\n\n**Nguồn:** DD:SCR-09 §4.5\n\n**Định nghĩa xong:**\n- [ ] Không dùng tồn hiện tại\n- [ ] Test với lô vào / ra zone giữa đợt",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I07-S03",
+              "title": "Tạo ca + cách ly trong giao dịch nhập",
+              "body": "**Mục tiêu:** Bước 4.5.3〜4.5.5.\n\n**Nguồn:** DD:SCR-09 §4.5; ADR-003\n\n**Định nghĩa xong:**\n- [ ] Dùng helper ca của EP01-I09 và dịch vụ cách ly EP02-I12\n- [ ] Thứ tự khóa (T1〜T3) trước (0)",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I08",
+          "title": "Gửi mail N-01 sau mỗi lần nhập có alarm mới hoặc 未評価",
+          "body": "**Mục tiêu:** 品質管理 (và 現場責任者 ngoài giờ) nhận đúng một mail mỗi lần nhập khi có việc cần xem.\n\n**Phạm vi:** Làm: một outbox N-01 / lần nhập khi có alarm mới hoặc reading 未評価, nội dung số alarm / zone / lệch lớn nhất / hạn review / số 未評価, thêm 現場責任者 trong khung ngoài giờ. Không làm: tiến trình gửi + thử lại (B-10).\n\n**Nguồn:** DD:SCR-09 §4.5 bước 6, §5.3; LAB4:TMP-FIX-07\n\n**Định nghĩa xong:**\n- [ ] Không có alarm / 未評価 → không mail\n- [ ] Tệp có dòng lỗi vẫn gửi nếu có alarm\n- [ ] Biên giờ theo đáp án Q-DTL-TMP-05 (TP-24)\n- [ ] Lỗi mail không rollback nhập\n\n**Phụ thuộc:** EP05-I07; ngoài nhóm: EP-00 / EP-09 (mail_outbox và tiến trình gửi B-10)",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP05-I07"
+          ],
+          "bidding_ref": [
+            "S5.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I08-S01",
+              "title": "Test case N-01",
+              "body": "**Mục tiêu:** Case điều kiện gửi, ngoài giờ.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-24\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I08-S02",
+              "title": "Ghi outbox N-01 trong giao dịch nhập",
+              "body": "**Mục tiêu:** Bước 4.5.6.\n\n**Nguồn:** DD:SCR-09 §4.5\n\n**Định nghĩa xong:**\n- [ ] dedupe theo lần nhập\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I09",
+          "title": "Ghi review alarm đầu tiên và đánh dấu quá hạn 15 phút",
+          "body": "**Mục tiêu:** Giờ review đầu tiên ghi bằng giờ server tới giây, không sửa được, và người review thành 実施者 của ca.\n\n**Phạm vi:** Làm: API review (khóa alarm → ca → haccp_task), chặn review lần hai, so hạn mốc + 15 phút, F-1〜F-6 + E-5 đếm lùi theo giờ server. Không làm: điều tra / quyết định ca (EP05-I15).\n\n**Nguồn:** DD:SCR-09 §3.3.E, §4.6; DB:TMP_DB R3; FR-TEMP-03; LAB4:TMP-FIX-08, TMP-FIX-09\n\n**Định nghĩa xong:**\n- [ ] Đúng hạn +15:00 → trong hạn, +15:01 → quá hạn +00:01 (TP-10)\n- [ ] Hai người cùng review: người sau M_REC-14, giờ đầu giữ (TP-11)\n- [ ] センター作業者 / 監査者 gọi review → M_REC-09 (TP-12)\n- [ ] Ca chuyển confirmed với acknowledged_by = người review\n\n**Phụ thuộc:** EP05-I07; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp)\n\n**Ràng buộc nghiệp vụ:** SLA 15 phút tính từ giờ nhập tệp làm đợt thành alarm, không từ giờ thiết bị.",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:haccp"
+          ],
+          "depends_on": [
+            "EP05-I07"
+          ],
+          "bidding_ref": [
+            "S5.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I09-S01",
+              "title": "Test case review alarm",
+              "body": "**Mục tiêu:** Case biên SLA, đồng thời, quyền.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-10〜12\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I09-S02",
+              "title": "API review alarm",
+              "body": "**Mục tiêu:** Bước 4.6.\n\n**Nguồn:** DD:SCR-09 §4.6\n\n**Định nghĩa xong:**\n- [ ] Thứ tự khóa alarm → ca → task\n- [ ] Giờ lưu đến giây",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I09-S03",
+              "title": "Danh sách alarm + panel chi tiết / review",
+              "body": "**Mục tiêu:** E-1〜E-6, F-1〜F-6.\n\n**Nguồn:** DD:SCR-09 §3.3.E; wireframe view1\n\n**Định nghĩa xong:**\n- [ ] Trạng thái bằng chữ + biểu tượng\n- [ ] Đếm lùi dùng giờ server trả kèm",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I10",
+          "title": "Dashboard giám sát nhiệt độ (SCR-09 View 1)",
+          "body": "**Mục tiêu:** 品質管理 thấy tình trạng zone theo lần nhập cuối, biểu đồ gộp phía server và độ mới dữ liệu.\n\n**Phạm vi:** Làm: A-5 độ mới, C-1 tình trạng zone, D-1 biểu đồ gộp + D-3 bảng thay thế, bộ lọc B (≤ 31 ngày), tự làm mới 60 giây giữ dòng đang chọn. Không làm: tải chuỗi reading thô về client.\n\n**Nguồn:** DD:SCR-09 §3.3.A〜D, §4.1; LAB4:TMP-FIX-10, TMP-FEAT-03\n\n**Định nghĩa xong:**\n- [ ] Kỳ > 31 ngày → M_TMP-13 (TP-26)\n- [ ] A-5 chỉ tính tệp completed / partially_rejected\n- [ ] Biểu đồ có bảng thay thế (a11y)\n- [ ] Làm mới 60 giây không mất lựa chọn\n\n**Phụ thuộc:** EP05-I05",
+          "role": "FE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP05-I05"
+          ],
+          "bidding_ref": [
+            "S5.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I10-S01",
+              "title": "API đọc dashboard gộp phía server",
+              "body": "**Mục tiêu:** Bước 4.1.\n\n**Nguồn:** DD:SCR-09 §4.1\n\n**Định nghĩa xong:**\n- [ ] Lọc theo 職務 ở server\n- [ ] Gộp bucket theo kỳ",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I10-S02",
+              "title": "Test case dashboard",
+              "body": "**Mục tiêu:** Case lọc, quyền, làm mới.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-12, TP-26\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I11",
+          "title": "Cảnh báo 取込遅延 theo logger (B-05, A-8)",
+          "body": "**Mục tiêu:** Logger chưa có tệp sau mốc nhập + 30 phút được nhắc trên màn và qua mail.\n\n**Phạm vi:** Làm: job chạy 06:00 / 14:30 / 22:30, mỗi logger trong lịch không có tệp completed / partially_rejected sau mốc → gộp một N-01, A-8 tự ẩn khi tệp tới. Không làm: gắn cờ chặn lô khi chỉ nộp muộn.\n\n**Nguồn:** DD:SCR-09 §3.3.A A-8, §4.7; BATCH_LIST B-05; LAB4:TMP-FEAT-02\n\n**Định nghĩa xong:**\n- [ ] Kịch bản TP-25 đúng\n- [ ] Không gửi trùng cho cùng ngày + mốc\n- [ ] Job lỗi có log và cảnh báo vận hành\n\n**Phụ thuộc:** EP05-I04; ngoài nhóm: EP-00 (bộ lập lịch batch trên Functions timer); EP-00 / EP-09 (mail_outbox và tiến trình gửi B-10)",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP05-I04"
+          ],
+          "bidding_ref": [
+            "S5.1"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I11-S01",
+              "title": "Job timer B-05 trên Functions",
+              "body": "**Mục tiêu:** Lịch chạy + giám sát.\n\n**Nguồn:** BATCH_LIST B-05\n\n**Định nghĩa xong:**\n- [ ] IaC dev / test\n- [ ] Cảnh báo khi job không chạy",
+              "role": "Infra",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:Infra"
+              ]
+            },
+            {
+              "id": "EP05-I11-S02",
+              "title": "Logic phát hiện thiếu tệp + A-8",
+              "body": "**Mục tiêu:** Bước 4.7.\n\n**Nguồn:** DD:SCR-09 §4.7\n\n**Định nghĩa xong:**\n- [ ] Dùng chung logic cho A-8 và job\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I11-S03",
+              "title": "Test case 取込遅延",
+              "body": "**Mục tiêu:** TP-25.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-25\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I12",
+          "title": "Cờ 要確認 chặn 引当 / 出荷確認 khi mất dữ liệu nhiệt",
+          "body": "**Mục tiêu:** Không biết nhiệt độ thì không được coi là đạt: lô trong zone có khoảng trống dữ liệu bị gắn cờ theo quyết định của khách.\n\n**Phạm vi:** Làm: nếu khách chọn chặn: gắn cờ lô có tồn trong zone suốt khoảng trống, kiểm cờ ở 引当 / 出荷確認, 品質管理 đóng mục ロガー欠落 gỡ cờ hoặc đưa lô vào 隔離; nếu chọn chỉ cảnh báo: chỉ hiển thị cờ. Không làm: làm trước khi Q-DTL-TMP-09 có đáp án.\n\n**Nguồn:** DD:SCR-09 §3.4.5, §5.5 CR-3; LAB4:TMP-FEAT-05\n\n**Định nghĩa xong:**\n- [ ] Có quyết định Q-DTL-TMP-09 ghi trong register\n- [ ] Khoảng 30 phút không cờ, 31 phút có cờ (TP-32)\n- [ ] Đóng mục 「確認不能」 → lô 隔離 + ca\n- [ ] CR-3 đã duyệt nếu chọn chặn\n\n**Phụ thuộc:** EP05-I06, EP05-I02; ngoài nhóm: EP-03 (kiểm cờ ở 引当 / 出荷確認), EP-08 (cấu hình N phút)\n\n**Spec gap:** GAP-05-02",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:haccp",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP05-I06",
+            "EP05-I02"
+          ],
+          "bidding_ref": [
+            "S5.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I12-S01",
+              "title": "Test case mất dữ liệu nhiệt",
+              "body": "**Mục tiêu:** TP-32 + biến thể chỉ cảnh báo.\n\n**Nguồn:** DD:SCR-09 §5.2 TP-32\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I12-S02",
+              "title": "Gắn / gỡ cờ lô theo khoảng trống",
+              "body": "**Mục tiêu:** §3.4.5 + §4.4 bước 7.\n\n**Nguồn:** DD:SCR-09 §3.4.5\n\n**Định nghĩa xong:**\n- [ ] Theo thứ tự khóa chung\n- [ ] Test đỏ → xanh",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I13",
+          "title": "Đánh giá tăng dần cho khối lượng 2,5 triệu reading",
+          "body": "**Mục tiêu:** Thời gian nhập một tệp không tăng theo tổng lịch sử reading.\n\n**Phạm vi:** Làm: đánh giá chỉ reading của tệp + ngữ cảnh liền trước của device, đo trên dữ liệu 2,5 triệu dòng, chia giao dịch nếu cần. Không làm: tối ưu RPT / dashboard.\n\n**Nguồn:** DD:SCR-09 §5 (hiệu năng); DB:TMP_DB 4.3; NFR-PERF-02; LAB4:TMP-PERF-01\n\n**Định nghĩa xong:**\n- [ ] Có số đo thời gian nhập trên dataset 2,5 triệu\n- [ ] Không có truy vấn quét toàn chuỗi device\n- [ ] Kết quả đánh giá giống bản đầy đủ trên bộ test\n\n**Phụ thuộc:** EP05-I06",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP05-I06"
+          ],
+          "bidding_ref": [
+            "S5.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I13-S01",
+              "title": "Tối ưu truy vấn ngữ cảnh device",
+              "body": "**Mục tiêu:** Index + truy vấn liền trước.\n\n**Nguồn:** DD:SCR-09 §4.4\n\n**Định nghĩa xong:**\n- [ ] Explain plan lưu kèm PR",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I13-S02",
+              "title": "Đo tải nhập CSV",
+              "body": "**Mục tiêu:** Chạy trên dataset lớn.\n\n**Nguồn:** NFR-PERF-02\n\n**Định nghĩa xong:**\n- [ ] Báo cáo đo lưu repo",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I14",
+          "title": "Xuất RPT-17 温度記録表",
+          "body": "**Mục tiêu:** Xuất hồ sơ nhiệt độ theo kỳ từ dữ liệu đã lưu, in rõ chỗ thiếu.\n\n**Phạm vi:** Làm: PDF / CSV theo RPT-17_SPEC (zone, reading, alarm, vệ sinh, khách / tài xế, mục thiếu, nguồn dữ liệu), chặn 監査者, export_manifest. Không làm: tính lại đánh giá khi in.\n\n**Nguồn:** DD:SCR-09 §4.8; SPEC:RPT-17; LAB4:TMP-FEAT-04\n\n**Định nghĩa xong:**\n- [ ] Đọc giá trị đã lưu, không tính lại\n- [ ] Mục thiếu in rõ, 0 件 in 欠落なし\n- [ ] Phần đã purge in 保持期間外\n- [ ] 監査者 → M_REC-09\n\n**Phụ thuộc:** EP05-I06, EP05-I19; ngoài nhóm: EP-00 (dịch vụ PDF, export_manifest)\n\n**Spec gap:** Q-TMP-09 / Q-TMP-10 còn mở",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP05-I06",
+            "EP05-I19"
+          ],
+          "bidding_ref": [
+            "S5.1",
+            "S5.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I14-S01",
+              "title": "Test case RPT-17",
+              "body": "**Mục tiêu:** Case nội dung, quyền, purge.\n\n**Nguồn:** SPEC:RPT-17\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I14-S02",
+              "title": "Sinh RPT-17",
+              "body": "**Mục tiêu:** PDF / CSV + manifest.\n\n**Nguồn:** SPEC:RPT-17 §4\n\n**Định nghĩa xong:**\n- [ ] Có SHA-256 trong manifest",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I15",
+          "title": "Quản lý ca 逸脱: điều tra, 再測定 品温, chứng cứ, 決定案 (SCR-10)",
+          "body": "**Mục tiêu:** 品質管理 xử lý ca từ alarm / nhập / xếp xe tới khi có quyết định, với chứng cứ bắt buộc.\n\n**Phạm vi:** Làm: View 1〜2 danh sách / chi tiết ca, bản ghi điều tra, 再測定 với 品温 bắt buộc (chung đồng hồ 15 phút), tệp chứng cứ, 決定案 (gồm 「対象ロットなし」, 「リコール検討」), liên kết lô sang SCR-03. Không làm: vai trò theo 重大度 và クローズ (EP05-I16); chuyển trạng thái lô (SCR-03).\n\n**Nguồn:** SPEC:SCR-10 §3, §4, §5; DB:TMP_DB 4.7〜4.9; FR-TEMP-04\n\n**Định nghĩa xong:**\n- [ ] Ca nhập / xếp xe không có đồng hồ 15 phút\n- [ ] 再測定 thiếu 品温 bị chặn\n- [ ] Lô hiện chỉ đọc + link SCR-03\n- [ ] Mọi thao tác có entry + audit_log\n\n**Phụ thuộc:** EP05-I09, EP02-I10; ngoài nhóm: EP-00 (lưu tệp đính kèm trên Blob, ghi COM attachment)",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP05-I09",
+            "EP02-I10"
+          ],
+          "bidding_ref": [
+            "S5.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I15-S01",
+              "title": "Viết DD SCR-10",
+              "body": "**Mục tiêu:** DD BM-53 cho SCR-10 theo Azure (View 1〜4).\n\n**Nguồn:** SPEC:SCR-10; DB:TMP_DB 4.7〜4.13; DD:SCR-09 §5.6\n\n**Định nghĩa xong:**\n- [ ] Máy trạng thái ca\n- [ ] Điểm kiểm thử vai trò / đóng ca / hàng đợi\n- [ ] Review đạt",
+              "role": "SA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP05-I15-S02",
+              "title": "Test case ca 逸脱",
+              "body": "**Mục tiêu:** Case điều tra, 再測定, chứng cứ.\n\n**Nguồn:** SPEC:SCR-10 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I15-S03",
+              "title": "Màn danh sách + chi tiết ca",
+              "body": "**Mục tiêu:** View 1〜2 trên PC.\n\n**Nguồn:** SPEC:SCR-10 §2\n\n**Định nghĩa xong:**\n- [ ] Sắp 未設定 lên đầu\n- [ ] Đồng hồ 15 phút chỉ cho ca có alarm",
+              "role": "FE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I16",
+          "title": "Vai trò theo 重大度 và điều kiện đóng ca",
+          "body": "**Mục tiêu:** Ca chỉ đóng khi đủ rationale, chứng cứ, phê duyệt đúng số người khác nhau theo 重大度.\n\n**Phạm vi:** Làm: gán / nâng / hạ 重大度 theo quy tắc, 高 = 3 người khác nhau, 中 / 低 = 実施者 + 承認者 khác, kiểm lại ở server khi クローズ (rationale, ≥ 1 tệp, đã 承認, ≥ 1 điều tra, 中 / 高 có 是正措置), cảnh báo thiếu người duyệt. Không làm: đổi bảng vai trò (Q-TMP-11 đã xác nhận mặc định).\n\n**Nguồn:** SPEC:SCR-10 §3 (bảng vai trò), §5; DB:TMP_DB R5, R6; NFR-SEC-02\n\n**Định nghĩa xong:**\n- [ ] 実施者 tự đóng ca bị chặn ở mọi mức\n- [ ] 実施者 gán 低 / hạ mức → M_TMP-28\n- [ ] Thiếu người → M_TMP-35, không bỏ qua\n- [ ] Thiếu rationale / tệp → không đóng được\n\n**Phụ thuộc:** EP05-I15\n\n**Ràng buộc nghiệp vụ:** Người lập không tự duyệt, kể cả khi kiêm nhiều 職務.",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "domain:haccp"
+          ],
+          "depends_on": [
+            "EP05-I15"
+          ],
+          "bidding_ref": [
+            "S5.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I16-S01",
+              "title": "Test case vai trò và đóng ca",
+              "body": "**Mục tiêu:** Ma trận 重大度 × vai trò.\n\n**Nguồn:** SPEC:SCR-10 §3; DB:TMP_DB R5, R6\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I17",
+          "title": "Hàng đợi HACCP欠落 và batch B-07 phát hiện thiếu hồ sơ",
+          "body": "**Mục tiêu:** Thiếu hồ sơ HACCP được tự phát hiện, có hạn xử lý, và không bao giờ tự đóng.\n\n**Phạm vi:** Làm: batch 05:00 cho ngày hôm trước: 衛生 theo ca, 来訪者・ドライバー theo lượt (tài xế từ route / 予定), 受入 / 出荷 theo movement, mục 日次 / 月次; idempotent; bản ghi đến muộn → 記録到着, vẫn mở; View 3 hàng đợi + đóng có lý do. Không làm: nguồn lượt visitor (chưa có, Q-TMP-24); 教育 (ngoài WMS).\n\n**Nguồn:** DD:SCR-09 §5.6; SPEC:SCR-10 §3 (2), View 3; BATCH_LIST B-07; DB:TMP_DB 4.10, R7; BR-HACCP-01\n\n**Định nghĩa xong:**\n- [ ] TP-34〜37 đúng\n- [ ] Chạy lại cùng ngày không sinh trùng\n- [ ] Mục chỉ đóng bởi 品質管理 có lý do hoặc bởi review\n- [ ] Quy tắc phát hiện 受入 / 出荷記録欠落 theo kết luận GAP-05-01\n\n**Phụ thuộc:** EP05-I06, EP05-I15; ngoài nhóm: EP-00 (bộ lập lịch batch trên Functions timer)\n\n**Spec gap:** GAP-05-01 — nguồn lượt khách thăm: trỏ DR-final M-5 (B M-11)",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "domain:haccp",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP05-I06",
+            "EP05-I15"
+          ],
+          "bidding_ref": [
+            "S5.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I17-S01",
+              "title": "Viết DD luồng B-07 và hàng đợi",
+              "body": "**Mục tiêu:** DD cho batch + View 3.\n\n**Nguồn:** BATCH_LIST B-07; SPEC:SCR-10 View 3; DD:SCR-09 §5.6\n\n**Định nghĩa xong:**\n- [ ] Quy tắc sinh mục cho 9 loại\n- [ ] Ranh giới giao dịch + idempotency\n- [ ] Review đạt",
+              "role": "SA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP05-I17-S02",
+              "title": "Test case hàng đợi HACCP",
+              "body": "**Mục tiêu:** TP-34〜37.\n\n**Nguồn:** DD:SCR-09 §5.6 TP-34〜37\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I17-S03",
+              "title": "Job timer B-07",
+              "body": "**Mục tiêu:** Lịch 05:00 + ngày 1.\n\n**Nguồn:** BATCH_LIST B-07\n\n**Định nghĩa xong:**\n- [ ] IaC dev / test\n- [ ] Cảnh báo khi job không chạy",
+              "role": "Infra",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:Infra"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I18",
+          "title": "日次確認 / 月次確認 với maker ≠ checker",
+          "body": "**Mục tiêu:** Xác nhận ngày / tháng ghi bằng tài khoản + giờ, trên PC có MFA, và tháng phải khác người xác nhận ngày cuối tháng.\n\n**Phạm vi:** Làm: haccp_review daily / monthly (UNIQUE loại + kỳ), quá hạn vẫn ghi được, 月次 chỉ khi đủ 日次, chặn trùng người theo quy tắc. Không làm: chặn trùng người ghi 衛生 / 来訪者 với người 日次 khi chưa có đáp án Q-DTL-HACCP-02.\n\n**Nguồn:** DD:SCR-09 §5.6; SPEC:SCR-10 N-17, N-18; DB:TMP_DB 4.13, R7\n\n**Định nghĩa xong:**\n- [ ] TP-38〜40 đúng\n- [ ] Thiếu ngày → M_TMP-36 liệt kê ngày\n- [ ] Trùng người 日次 cuối tháng → M_TMP-32\n- [ ] Trên tablet chung bị chặn\n\n**Phụ thuộc:** EP05-I17; ngoài nhóm: EP-00 (khung App Service, Entra ID + 職務 phiên + thiết bị phiên, audit_log, sổ idempotency, catalog mã thông điệp)",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "domain:haccp"
+          ],
+          "depends_on": [
+            "EP05-I17"
+          ],
+          "bidding_ref": [
+            "S5.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I18-S01",
+              "title": "Test case 日次 / 月次確認",
+              "body": "**Mục tiêu:** TP-38〜40.\n\n**Nguồn:** DD:SCR-09 §5.6\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I19",
+          "title": "Nhập hồ sơ 衛生 và 来訪者・ドライバー trên tablet chung (SCR-10 View 4)",
+          "body": "**Mục tiêu:** Trưởng ca và quầy cửa nhập ghi hồ sơ vệ sinh / ra vào; dữ liệu cá nhân tối thiểu và được mã hóa.\n\n**Phạm vi:** Làm: View 4 theo 種別 của 職務, sanitation_record chỉ thêm (sửa = bản mới), visitor_driver_log điền giờ ra một lần, mã hóa cột định danh. Không làm: danh sách hạng mục vệ sinh cụ thể (chờ Q-DTL-HACCP-03).\n\n**Nguồn:** SPEC:SCR-10 View 4 (O-1〜O-16); DB:TMP_DB 4.11, 4.12; DR-PRIV-01; DD:SCR-09 §5.6\n\n**Định nghĩa xong:**\n- [ ] Mỗi 職務 chỉ thấy 種別 của mình\n- [ ] Sửa tạo bản mới, bản cũ giữ\n- [ ] Cột định danh mã hóa, khóa ở Key Vault\n- [ ] Bản ghi đến làm mục thiếu chuyển 記録到着\n\n**Phụ thuộc:** EP05-I17; ngoài nhóm: EP-00 (Key Vault, mã hóa cột)",
+          "role": "FE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP05-I17"
+          ],
+          "bidding_ref": [
+            "S5.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I19-S01",
+              "title": "Migration + API sanitation / visitor",
+              "body": "**Mục tiêu:** Bảng 4.11〜4.12 và API ghi.\n\n**Nguồn:** DB:TMP_DB 4.11, 4.12\n\n**Định nghĩa xong:**\n- [ ] Bảng chỉ thêm\n- [ ] Mã hóa cột PII",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP05-I19-S02",
+              "title": "Test case View 4",
+              "body": "**Mục tiêu:** Case quyền theo 種別, sửa bản mới.\n\n**Nguồn:** SPEC:SCR-10 §5\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I20",
+          "title": "Xuất RPT-18 逸脱・隔離記録 cho một ca",
+          "body": "**Mục tiêu:** In hồ sơ một ca với bảng vai trò cố định cho mọi ca.\n\n**Phạm vi:** Làm: PDF theo RPT-18_SPEC, mục 7 bảng 実施者 / レビュー者 / 承認者 × 重大度 với 「不要」 / 「未」, chặn 監査者, manifest. Không làm: tạo trạng thái mới.\n\n**Nguồn:** SPEC:RPT-18; DB:TMP_DB R8\n\n**Định nghĩa xong:**\n- [ ] Ô không áp dụng in 「不要」, chưa làm in 「未」\n- [ ] Ca đã purge → M_RPT-13\n- [ ] 監査者 không xuất được\n\n**Phụ thuộc:** EP05-I16; ngoài nhóm: EP-00 (dịch vụ PDF, export_manifest)\n\n**Spec gap:** vai trò in theo lúc đóng hay quy tắc hiện hành (Q-RPT18-03)",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP05-I16"
+          ],
+          "bidding_ref": [
+            "S5.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I20-S01",
+              "title": "Test case RPT-18",
+              "body": "**Mục tiêu:** Case theo 重大度.\n\n**Nguồn:** SPEC:RPT-18\n\n**Định nghĩa xong:**\n- [ ] Mỗi item spec / điểm kiểm thử có ít nhất 1 case\n- [ ] Có ca lỗi, biên, 0件 và phân quyền\n- [ ] Case lưu theo khuôn TEST_PLAN, link về issue",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP05-I21",
+          "title": "Chạy kiểm thử SCR-09 / SCR-10 trên môi trường test",
+          "body": "**Mục tiêu:** Toàn bộ điểm kiểm thử nhiệt độ / HACCP xanh trên test trước hardening.\n\n**Phạm vi:** Làm: chạy case TP-01〜41 và case SCR-10, TR, triage. Không làm: hiệu năng (EP05-I13 đã đo).\n\n**Nguồn:** DD:SCR-09 §5.2, §5.6; SPEC:SCR-10\n\n**Định nghĩa xong:**\n- [ ] TR từng case\n- [ ] Không còn Sev1 / Sev2\n- [ ] Truy vết FR-TEMP / BR-HACCP ↔ TC hai chiều\n\n**Phụ thuộc:** EP05-I09, EP05-I16, EP05-I18",
+          "role": "QA",
+          "sprint": "S6",
+          "labels": [
+            "type:issue",
+            "role:QA",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP05-I09",
+            "EP05-I16",
+            "EP05-I18"
+          ],
+          "bidding_ref": [
+            "S5.1",
+            "S5.2",
+            "S5.3",
+            "S5.4",
+            "S5.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP05-I21-S01",
+              "title": "Chạy case SCR-09",
+              "body": "**Mục tiêu:** TP-01〜33.\n\n**Nguồn:** DD:SCR-09 §5.2\n\n**Định nghĩa xong:**\n- [ ] TR lưu repo",
+              "role": "QA",
+              "sprint": "S6",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP05-I21-S02",
+              "title": "Chạy case SCR-10 và HACCP",
+              "body": "**Mục tiêu:** TP-34〜41 + case SCR-10.\n\n**Nguồn:** DD:SCR-09 §5.6; SPEC:SCR-10\n\n**Định nghĩa xong:**\n- [ ] TR lưu repo\n- [ ] Purge TP-41 kiểm với EP-08",
+              "role": "QA",
+              "sprint": "S6",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "spec_gaps": [
+    {
+      "id": "GAP-01-01",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-01_DETAIL.md:321 ↔ yuki-cold-chain-wms-2360-management/requirements/REQ-L02-rfp-d1-d8-domains.md:604",
+      "evidence": "DD §3.4.6 chỉ kiểm 米産地 rỗng; BR-TRACE-01 yêu cầu lane gạo giữ mã giao dịch, số lượng, ngày, đối tác và 産地. 02-architecture.md:338 (G-11) đã thấy thiếu nhưng DD không có ánh xạ",
+      "desc": "Lane gạo thiếu quy định 4 trường giao dịch: không rõ lấy từ cột có sẵn (参照コード, counted_qty, ngày nhận, 仕入先) hay phải nhập thêm",
+      "severity": "med",
+      "proposal": "sửa DD: ánh xạ rõ 4 trường vào cột có sẵn; nếu thiếu cột thì CR REC_DB + hỏi khách xác nhận",
+      "issues": [
+        "EP01-I07"
+      ]
+    },
+    {
+      "id": "GAP-01-02",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-01_DETAIL.md:210 ↔ :213",
+      "evidence": "D-3 ghi GS1 AI 15 → hạn 賞味, AI 17 → hạn 消費 vào D-9; D-6 lấy loại hạn từ master SKU; không có quy tắc khi hai bên lệch",
+      "desc": "Mã vạch mang loại hạn khác master SKU: hệ thống không biết chặn, cảnh báo hay theo master — rủi ro đánh giá 消費期限 như 賞味期限",
+      "severity": "med",
+      "proposal": "hỏi khách (品質オーナー); đề xuất mặc định: chặn lưu nháp và yêu cầu kiểm master",
+      "issues": [
+        "EP01-I06"
+      ]
+    },
+    {
+      "id": "GAP-01-03",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-01_DETAIL.md:142-144",
+      "evidence": "Modal C 入荷予定登録 không có wireframe trong bộ APV-019; DD đề xuất CR SCR-01_wf-modal-c.svg nhưng chưa có CR",
+      "desc": "FE làm modal C theo bảng Item, chưa có hình duyệt",
+      "severity": "low",
+      "proposal": "CR bổ sung wireframe trước S2; trong lúc chờ theo bảng §3.3.C",
+      "issues": [
+        "EP01-I03"
+      ]
+    },
+    {
+      "id": "GAP-01-04",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-01_DETAIL.md:520 ↔ yuki-cold-chain-wms-2360-management/inputs/customer/breakdown/breakdown-v2.json (S1.1)",
+      "evidence": "DD §4.3 bước 7 không đổi trạng thái 予定 vì CD-REC-02 chỉ có 予定 (Q-RECDB-06); story S1.1 nêu theo dõi được trạng thái appointment",
+      "desc": "Tiêu chí nghiệm thu S1.1 về theo dõi trạng thái 予定 không kiểm được tới khi Q-RECDB-06 có đáp án",
+      "severity": "med",
+      "proposal": "hỏi khách (đẩy Q-RECDB-06 lên câu chặn S2); không tự thêm 検品中 / 完了",
+      "issues": [
+        "EP01-I03"
+      ]
+    },
+    {
+      "id": "GAP-01-05",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-01_DETAIL.md:409-417 ↔ yuki-wms-prototype/docs/lab4/04-adr/ADR-003-atomic-allocation-lock-order.md",
+      "evidence": "Thứ tự khóa REC đặt OUT shipment_line (bước 5) trước INV lot FOR SHARE (bước 6); ADR-003 chỉ định nghĩa cặp → lot → stock_unit → allocation, không có vị trí của shipment_line [INFERRED]",
+      "desc": "Chưa có thứ tự khóa chung cho shipment_line giữa 返品入荷 (REC) và 出荷確認 / POD (OUT) — có thể deadlock khi hai luồng chạy cùng lúc",
+      "severity": "low",
+      "proposal": "sửa DD / ADR-003: SA chốt vị trí shipment_line trong thứ tự chung",
+      "issues": [
+        "EP01-I11"
+      ]
+    },
+    {
+      "id": "GAP-02-01",
+      "where": "yuki-cold-chain-wms-2360-management/specs/inventory/screen-specification/SCR-02_SPEC.md (§6 Giả định: trường được 訂正) ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-01_DETAIL.md:213",
+      "evidence": "Trường được 訂正 chỉ gồm 仕入先ロット, 有効期限, 受入数量, 牛個体識別番号; loại hạn của lô lấy từ master SKU lúc nhận và không có đường sửa",
+      "desc": "Nếu master SKU khai sai loại hạn (賞味 thay 消費) lúc nhận, lô đã tạo giữ loại sai và không có cách sửa có duyệt",
+      "severity": "med",
+      "proposal": "hỏi khách: thêm 訂正 loại hạn hai người hay xử lý bằng cách ly + nhập lại; cập nhật Q-INV-01a",
+      "issues": [
+        "EP02-I09",
+        "EP02-I16"
+      ]
+    },
+    {
+      "id": "GAP-02-02",
+      "where": "yuki-cold-chain-wms-2360-management/specs/inventory/screen-specification/SCR-02_SPEC.md (§5 F-12) ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-01_DETAIL.md:323",
+      "evidence": "F-12 chỉ giải phóng 引当 khi đổi 有効期限; SCR-01 coi 消費期限 ≤ ngày nhận là NG và cách ly. Không nói lô có vào 隔離 khi 訂正 làm 消費期限 đã qua",
+      "desc": "Lô sau 訂正 có 消費期限 đã qua vẫn ở 利用可能; chỉ bị chặn gián tiếp ở 引当",
+      "severity": "low",
+      "proposal": "sửa DD SCR-02: sau 承認 kiểm lại 消費期限, quá hạn → cảnh báo hoặc 隔離 (PO chọn)",
+      "issues": [
+        "EP02-I09"
+      ]
+    },
+    {
+      "id": "GAP-02-03",
+      "where": "yuki-cold-chain-wms-2360-management/specs/inventory/screen-specification/SCR-16_SPEC.md (§6 Cơ sở so sánh) ↔ yuki-cold-chain-wms-2360-management/specs/system-design/database-design/inventory/INV_DB.md:400 (R11)",
+      "evidence": "System qty của 棚卸し = stock_unit theo vị trí; theo D-A hàng 積込済 chưa 出荷確認 vẫn nằm trong stock_unit (R11 tính on-hand gồm 積込済) [INFERRED]",
+      "desc": "Đếm vị trí khi hàng đã lên xe nhưng chưa 出荷確認 sẽ ra chênh lệch giả và có thể bị điều chỉnh sai",
+      "severity": "med",
+      "proposal": "sửa DD SCR-16: loại phần 積込済 khỏi system qty hoặc đánh dấu dòng; SA xác nhận vị trí tồn của hàng 積込済",
+      "issues": [
+        "EP02-I13",
+        "EP02-I14",
+        "EP02-I16"
+      ]
+    },
+    {
+      "id": "GAP-02-04",
+      "where": "yuki-cold-chain-wms-2360-management/specs/inventory/screen-specification/SCR-02_SPEC.md (§3 一時温度帯) ↔ yuki-cold-chain-wms-2360-management/specs/system-design/database-design/receiving/REC_DB.md:378 (R9)",
+      "evidence": "Dải áp dụng = 一時温度帯 khi còn hạn, hết hạn quay về dải SKU; không có quy tắc phát hiện lô đang nằm ở vị trí dải ticket khi ticket hết hạn",
+      "desc": "Lô ở sai dải sau khi ticket hết hạn mà không ai được nhắc chuyển",
+      "severity": "low",
+      "proposal": "hỏi khách: cần nhắc / danh sách việc khi ticket hết hạn không; nếu cần → thêm vào COM-02",
+      "issues": [
+        "EP02-I05",
+        "EP02-I16"
+      ]
+    },
+    {
+      "id": "GAP-05-01",
+      "where": "yuki-cold-chain-wms-2360-management/specs/_common/code-definitions.md:211 ↔ yuki-cold-chain-wms-2360-management/business-flows/BATCH_LIST.md:157",
+      "evidence": "CD-TMP-12 có receiving_record_missing / shipping_record_missing; B-07 chỉ nói phát hiện thiếu 受入 / 出荷 cho ngày hôm trước, không định nghĩa 'movement kỳ vọng' là gì",
+      "desc": "Không có quy tắc sinh mục 受入記録欠落 / 出荷記録欠落 (vd 予定 không có 判定, xuất không có 出荷前チェック), nên batch không cài được đúng",
+      "severity": "med",
+      "proposal": "sửa DD (viết DD B-07) + hỏi 品質オーナー xác nhận quy tắc",
+      "issues": [
+        "EP05-I17",
+        "EP05-I02"
+      ]
+    },
+    {
+      "id": "GAP-05-02",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-09_DETAIL.md:296-305, :723 (CR-3)",
+      "evidence": "Cờ 要確認 chặn 引当 / 出荷確認 cần sửa INV_DB, SCR-05, SCR-06, SCR-10, error-codes; CR-3 mới là đề xuất, chưa có CR",
+      "desc": "Nếu khách chọn chặn, việc rơi sang nhóm EP-03 mà backlog bên đó chưa có issue",
+      "severity": "med",
+      "proposal": "CR sau khi Q-DTL-TMP-09 có đáp án; báo nhóm EP-03 thêm issue kiểm cờ",
+      "issues": [
+        "EP05-I12",
+        "EP05-I02"
+      ]
+    },
+    {
+      "id": "GAP-05-03",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-09_DETAIL.md:262, :275",
+      "evidence": "Chu kỳ đọc 15 phút ghi như hằng số; duration = last − first + 15 phút",
+      "desc": "Logger có chu kỳ khác 15 phút (thay máy, cấu hình) sẽ làm sai thời lượng đợt và điều kiện alarm",
+      "severity": "low",
+      "proposal": "sửa DD: lấy chu kỳ từ master device; chấp nhận 15 phút nếu khách xác nhận mọi logger cùng chu kỳ",
+      "issues": [
+        "EP05-I06"
+      ]
+    }
+  ],
+  "differences": [
+    {
+      "lab4_ref": "DD:SCR-01 §4 (rpc_rcv_*), DD:SCR-09 §4 (rpc_temp_*), ADR-002",
+      "change": "Logic nghiệp vụ chuyển từ hàm RPC SECURITY DEFINER sang service module receiving / temperature trong App Service; mỗi lệnh mở một giao dịch PostgreSQL. CHECK / UNIQUE / khóa hàng và advisory lock vẫn ở DB",
+      "reason": "D-1, D-3; quy ước §2 (ADR-002 không là tiền đề)",
+      "impact": "EP01-I01, EP05-I01 sửa DD; mọi sub-issue BE viết service + unit test thay migration RPC"
+    },
+    {
+      "lab4_ref": "DD:SCR-01 §5.1 G-12, DD:SCR-09 §5.1 T-13, LAB4:SEC-02 = L5-DB-01",
+      "change": "Bỏ RLS + PostgREST / Data API. Quyền đọc theo 職務 và quyền kho kiểm ở API; DB chỉ cho identity của ứng dụng truy cập",
+      "reason": "D-1 (không Supabase), ADR-012 không dùng",
+      "impact": "Task 'sửa RLS' không còn; mỗi API đọc có test quyền (EP01-I13, EP05-I10, EP02-I02)"
+    },
+    {
+      "lab4_ref": "DD:SCR-01 §5.1 G-11, §4.6; LAB4:SEC-01",
+      "change": "Thiết bị (PC / tablet) và MFA lấy từ phiên Entra ID do server xác lập lúc đăng nhập, không từ cookie client; MFA theo 職務 được gán (ADR-008 giữ)",
+      "reason": "D-1 (Entra ID)",
+      "impact": "EP01-I10, EP02-I07, EP05-I18 phụ thuộc khung auth EP-00"
+    },
+    {
+      "lab4_ref": "DD:SCR-09 §2, §4.2〜4.5 (nhập CSV trong request API)",
+      "change": "Nhận tệp ở API (lưu Blob + xếp hàng Service Bus), xử lý ở worker Functions trong một giao dịch / tệp; UI xem trạng thái tệp. Thông điệp M_TMP-38 / 04 / 05 / 06 / 07 giữ nguyên",
+      "reason": "D-1; giới hạn thời gian request App Service — trỏ review-261024-step3-dr-final M-6",
+      "impact": "EP05-I01 sửa DD; EP05-I04 thêm sub-issue Infra; cần trạng thái 'đang chờ xử lý' trên View 2"
+    },
+    {
+      "lab4_ref": "DD:SCR-01 §5.1 G-16; DD:SCR-09 §4.2 bước 4 (attachment); 02-architecture G-10 (port Storage, ISS-30)",
+      "change": "Ảnh kiểm hàng, tệp CSV gốc, chứng cứ ca lưu Azure Blob (WORM cho chứng từ) qua URL ký hạn ngắn; COM attachment giữ metadata",
+      "reason": "D-1 (Blob WORM)",
+      "impact": "EP01-I04, EP05-I04, EP05-I15 phụ thuộc dịch vụ tệp EP-00"
+    },
+    {
+      "lab4_ref": "DD:SCR-01 §4.5 (N-07), DD:SCR-09 §4.5 bước 6, §4.7 (B-05); 02-architecture G-10 (không bộ lập lịch)",
+      "change": "mail_outbox ghi cùng giao dịch giữ nguyên; gửi và thử lại B-10 chạy ở Functions; batch B-05 / B-07 dùng Functions timer",
+      "reason": "D-1 (Service Bus / Functions)",
+      "impact": "EP05-I11, EP05-I17 có sub-issue Infra; phụ thuộc EP-00 / EP-09"
+    },
+    {
+      "lab4_ref": "README LAB-4 (SEC-AUD-01 khóa rpc_audit_append), DD:SCR-01 §4.x, DD:SCR-09 §4.x (audit_log)",
+      "change": "audit_log ghi từ service trong cùng giao dịch nghiệp vụ; chỉ-thêm bằng quyền DB của identity ứng dụng; ADR-011 (manifest SHA-256) giữ",
+      "reason": "D-1, D-3",
+      "impact": "Không còn task khóa RPC audit; mọi DoD BE có kiểm audit_log"
+    },
+    {
+      "lab4_ref": "DD:SCR-01 §5.1, DD:SCR-09 §5.1 (mã REC-FIX-*, REC-FEAT-*, TMP-FIX-*, TMP-FEAT-*, TMP-DB-*, L5-DB-04)",
+      "change": "Task sửa gap prototype đổi thành task xây mới theo thiết kế; mã LAB-4 chỉ giữ trong mục Nguồn để truy vết",
+      "reason": "D-3",
+      "impact": "Toàn bộ EP-01 / EP-05; điểm kiểm thử dựa trên dòng code prototype được viết lại theo hành vi"
+    },
+    {
+      "lab4_ref": "05-database L5-DB-02 (mã trạng thái ASCII), L5-DB-04 (bảng nối lô ↔ ca)",
+      "change": "Không có migration chuyển mã chữ Nhật → ASCII; schema mới dùng mã ASCII ngay. Bảng nối deviation_case_lot / temperature_alarm_lot tạo mới theo TMP_DB",
+      "reason": "D-3",
+      "impact": "EP01-I09 (bảng ca), EP05-I03 (bảng alarm_lot); bỏ task L5-DB-02"
+    },
+    {
+      "lab4_ref": "LAB4:L5-DB-06 = REC-TMP-01 = TMP-DB-01 (bảng ngưỡng có version)",
+      "change": "Bảng 版 ngưỡng là phần 'bảng quy tắc có version' của EP-00, kích hoạt ở SCR-14 (EP-08); nhóm B chỉ đọc và lưu FK",
+      "reason": "Quy ước §3 (EP-00), ADR-007 giữ",
+      "impact": "EP01-I05, EP05-I05 phụ thuộc ngoài nhóm"
+    },
+    {
+      "lab4_ref": "DD:SCR-01 §3.1, DD:SCR-09 §3.1 (prototype là nguồn), §5.2 TP dẫn file:line prototype",
+      "change": "Prototype chỉ là tài liệu tham khảo quy tắc; không dùng lại code / seed",
+      "reason": "D-3",
+      "impact": "EP01-I01-S03, EP05-I01-S03 viết lại điểm kiểm thử theo hành vi"
+    }
+  ]
+}

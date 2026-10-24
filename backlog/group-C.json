@@ -1,0 +1,3288 @@
+{
+  "group": "C",
+  "epics": [
+    {
+      "id": "EP-03",
+      "title": "有効期限管理・出荷・ピッキング・POD (E3)",
+      "body": "**Mục tiêu**\nXây mới trên Azure toàn bộ luồng xuất: 受注 → 引当 (loại trừ 6 mức, FEFO, khóa nguyên tử) → ピッキング / 積込 → 出荷前チェック → 出荷確認 (trừ tồn một lần) → POD theo dòng (offline mã hóa ở app tài xế) → POD訂正 / claim.\n\n**Phạm vi**\n- Làm: SCR-04, SCR-05, SCR-06, SCR-08 (POD, hàng đợi, đồng bộ), SCR-12 (phần POD訂正 và claim).\n- Không làm: ca recall / đối chiếu (EP-06), 返品入荷 (EP-01), nhập tệp ERP (EP-09 IF.1), 出発 / 帰着 / seal / 例外事象 ở SCR-08 (EP-04).\n\n**Nguồn**\nDD:SCR-05, DD:SCR-06, DD:SCR-08; SPEC:SCR-04, SPEC:SCR-12; DB:OUT_DB, DB:DSP_DB; ADR-003, ADR-004, ADR-005, ADR-009; bidding:E3 (S3.1〜S3.9); plan-261024-dev-phase-wbs §4, §7\n\n**Định nghĩa xong**\n- [ ] Mọi issue con đóng, test T-xx / P-xx / TP08-xx của DD chạy xanh trên môi trường test\n- [ ] Đường găng D-A (出荷確認 + POD theo dòng) phát hành cùng một lần\n- [ ] RTM cập nhật cho FR-OUT-01〜07",
+      "labels": [
+        "type:epic"
+      ],
+      "issues": [
+        {
+          "id": "EP03-I01",
+          "title": "Chỉnh DD SCR-05 cho hệ đích Azure",
+          "body": "**Mục tiêu**\nĐưa DD SCR-05 về kiến trúc đích (App Service modular monolith) để dev viết mới, bỏ phần gap prototype.\n\n**Phạm vi**\n- Làm: thay RPC / RLS / PGlite bằng service + giao dịch ở App Service; chốt các đề xuất Q-DD05-01〜06; chạy predict-risks cho 引当\n- Không làm: đổi quy tắc nghiệp vụ đã duyệt; sửa spec SCR-05\n\n**Nguồn**\nDD:SCR-05 §3.5, §4, §5.5; ADR-003; ADR-004; plan-261024-dev-phase-wbs §8.3; LAB4:README thứ tự đợt\n\n**Định nghĩa xong**\n- [ ] DD không còn tham chiếu `rpc_*`, RLS, PostgREST; mô tả service + transaction boundary\n- [ ] Bảng thứ tự khóa L8 khớp EP-00\n- [ ] Q-DD05-01〜06 có trạng thái (chốt / chờ) và người quyết\n- [ ] Biên bản review-detail-design, DoR đạt\n\n**Phụ thuộc**\nEP-00 (ngoài nhóm): khung app, thứ tự khóa chung",
+          "role": "SA",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:SA",
+            "dd:yes"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S3.2",
+            "S3.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I01-S01",
+              "title": "Viết lại §4 của DD SCR-05 theo service App Service",
+              "body": "**Mục tiêu**\nThay mô tả RPC bằng AllocationService / InventoryService và ranh giới giao dịch.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] 4.1〜4.6 không còn RPC / RLS\n- [ ] Ghi rõ nơi giữ khóa (0)(1)(2)(3) trong một giao dịch",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP03-I01-S02",
+              "title": "Chạy predict-risks cho cây 引当 và khóa",
+              "body": "**Mục tiêu**\nRà rủi ro đồng thời, biên và phân quyền của 引当 trước khi code.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Danh sách rủi ro + ca kiểm thêm được ghi vào §5.4\n- [ ] Rủi ro Cao có biện pháp",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP03-I01-S03",
+              "title": "Review DD SCR-05 và chốt DoR",
+              "body": "**Mục tiêu**\nDuyệt DD đã chỉnh, gom câu hỏi còn mở.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review\n- [ ] Câu hỏi chặn gửi khách theo lô Q&A",
+              "role": "BrSE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I02",
+          "title": "Chỉnh DD SCR-06 cho hệ đích Azure",
+          "body": "**Mục tiêu**\nĐưa DD SCR-06 về kiến trúc đích, giữ nguyên D-A, thứ tự khóa và các nhánh 逸脱.\n\n**Phạm vi**\n- Làm: thay RPC bằng service; chốt Q-DD06-02〜05; ghi rõ nhánh nào chờ ISS-35 (H-5, H-7)\n- Không làm: chọn phương án CR H-5 / H-7 (người duyệt quyết)\n\n**Nguồn**\nDD:SCR-06 §3.6, §4, §5.5; ADR-005; CR-202610-loaded-task-release-on-precheck-ng; CR-202610-block-recalled-lot-before-departure\n\n**Định nghĩa xong**\n- [ ] 4.2〜4.7 viết theo service + giao dịch\n- [ ] Nhánh H-5 / H-7 đánh dấu 【chờ ISS-35】 kèm phương án khuyến nghị\n- [ ] Q-DD06-03 (UNIQUE index 出荷) có hướng CR\n- [ ] DoR đạt\n\n**Phụ thuộc**\n—\n\n**Spec gap**\nGAP-03-01, GAP-03-03",
+          "role": "SA",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:SA",
+            "dd:yes",
+            "spec-gap"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S3.4",
+            "S3.5",
+            "S3.6"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I02-S01",
+              "title": "Viết lại §4 DD SCR-06 theo service App Service",
+              "body": "**Mục tiêu**\nMô tả lại 積込確認 / 積込完了 / 記録 / 出荷確認 / 積込取消 theo service.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Không còn RPC\n- [ ] Mỗi thao tác ghi ghi rõ khóa theo L8",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP03-I02-S02",
+              "title": "Chạy predict-risks cho D-A và 積込取消",
+              "body": "**Mục tiêu**\nRà rủi ro trừ tồn hai lần / không trừ, đồng thời 積込取消 × 出荷確認.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Ca kiểm thêm ghi vào §5.4",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP03-I02-S03",
+              "title": "Review DD SCR-06 và chốt DoR",
+              "body": "**Mục tiêu**\nDuyệt DD đã chỉnh.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review\n- [ ] Q-OUT-29, Q-OUT-33, Q-OUT-34 có trạng thái",
+              "role": "BrSE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I03",
+          "title": "Chỉnh DD SCR-08 phần POD / hàng đợi / đồng bộ",
+          "body": "**Mục tiêu**\nĐưa phần POD, OfflineQueue, đồng bộ của DD SCR-08 về hệ đích (Entra ID, MDM, Blob).\n\n**Phạm vi**\n- Làm: chuyển auth sang Entra ID + thiết bị MDM; attachment sang Blob; chốt Q-DD08-01〜03\n- Không làm: phần 出発 / 帰着 / seal / 例外事象 (EP04), đổi phạm vi offline đã duyệt\n\n**Nguồn**\nDD:SCR-08 §3.3 C/E, §3.4, §4.4, §4.6; ADR-009; SEQ_pod-offline-sync; DB:DSP_DB R7〜R11\n\n**Định nghĩa xong**\n- [ ] DD không còn Supabase Auth / localStorage\n- [ ] Quản lý khóa hàng đợi có hướng (Q-DD08-01 gửi セキュリティオーナー)\n- [ ] Q-NEW-C1 (giữ bản đã sync) có trạng thái\n- [ ] DoR đạt\n\n**Phụ thuộc**\n—",
+          "role": "SA",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:SA",
+            "dd:yes"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S3.7",
+            "S3.8"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I03-S01",
+              "title": "Viết lại §4.4, §4.6 DD SCR-08 theo service + Blob",
+              "body": "**Mục tiêu**\nMô tả registerPod và sync theo service, attachment lên Blob.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Ranh giới giao dịch từng bản ghi rõ ràng\n- [ ] Không còn RPC",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP03-I03-S02",
+              "title": "Chạy predict-risks cho offline / idempotency POD",
+              "body": "**Mục tiêu**\nRà rủi ro mất bản ghi, trùng, khóa mã hóa.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Ca kiểm thêm ghi vào §5.5",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP03-I03-S03",
+              "title": "Review DD SCR-08 phần POD và chốt DoR",
+              "body": "**Mục tiêu**\nDuyệt DD.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "BrSE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I04",
+          "title": "Dựng schema OUT_DB cho luồng xuất",
+          "body": "**Mục tiêu**\nCó schema xuất theo OUT_DB 1.1.0 trên PostgreSQL Flexible làm nền cho mọi issue EP-03.\n\n**Phạm vi**\n- Làm: migration `delivery_order`, `allocation`, `picking_load_record`, `pre_shipment_check`, `delivery_order_event`, `shipment_line`; CHECK / index / mã ASCII CD-OUT-01, 06〜16; soạn CR cho `idempotency_key` và mức khóa (R)(D)(4)\n- Không làm: bảng INV / DSP (issue khác); dữ liệu migration\n\n**Nguồn**\nDB:OUT_DB 1.1.0 §4.1〜4.7; DD:SCR-05 Q-DD05-06; LAB4:OUT-DB-01; LAB4:L5-DB-02; code-definitions CD-OUT\n\n**Định nghĩa xong**\n- [ ] Migration chạy lên / xuống sạch trên môi trường dev\n- [ ] CHECK trạng thái dùng mã ASCII (Q-CD-01)\n- [ ] Test ràng buộc: Σ allocation active ≤ tồn bị chặn ở mức DB khi có thể\n- [ ] CR Q-DD05-06 nộp người duyệt\n\n**Phụ thuộc**\nEP-00 (ngoài nhóm): hạ tầng PostgreSQL, công cụ migration, quy ước mã ASCII",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S3.2",
+            "S3.3",
+            "S3.6"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I04-S01",
+              "title": "Soạn CR OUT_DB: idempotency_key và mức khóa (R)(D)(4)",
+              "body": "**Mục tiêu**\nĐưa đề xuất Q-DD05-06 thành CR để DB đã duyệt có chỗ lưu `request_id`.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] CR có phương án + ảnh hưởng\n- [ ] Đã gửi người duyệt",
+              "role": "BrSE",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            },
+            {
+              "id": "EP03-I04-S02",
+              "title": "Viết migration bảng xuất và index",
+              "body": "**Mục tiêu**\nTạo bảng, FK, CHECK, index theo OUT_DB.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Migration idempotent\n- [ ] Index như OUT_DB §6",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I04-S03",
+              "title": "Viết test ràng buộc DB xuất",
+              "body": "**Mục tiêu**\nKiểm CHECK / UNIQUE / FK.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Ca vi phạm từng CHECK bị từ chối",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I04-S04",
+              "title": "Review schema OUT_DB",
+              "body": "**Mục tiêu**\nĐối chiếu migration với OUT_DB 1.1.0.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Không lệch cột / kiểu",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I05",
+          "title": "Nhập dòng 受注 tay và kiểm master / trùng tham chiếu",
+          "body": "**Mục tiêu**\nクレーム/CS tạo dòng 受注 未確定 với 顧客, SKU, 数量, 要求日, 配送条件, 参照; lỗi master / trùng được báo, dữ liệu giữ nguyên.\n\n**Phạm vi**\n- Làm: API + màn View 1: thêm / sửa / xóa dòng 未確定; 配送条件 lấy từ hợp đồng (chỉ đọc); 要求日 quá khứ chặn; trùng 顧客 + 参照 chặn\n- Không làm: chọn lô (SCR-05); nhập tệp ERP (EP-09)\n\n**Nguồn**\nSPEC:SCR-04 §3, §5; DB:OUT_DB §4.1; bidding:S3.1; gap-261024-wbs-A #14\n\n**Định nghĩa xong**\n- [ ] Test API: thiếu master → M_OUT-02, trùng → M_OUT-03, quá khứ → M_OUT-47\n- [ ] Dòng 未確定 không mồ côi khi rời màn\n- [ ] Chỉ クレーム/CS gọi được (test 403)\n- [ ] Test FE cho lỗi dưới ô và giữ dữ liệu\n\n**Phụ thuộc**\nEP03-I04; EP-08 (ngoài nhóm): master 顧客 / SKU / hợp đồng",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP03-I04"
+          ],
+          "bidding_ref": [
+            "S3.1"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I05-S01",
+              "title": "Viết DD SCR-04 — nhập / sửa / xóa dòng 未確定",
+              "body": "**Mục tiêu**\nViết detail design SCR-04 phần nhập / sửa / xóa dòng 未確定 theo khuôn BM-2-901-53, bám spec đã duyệt, không đặt giá trị tạm.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có sequence, bảng xử lý server (Input / Output / Error / Detail), máy trạng thái, ma trận quyền\n- [ ] Có điểm kiểm thử biên và bảng câu hỏi mở trỏ Q-xx\n- [ ] Qua review-detail-design, đạt DoR trước sprint code",
+              "role": "BrSE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I06",
+          "title": "受注確定 một dòng / 一括 kèm giờ cắt 16:00 và kích hoạt 引当",
+          "body": "**Mục tiêu**\n受注確定 khóa dòng và tự chạy 引当; giờ cắt xét lúc 確定; 一括 chạy theo 要求日 tăng dần, mỗi dòng một giao dịch.\n\n**Phạm vi**\n- Làm: xác nhận 2 bước; giờ cắt là tham số; lý do 締め後受付 bắt buộc khi sau giờ cắt + đếm; 一括 commit `processing` rồi 引当 từng dòng (Q-DD05-05)\n- Không làm: lịch ngày nghỉ (Q66 chưa có đáp án)\n\n**Nguồn**\nSPEC:SCR-04 E-2, E-4, C-3; DD:SCR-05 §3.6, Q-DD05-05; Q-FLW-OUT-15; Q-FLW-OUT-17 (APV-015); bidding:S3.1\n\n**Định nghĩa xong**\n- [ ] Test: sau giờ cắt thiếu lý do → M_OUT-46, dòng giữ 未確定\n- [ ] Test 一括: thứ tự 要求日 rồi thời điểm 確定\n- [ ] Tiến trình chết giữa 一括 → dòng còn `processing` được job R12 trả về\n- [ ] Chuyển SCR-05 kèm danh sách 受注ID\n\n**Phụ thuộc**\nEP03-I05",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP03-I05"
+          ],
+          "bidding_ref": [
+            "S3.1",
+            "S3.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I06-S01",
+              "title": "Viết DD SCR-04 — 受注確定 và 一括確定",
+              "body": "**Mục tiêu**\nViết detail design SCR-04 phần 受注確定 và 一括確定 theo khuôn BM-2-901-53, bám spec đã duyệt, không đặt giá trị tạm.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có sequence, bảng xử lý server (Input / Output / Error / Detail), máy trạng thái, ma trận quyền\n- [ ] Có điểm kiểm thử biên và bảng câu hỏi mở trỏ Q-xx\n- [ ] Qua review-detail-design, đạt DoR trước sprint code",
+              "role": "BrSE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I07",
+          "title": "Màn SCR-04 View 2: duyệt dòng từ 2 tệp ERP delta",
+          "body": "**Mục tiêu**\nクレーム/CS xem dòng 未確定 từ tệp 10:30 / 13:30, nhãn 要確認, 除外 dòng tệp có audit.\n\n**Phạm vi**\n- Làm: View 2 danh sách dòng tệp, lỗi / cảnh báo theo dòng, 除外, 一括確定 cho dòng sạch\n- Không làm: đọc tệp, kiểm tệp, B-02 (EP-09 IF.1)\n\n**Nguồn**\nSPEC:SCR-04 View 2, E-1, E-6; SEQ_erp-order-import; bidding:S3.1\n\n**Định nghĩa xong**\n- [ ] Dòng エラー không 確定 được\n- [ ] 除外 ghi audit_log\n- [ ] Test E2E: tệp có 1 dòng lỗi + 1 dòng sạch\n\n**Phụ thuộc**\nEP03-I06; EP-09 (ngoài nhóm): B-02 nạp tệp ERP; DR H-4 / M-3 chưa đóng",
+          "role": "FE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP03-I06"
+          ],
+          "bidding_ref": [
+            "S3.1"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I07-S01",
+              "title": "Viết DD SCR-04 — View 2 dòng tệp ERP",
+              "body": "**Mục tiêu**\nViết detail design SCR-04 phần View 2 dòng tệp ERP theo khuôn BM-2-901-53, bám spec đã duyệt, không đặt giá trị tạm.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có sequence, bảng xử lý server (Input / Output / Error / Detail), máy trạng thái, ma trận quyền\n- [ ] Có điểm kiểm thử biên và bảng câu hỏi mở trỏ Q-xx\n- [ ] Qua review-detail-design, đạt DoR trước sprint code",
+              "role": "BrSE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I08",
+          "title": "Engine 引当 ở server: loại trừ 6 mức, FEFO/FIFO, khóa nguyên tử",
+          "body": "**Mục tiêu**\nServer tự đánh giá và chọn lô cho từng dòng trong một giao dịch, không nhận lô từ client, không over-allocation.\n\n**Phạm vi**\n- Làm: hàm đánh giá thuần (thứ tự E1→E2→E3→E3b→E4→E5, chỉ ghi lý do đầu); FEFO, cùng hạn FIFO, tie-break Q-DD05-01; đủ số lượng ở một vị trí; khóa (D)→(0)→(1)→(2)→(3); kiểm lại sau khóa, thua → conflict_rejected, không thử lô kế; `request_id` tra trước `row_version`\n- Không làm: nội dung từng quy tắc loại trừ (issue domain riêng); F-4 / F-5 (issue riêng)\n\n**Nguồn**\nDD:SCR-05 §3.5 L1〜L11, §4.2; ADR-003; DB:OUT_DB R2〜R5, R4a; CD-OUT-09; LAB4:OUT-ALLOC-03; LAB4:OUT-ALLOC-02; bidding:S3.2; bidding:S3.3\n\n**Định nghĩa xong**\n- [ ] Unit T-07, T-19, T-20 xanh\n- [ ] SQL 2 kết nối T-22 (cùng lô khác khách), T-33 (không deadlock) xanh\n- [ ] T-21 (không đủ ở một vị trí) xanh\n- [ ] Gửi lại cùng `request_id` không sinh allocation thứ hai (T-34)\n- [ ] Không có tham số lô / kết quả nào nhận từ client\n\n**Phụ thuộc**\nEP03-I04, EP03-I01; EP-00 (ngoài nhóm): thứ tự khóa chung, sổ idempotency",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I04",
+            "EP03-I01"
+          ],
+          "bidding_ref": [
+            "S3.2",
+            "S3.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I08-S01",
+              "title": "Viết TC engine 引当 (thứ tự loại trừ, FEFO, đồng thời)",
+              "body": "**Mục tiêu**\nChuyển T-07, T-19〜T-23, T-33, T-34 thành test case.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC có dữ liệu biên và kỳ vọng\n- [ ] Có ca 2 kết nối",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I08-S02",
+              "title": "Cài hàm đánh giá thuần evaluateCandidates",
+              "body": "**Mục tiêu**\nHàm thuần trả lý do đầu tiên và thứ hạng FEFO.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Unit test xanh\n- [ ] Dùng chung cho màn xem (4.1) và giao dịch (4.2)",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I08-S03",
+              "title": "Cài giao dịch 引当 với khóa và kiểm lại",
+              "body": "**Mục tiêu**\nGiao dịch 4.2 bước 0〜12 với savepoint trước khóa lô.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-22, T-33 xanh\n- [ ] lock_timeout đọc từ cấu hình (ISS-31)",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I08-S04",
+              "title": "Ghi kết quả 引当 vào idempotency và sự kiện",
+              "body": "**Mục tiêu**\nLưu kết quả mọi nhánh commit, sinh delivery_order_event + audit_log.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-34, T-37 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I08-S05",
+              "title": "Review code engine 引当",
+              "body": "**Mục tiêu**\nReview theo ADR-003 và L8.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Không lấy khóa ngược thứ tự",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I09",
+          "title": "日付逆転: so hạn với lần giao 受領済 gần nhất theo cặp khách × SKU",
+          "body": "**Mục tiêu**\nChặn lô có hạn sớm hơn mốc R4 nguồn (a) của đúng cặp khách × SKU; không so với hôm nay, không mượn lịch sử khách khác.\n\n**Phạm vi**\n- Làm: tính mốc từ `shipment_line` received, bỏ 持戻り / 受領拒否 / reversal / thiếu hạn; đọc mốc sau khóa (0); lưu `reference_expiry_date`, `reference_shipment_line_id` trên allocation; tham số `equal_expiry_policy` mặc định allow\n- Không làm: nguồn (b)(c) (issue riêng); ánh xạ đổi mã khách (Q-OUT-25 b)\n\n**Nguồn**\nADR-004; DD:SCR-05 §3.5 E5, L11; DB:OUT_DB R4; BR-DATE-01; LAB4:OUT-ALLOC-03; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] Unit T-14, T-16, T-17 xanh (CUS-003 / CUS-004)\n- [ ] T-15 chạy hai giá trị `equal_expiry_policy`\n- [ ] SQL 2 kết nối T-23 (cùng cặp, hai lô) xanh\n- [ ] Màn SCR-05 D-2 hiện mốc đã lưu, không tính lại theo hôm nay\n\n**Phụ thuộc**\nEP03-I08\n\n**Ràng buộc nghiệp vụ**\nMốc là lịch sử giao **đã nhận** của cặp khách × SKU (BR-DATE-01), không phải ngày hôm nay. Đây là bẫy đọc-hiểu chính của đề.",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:date-reversal"
+          ],
+          "depends_on": [
+            "EP03-I08"
+          ],
+          "bidding_ref": [
+            "S3.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I09-S01",
+              "title": "Viết TC 日付逆転 nguồn (a)",
+              "body": "**Mục tiêu**\nTC cho T-14〜T-17, T-23.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có dữ liệu CUS-003 / CUS-004",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I09-S02",
+              "title": "Cài tính mốc R4 nguồn (a) và so sánh",
+              "body": "**Mục tiêu**\nTruy vấn mốc + nhánh E5.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Unit + SQL xanh\n- [ ] Đọc sau khóa (0)",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I09-S03",
+              "title": "Review 日付逆転 với ADR-004",
+              "body": "**Mục tiêu**\nKiểm không so với hôm nay, không dùng lịch sử toàn kho.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I10",
+          "title": "日付逆転: thêm nguồn (b)(c) đơn khác cùng cặp đang 引当 / 積込 / đang chở",
+          "body": "**Mục tiêu**\nCho mốc R4 gồm cả hàng của đơn khác cùng cặp chưa tới tay khách, có thể bật / tắt khi khách trả lời Q-OUTDB-13.\n\n**Phạm vi**\n- Làm: nguồn (b) allocation active / task loaded; nguồn (c) task dispatched chưa có shipment_line; công tắc cấu hình chọn tập nguồn\n- Không làm: quyết định chấp nhận (khách / 品質オーナー)\n\n**Nguồn**\nADR-004 (b)(c) Proposed; DD:SCR-05 §3.5 ref; DB:OUT_DB R4, Q-OUTDB-13; gap-261024-wbs-A #20; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] SQL T-18 xanh với công tắc bật\n- [ ] Công tắc tắt → chỉ nguồn (a), test hồi quy T-14 vẫn xanh\n- [ ] 出荷確認 chuyển nguồn (b) → (c) dưới khóa (0)\n\n**Phụ thuộc**\nEP03-I09\n\n**Ràng buộc nghiệp vụ**\n(b)(c) chặt hơn chữ RFP; chưa được khách chấp nhận nên phải đổi được bằng cấu hình, không sửa code.\n\n**Spec gap**\nGAP-03-02",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:date-reversal",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP03-I09"
+          ],
+          "bidding_ref": [
+            "S3.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I10-S01",
+              "title": "Viết TC nguồn (b)(c) và công tắc",
+              "body": "**Mục tiêu**\nTC T-18 hai trạng thái công tắc.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca đang chở chưa POD",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I10-S02",
+              "title": "Cài nguồn (b)(c) và tham số chọn nguồn",
+              "body": "**Mục tiêu**\nMở rộng truy vấn mốc R4.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-18 xanh\n- [ ] Không đổi hành vi khi tắt",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I11",
+          "title": "消費期限 chặn cứng / 賞味期限 chỉ cảnh báo trong 引当 và lúc 積込・出荷",
+          "body": "**Mục tiêu**\nTách xử lý hai loại hạn: 消費期限 tới hạn bị loại không ngoại lệ, 賞味期限 chỉ cảnh báo và không đổi thứ tự FEFO.\n\n**Phạm vi**\n- Làm: E1 theo `sku.expiry_type`; event `use_by_block` do server sinh, ghi ở giao dịch riêng nên còn sau rollback; kiểm lại ở 積込確認 / 積込完了 / 出荷確認 (M_OUT-30); cảnh báo M_OUT-54 / 55, ngưỡng 接近 đọc cấu hình (chưa có thì không hiện); nhãn hạn luôn ghi rõ loại\n- Không làm: đặt ngưỡng 接近 (Q-OUT-26); đổi mốc so 消費期限 sang 要求日 (Q-NEW-B1 chưa trả lời)\n\n**Nguồn**\nDD:SCR-05 §3.5 E1, L3, L5; DD:SCR-06 4.3, 4.4, 4.6; BR-EXP-01; BR-EXP-02; LAB4:OUT-ALLOC-04; review-261024-step3-dr-final M-5; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] Unit T-01〜T-03, T-32 xanh\n- [ ] SQL P-14: event `use_by_block` còn sau rollback\n- [ ] Không có chỗ nào nhập lại loại hạn ngoài master SKU\n- [ ] UI SCR-05 / SCR-06 không hiện chữ gộp 「期限」\n\n**Phụ thuộc**\nEP03-I08\n\n**Ràng buộc nghiệp vụ**\n消費期限 = an toàn, chặn cứng; 賞味期限 = chất lượng, chỉ cảnh báo. Không trộn hai loại ở UI và logic.",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:expiry-type"
+          ],
+          "depends_on": [
+            "EP03-I08"
+          ],
+          "bidding_ref": [
+            "S3.2",
+            "S3.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I11-S01",
+              "title": "Viết TC 賞味 / 消費 ở 引当 và 積込・出荷",
+              "body": "**Mục tiêu**\nTC T-01〜T-03, T-32, P-14.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên hôm nay / hôm nay + 1",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I11-S02",
+              "title": "Cài E1 và event use_by_block giao dịch riêng",
+              "body": "**Mục tiêu**\nNhánh E1 + ghi sự kiện bất biến.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] P-14 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I11-S03",
+              "title": "Cài cảnh báo 賞味 theo cấu hình",
+              "body": "**Mục tiêu**\nM_OUT-54 / 55 không chặn.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-32 xanh\n- [ ] Ngưỡng NULL → không hiện",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I12",
+          "title": "配送ウィンドウ 1/3・1/2 theo 要求日 và lưu bằng chứng tính",
+          "body": "**Mục tiêu**\nLoại lô vi phạm hạn giao theo tập quán thương mại của hợp đồng khách × SKU, tính theo 要求日 và lưu căn cứ.\n\n**Phạm vi**\n- Làm: ONE_THIRD / ONE_HALF / LABEL_DATE_ONLY; 契約なし bỏ E4; rule NULL → out_of_scope + N-11; lưu `delivery_deadline_date`, `customer_sku_agreement_id`; hiện D-1.1〜D-1.5; làm tròn là tham số, test T-09 pending tới Q-OUT-27\n- Không làm: chọn cách làm tròn (Q-OUT-27); áp cho SKU 消費期限 hay không (Q-OUT-27)\n\n**Nguồn**\nDD:SCR-05 §3.5 E4, D-1; BR-DELWIN-01; CD-MST-06; LAB4:OUT-ALLOC-04; gap-261024-wbs-A #18; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] Unit T-08, T-10〜T-12 xanh\n- [ ] SQL T-13 (AGR-008 / 014 → out_of_scope) xanh\n- [ ] T-09 có hai kỳ vọng, bật một khi có đáp án\n- [ ] Bằng chứng tính hiện từ dữ liệu đã lưu cho dòng đã 引当\n\n**Phụ thuộc**\nEP03-I08\n\n**Ràng buộc nghiệp vụ**\n1/3・1/2 là tập quán thương mại theo hợp đồng, **không** phải hạn dùng pháp lý; không gộp với E1.",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:delivery-window"
+          ],
+          "depends_on": [
+            "EP03-I08"
+          ],
+          "bidding_ref": [
+            "S3.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I12-S01",
+              "title": "Viết TC 1/3・1/2",
+              "body": "**Mục tiêu**\nTC T-08〜T-13.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên = / +1 ngày\n- [ ] Ca 契約なし",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I12-S02",
+              "title": "Cài E4 và lưu bằng chứng",
+              "body": "**Mục tiêu**\nNhánh E4 + cột bằng chứng trên allocation.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Unit + SQL xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I12-S03",
+              "title": "Đưa làm tròn 1/3・1/2 thành tham số cấu hình",
+              "body": "**Mục tiêu**\nTham số chờ Q-OUT-27, không viết cứng.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Đổi tham số không cần deploy",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I13",
+          "title": "Chặn lô 牛 確認待ち ở 引当 và lúc 積込・出荷",
+          "body": "**Mục tiêu**\nLô 牛 có số cá thể không đủ 10 chữ số bị loại ở mức thứ 4 của thứ tự loại trừ và bị chặn ở 積込確認 / 積込完了 / 出荷確認.\n\n**Phạm vi**\n- Làm: E3b `beef_id_unconfirmed` sau 隔離 và trước 配送ウィンドウ (CD-OUT-09); M_OUT-66 ở SCR-05, M_OUT-65 ở C-11 / D-13 / D-6\n- Không làm: sửa số cá thể (訂正 ở EP-02); lane 米\n\n**Nguồn**\nDD:SCR-05 §3.5 E3b, G1; DD:SCR-06 S2; CD-OUT-09; INV_DB R13; BR-TRACE-02; LAB4:OUT-ALLOC-01; LAB4:OUT-SHIP-02; review-261024-step3-dr-final H-3; bidding:S3.2; bidding:S3.5\n\n**Định nghĩa xong**\n- [ ] Unit T-06 (9 / 10 chữ số) xanh\n- [ ] Lô vừa 隔離 vừa 牛 chỉ hiện 隔離中 (lý do đầu)\n- [ ] SQL P-15: M_OUT-65 ở 3 điểm\n- [ ] Thứ tự 6 mức khớp CD-OUT-09 (không xếp cuối như flow nháp)\n\n**Phụ thuộc**\nEP03-I08\n\n**Ràng buộc nghiệp vụ**\nTruy xuất 牛 là nghĩa vụ luật; lô chưa xác nhận số cá thể không được rời kho.",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:traceability-rice-beef"
+          ],
+          "depends_on": [
+            "EP03-I08"
+          ],
+          "bidding_ref": [
+            "S3.2",
+            "S3.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I13-S01",
+              "title": "Viết TC lô 牛 確認待ち",
+              "body": "**Mục tiêu**\nTC T-06, P-15, thứ tự lý do.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có dữ liệu migration 9 chữ số",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I13-S02",
+              "title": "Cài E3b trong hàm đánh giá",
+              "body": "**Mục tiêu**\nNhánh E3b đúng vị trí.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-06 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I13-S03",
+              "title": "Cài chặn M_OUT-65 ở 積込確認 / 積込完了 / 出荷確認",
+              "body": "**Mục tiêu**\nKiểm INV R13 ở 3 điểm SCR-06.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] P-15 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I14",
+          "title": "温度帯: loại lô lệch dải ở 引当 và kiểm 3 giá trị ở 積込確認",
+          "body": "**Mục tiêu**\nLô chỉ được 引当 / 積込 khi dải áp dụng khớp dải vị trí và nhiệt hàng trong ngưỡng có version.\n\n**Phạm vi**\n- Làm: appliedBand (ticket 一時温度帯 còn hạn → SKU); E2 ở 引当; C-11 so 3 giá trị theo `temperature_policy_version` hiện hành, biên bao gồm; nhập ticket 出荷票 C-14〜C-17 (lưu số tham chiếu, duyệt ngoài hệ thống); NG → rollback + giao dịch riêng tạo 逸脱, 隔離, 解放\n- Không làm: luồng duyệt ticket trong hệ thống (gap-A #13: ngoài phạm vi); quản lý version ngưỡng (EP-05 / EP-00)\n\n**Nguồn**\nDD:SCR-05 §3.5 E2; DD:SCR-06 §3.5, 4.3; BR-TEMP-01; BR-TEMP-02; LAB4:OUT-SHIP-04; gap-261024-wbs-A #3, #13; bidding:S3.5\n\n**Định nghĩa xong**\n- [ ] Unit T-04, P-07〜P-09 (biên bao gồm) xanh\n- [ ] SQL P-10, P-11 xanh\n- [ ] Lưu `temperature_policy_version_id` vào task\n- [ ] NG tạo `deviation_case` (P-33)\n\n**Phụ thuộc**\nEP03-I08; EP-00 / EP-05 (ngoài nhóm): bảng ngưỡng có version, helper tạo deviation_case\n\n**Ràng buộc nghiệp vụ**\nNgưỡng 3 dải có version, không viết cứng; đúng bằng ngưỡng là đạt (Q26).",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:temp-band"
+          ],
+          "depends_on": [
+            "EP03-I08"
+          ],
+          "bidding_ref": [
+            "S3.2",
+            "S3.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I14-S01",
+              "title": "Viết TC 温度帯 ở 引当 và 積込確認",
+              "body": "**Mục tiêu**\nTC T-04, P-07〜P-11.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Đủ 3 dải, biên ±0.1",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I14-S02",
+              "title": "Cài appliedBand và E2",
+              "body": "**Mục tiêu**\nDùng chung cho SCR-05 / SCR-06.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-04 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I14-S03",
+              "title": "Cài kiểm 3 giá trị + ticket 出荷票 ở C-11",
+              "body": "**Mục tiêu**\nNhánh BR-TEMP-02 và giao dịch 逸脱 riêng.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] P-07〜P-11 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I15",
+          "title": "解放 → 再引当: giải phóng khi lô 隔離 / 訂正 / 棚卸し và F-4",
+          "body": "**Mục tiêu**\nKhi lô đổi trạng thái hoặc số lượng, các 引当 liên quan được giải phóng đúng thứ tự khóa và CS chạy lại 引当.\n\n**Phạm vi**\n- Làm: AllocationService.release chạy trong giao dịch người gọi theo giao thức 4.5 (đọc không khóa → D → 0 → 1 → đọc lại, ≤ 3 lần); task loaded không giải phóng, trả cho người gọi; F-4 với 4 trạng thái nguồn; N-11, N-12\n- Không làm: thứ tự chọn đơn khi thiếu một phần (Q-DD05-02 chưa chốt — làm theo đề xuất, đánh dấu)\n\n**Nguồn**\nDD:SCR-05 4.3, 4.5; FR-INV-05; LAB4:OUT-ALLOC-03; gap-261024-wbs-A #16; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] SQL T-24, T-25, T-28, T-29, T-36 xanh\n- [ ] Không deadlock khi 解放 song song 引当 (T-33)\n- [ ] Quyền: センター作業者 gọi F-4 → 403 (T-31)\n\n**Phụ thuộc**\nEP03-I08",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I08"
+          ],
+          "bidding_ref": [
+            "S3.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I15-S01",
+              "title": "Viết TC 解放 và F-4",
+              "body": "**Mục tiêu**\nTC T-24〜T-29, T-36.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca task loaded",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I15-S02",
+              "title": "Cài release theo giao thức khóa 4.5",
+              "body": "**Mục tiêu**\nDịch vụ cho INV / REC / TRC gọi.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-28, T-36 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I15-S03",
+              "title": "Cài API F-4 再引当",
+              "body": "**Mục tiêu**\nF-4 dùng lại 4.2.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-24, T-25 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I16",
+          "title": "受注取消 trước picking (F-5) và job phục hồi dòng kẹt 処理中",
+          "body": "**Mục tiêu**\nCS hủy đơn chưa picking, giải phóng 引当; dòng kẹt `processing` từ 一括 được trả về `unconfirmed`.\n\n**Phạm vi**\n- Làm: F-5 với lý do bắt buộc, xác nhận 2 bước, khóa D → 0 → 1 → 2 → 3, kiểm lại `picked_at` sau khóa; job R12 ngưỡng 5 phút 【仮】 SKIP LOCKED + N-11\n- Không làm: lịch chạy batch (EP-00 bộ lập lịch); F-5 từ no_eligible_lot / conflict_rejected / out_of_scope chờ Q-CD-04 (làm theo spec màn)\n\n**Nguồn**\nDD:SCR-05 4.4, 4.6; CR-202610-order-cancel-before-picking (APV-002); LAB4:OUT-JOB-01; gap-261024-wbs-A #15; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] SQL T-26, T-30, T-35 (F-5 × quét đầu, không deadlock) xanh\n- [ ] E2E T-27\n- [ ] Job chạy trên Azure Functions timer ở môi trường test\n\n**Phụ thuộc**\nEP03-I08, EP03-I06; EP-00 (ngoài nhóm): bộ lập lịch batch",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I08",
+            "EP03-I06"
+          ],
+          "bidding_ref": [
+            "S3.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I16-S01",
+              "title": "Viết TC F-5 và job R12",
+              "body": "**Mục tiêu**\nTC T-26, T-27, T-30, T-35.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca 2 kết nối",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I16-S02",
+              "title": "Cài API F-5 受注取消",
+              "body": "**Mục tiêu**\nTheo 4.4.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-26, T-35 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I16-S03",
+              "title": "Cài job R12 処理中 timeout",
+              "body": "**Mục tiêu**\nTheo 4.6.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] T-30 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I17",
+          "title": "Màn SCR-05 ロット引当結果確認 (xem kết quả, đánh giá lô, F-4 / F-5)",
+          "body": "**Mục tiêu**\nNgười dùng xem kết quả 引当 và lý do loại từng lô; CS chạy 再引当 / 受注取消 trên PC.\n\n**Phạm vi**\n- Làm: vùng A〜F, lọc B-4 trống (Q-OUT-35), CS mặc định 要対応; D tính bằng cùng hàm thuần, không khóa; chỉ PC (M_COM-26); nút theo 職務\n- Không làm: sửa lô thủ công (ngoài phạm vi đề)\n\n**Nguồn**\nDD:SCR-05 §3.3, §3.4, §3.7, 4.1; SPEC:SCR-05; wireframe SCR-05_wf-view1; LAB4:OUT-UI-01; bidding:S3.2\n\n**Định nghĩa xong**\n- [ ] E2E: dòng đã 引当 hiện bằng chứng đã lưu\n- [ ] Truy cập từ ハンディ → M_COM-26\n- [ ] Lý do loại hiện chữ + biểu tượng, không chỉ màu\n- [ ] Nút F-4 / F-5 ẩn với 職務 khác CS\n\n**Phụ thuộc**\nEP03-I08, EP03-I15, EP03-I16",
+          "role": "FE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I08",
+            "EP03-I15",
+            "EP03-I16"
+          ],
+          "bidding_ref": [
+            "S3.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I17-S01",
+              "title": "Dựng màn SCR-05 vùng A〜D",
+              "body": "**Mục tiêu**\nDanh sách + panel đánh giá lô.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Khớp wireframe\n- [ ] Skeleton khi > 1 giây",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I17-S02",
+              "title": "Nối F-4 / F-5 và thông điệp E-1",
+              "body": "**Mục tiêu**\nGọi API, xác nhận 2 bước, giữ D-8.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] E2E T-27 xanh",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I17-S03",
+              "title": "Kiểm E2E SCR-05",
+              "body": "**Mục tiêu**\nChạy luồng chính + quyền.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I18",
+          "title": "タスク一覧 và quét GS1-128 / JAN / ITF, lần quét đầu → picked",
+          "body": "**Mục tiêu**\nセンター作業者 thấy task theo 区域 / ルート / 積込順 và quét để chuyển task sang picked.\n\n**Phạm vi**\n- Làm: View 1 nhóm task (Q-OUT-19 trước khi route 公開); tách mã GS1-128 nhận cả AI 15 và AI 17, ký tự GS; tìm lô theo (SKU, supplier_lot, hạn); nhập tay có lý do; khóa D → 3 ở lần quét đầu\n- Không làm: đổi task bằng tay (Q-OUT-16: không có)\n\n**Nguồn**\nDD:SCR-06 4.1, 4.2; SPEC:SCR-06 View 1〜2; CR-202610-handheld-picking-scr06; LAB4:OUT-SCAN-01; bidding:S3.4; bidding:S3.5\n\n**Định nghĩa xong**\n- [ ] Unit P-01〜P-04 xanh\n- [ ] SQL P-05, P-31 (quét × F-5) xanh\n- [ ] Lần quét sai ghi audit_log, không lưu bản sao giá trị quét\n\n**Phụ thuộc**\nEP03-I04, EP03-I02, EP03-I08",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I04",
+            "EP03-I02",
+            "EP03-I08"
+          ],
+          "bidding_ref": [
+            "S3.4",
+            "S3.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I18-S01",
+              "title": "Viết TC quét và タスク一覧",
+              "body": "**Mục tiêu**\nTC P-01〜P-06, P-31.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có mã AI 15 / 17",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I18-S02",
+              "title": "Cài bộ tách mã vạch",
+              "body": "**Mục tiêu**\nHàm thuần tách GS1-128 / JAN / ITF / QR xe.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] P-01〜P-04 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I18-S03",
+              "title": "Cài API タスク一覧 và lần quét đầu",
+              "body": "**Mục tiêu**\n4.1 + 4.2 bước 3.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] P-05, P-31 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I19",
+          "title": "積込確認 (C-11) theo thứ tự kiểm OUT_DB R7",
+          "body": "**Mục tiêu**\nTask chỉ sang loaded khi SKU / lô / 数量 / 車両 khớp, route đã 公開, xe đúng ngăn và các kiểm lô đạt.\n\n**Phạm vi**\n- Làm: giao dịch D → 0 → 1 → 3; thứ tự lỗi theo bảng 4.3; M_OUT-43 khi route chưa 公開; M_OUT-44 xe không có ngăn; M_OUT-60 xe đã có seal; không sinh stock_event\n- Không làm: nội dung kiểm 温度帯 / 消費期限 / 牛 (issue domain riêng, gọi vào đây)\n\n**Nguồn**\nDD:SCR-06 4.3; DB:OUT_DB R7; ADR-005; bidding:S3.5\n\n**Định nghĩa xong**\n- [ ] SQL P-12, P-13 xanh\n- [ ] Gửi lại cùng request_id trả M_OUT-24 (P-32)\n- [ ] Không có stock_event sau 積込確認\n\n**Phụ thuộc**\nEP03-I18, EP03-I14, EP03-I11, EP03-I13",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I18",
+            "EP03-I14",
+            "EP03-I11",
+            "EP03-I13"
+          ],
+          "bidding_ref": [
+            "S3.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I19-S01",
+              "title": "Viết TC 積込確認",
+              "body": "**Mục tiêu**\nTC P-12, P-13, P-32 và thứ tự lỗi.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Mỗi dòng lỗi một ca",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I19-S02",
+              "title": "Cài API 積込確認",
+              "body": "**Mục tiêu**\nTheo 4.3.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I20",
+          "title": "積込完了 (車両) và ghi seal một lần cho xe × chuyến",
+          "body": "**Mục tiêu**\nGhi một seal hợp lệ cho mỗi route khi mọi task của xe đã 積込確認.\n\n**Phạm vi**\n- Làm: khóa R → D (share) → 1 → 3 → 4; chặn M_OUT-60 (còn task chưa loaded / recheck), M_OUT-64 (đơn 再引当 / không lô, liệt kê 受注ID); kiểm lại lô; UNIQUE một seal valid / route; đưa seal vào gói route SCR-08\n- Không làm: so seal mong đợi (Q-OUT-34, M_OUT-21 tạm không dùng); xe nhiều seal (Q-OUT-33)\n\n**Nguồn**\nDD:SCR-06 4.4; DB:DSP_DB trip_seal; SEQ_load-to-ship-confirm; LAB4:OUT-SHIP-03; gap-261024-wbs-A #23; bidding:S3.5\n\n**Định nghĩa xong**\n- [ ] SQL P-16, P-17 xanh\n- [ ] Không thể có hai seal valid cho một route (test UNIQUE)\n- [ ] Gửi lại cùng request_id trả M_OUT-59\n\n**Phụ thuộc**\nEP03-I19, EP04-I03; EP-04: bảng trip_seal trong schema DSP_DB",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I19",
+            "EP04-I03"
+          ],
+          "bidding_ref": [
+            "S3.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I20-S01",
+              "title": "Viết TC 積込完了",
+              "body": "**Mục tiêu**\nTC P-16, P-17, P-32.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca đơn realloc_required",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I20-S02",
+              "title": "Cài API 積込完了 + seal",
+              "body": "**Mục tiêu**\nTheo 4.4.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I21",
+          "title": "出荷前チェック 記録 / 再測定 theo ngưỡng có version và tạo 逸脱",
+          "body": "**Mục tiêu**\nGhi 車両温度 / 貨物温度 / 予冷 / thời điểm; ngoài ngưỡng thì tạo `deviation_case` và chặn 出荷確認.\n\n**Phạm vi**\n- Làm: `pre_shipment_check` bất biến, 再測定 thêm dòng; so theo appliedBand; ngoài ngưỡng → deviation_case qua helper chung, M_OUT-23; chỉ 車両温度 NG → không 隔離 lô 【仮】 Q-OUT-29\n- Không làm: nhánh 貨物温度 NG khi task loaded (issue blocked riêng); xử lý 逸脱 (SCR-10, EP-05)\n\n**Nguồn**\nDD:SCR-06 4.5, S16; DR-TEMP-01; LAB4:OUT-DEV-01; LAB4:REC-FIX-02; bidding:S3.6\n\n**Định nghĩa xong**\n- [ ] SQL P-18〜P-20, P-33 xanh\n- [ ] Mỗi lần 逸脱 có đúng 1 deviation_case, SCR-10 thấy ca\n- [ ] Không UPDATE dòng check cũ\n\n**Phụ thuộc**\nEP03-I20, EP03-I14; EP-05 / EP-00 (ngoài nhóm): helper tạo deviation_case dùng chung\n\n**Ràng buộc nghiệp vụ**\nHồ sơ HACCP: lệch ngưỡng phải thành ca 逸脱 xử lý được, không chỉ là một sự kiện.\n\n**Spec gap**\nGAP-03-03",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:temp-band",
+            "domain:haccp",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP03-I20",
+            "EP03-I14"
+          ],
+          "bidding_ref": [
+            "S3.6"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I21-S01",
+              "title": "Viết TC 出荷前チェック",
+              "body": "**Mục tiêu**\nTC P-18〜P-20, P-33.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên ngưỡng 3 dải",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I21-S02",
+              "title": "Cài API 記録 / 再測定",
+              "body": "**Mục tiêu**\nTheo 4.5 bước 1〜4.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I21-S03",
+              "title": "Chốt giao dịch cách ly lô khi 貨物温度 NG",
+              "body": "**Mục tiêu**\nXử lý GAP-03-03: cách ly ở giao dịch riêng sau commit.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] DD sửa, không lấy (D) sau (1)",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I22",
+          "title": "貨物温度 NG khi task loaded: bắt 積込取消 rồi mới 解放 (H-7)",
+          "body": "**Mục tiêu**\nThống nhất một luật cho lô 積込済 bị 隔離: không giải phóng thẳng, phải dỡ hàng (積込取消) rồi 解放.\n\n**Phạm vi**\n- Làm: theo PA A khuyến nghị của CR: D-5 chỉ 隔離 + 逸脱 + chặn D-6; task giữ loaded; D-11 bắt buộc; R5 giải phóng ngay sau\n- Không làm: chốt phương án (chờ người duyệt ISS-35); sửa tài liệu đã duyệt\n\n**Nguồn**\nCR-202610-loaded-task-release-on-precheck-ng (draft, PA A); ISS-35 H-7; DD:SCR-06 4.5 bước 5, Q-DD06-02; DB:OUT_DB R9; code-definitions §5.3\n\n**Định nghĩa xong**\n- [ ] Chỉ bắt đầu code khi CR được duyệt; nếu chọn PA B thì break lại\n- [ ] SQL: NG ở 記録 → task vẫn loaded, D-6 bị chặn M_OUT-23 / M_OUT-31\n- [ ] Sau 積込取消 → allocation released (load_deviation), task aborted, đơn realloc_required\n\n**Phụ thuộc**\nEP03-I21, EP03-I24\n\n**Ràng buộc nghiệp vụ**\n**Đang chờ quyết ISS-35** (hạn trước 2026-11-16). Break theo PA A khuyến nghị, chưa phải quyết định.\n\n**Spec gap**\nGAP-03-03",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:temp-band",
+            "blocked:ISS-35",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP03-I21",
+            "EP03-I24"
+          ],
+          "bidding_ref": [
+            "S3.6"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I22-S01",
+              "title": "Viết TC nhánh 貨物温度 NG khi loaded",
+              "body": "**Mục tiêu**\nTC theo PA A.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca seal đã có",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA",
+                "blocked:ISS-35"
+              ]
+            },
+            {
+              "id": "EP03-I22-S02",
+              "title": "Cài nhánh NG theo PA A",
+              "body": "**Mục tiêu**\nSửa 4.5 / 4.7 theo CR.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE",
+                "blocked:ISS-35"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I23",
+          "title": "出荷確認: trừ tồn đúng một lần (D-A)",
+          "body": "**Mục tiêu**\n出荷確認 ghi đúng một stock_event 出荷, trừ tồn vật lý và đóng allocation trong cùng giao dịch; 出荷再確認 không trừ lại.\n\n**Phạm vi**\n- Làm: khóa D → 0 → 1 → 2 → 3 → 4 (share); kiểm theo bảng 4.6; lần đầu gọi InventoryService.ship + allocation consumed; lần sau chỉ đổi task; UNIQUE partial index stock_event theo task (Q-DD06-03, CR)\n- Không làm: POD (issue riêng, phát hành cùng)\n\n**Nguồn**\nADR-005; DD:SCR-06 4.6, S1; DB:INV_DB R1, R2, R5; SEQ_load-to-ship-confirm; LAB4:OUT-SHIP-01; gap-261024-wbs-A #25; bidding:S3.6\n\n**Định nghĩa xong**\n- [ ] SQL P-21〜P-23, P-26, P-27 xanh\n- [ ] Index chặn stock_event 出荷 thứ hai ở mức DB\n- [ ] Phát hành cùng release với EP03-I30 (POD theo dòng)\n- [ ] Recall đọc shipped = Σ stock_event 出荷\n\n**Phụ thuộc**\nEP03-I21, EP03-I09; EP-02 (ngoài nhóm): InventoryService.ship, stock_event\n\n**Ràng buộc nghiệp vụ**\nD-A: 引当 chỉ giữ chỗ, 積込 chỉ đánh dấu, 出荷確認 trừ tồn một lần. Tách release với POD sẽ trừ hai lần hoặc không trừ.\n\n**Spec gap**\nGAP-03-01",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP03-I21",
+            "EP03-I09"
+          ],
+          "bidding_ref": [
+            "S3.6"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I23-S01",
+              "title": "Viết TC 出荷確認 một lần",
+              "body": "**Mục tiêu**\nTC P-21〜P-23, P-26, P-27.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca gửi lại sau mất mạng",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I23-S02",
+              "title": "Cài API 出荷確認",
+              "body": "**Mục tiêu**\nTheo 4.6.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I23-S03",
+              "title": "Soạn CR INV_DB: UNIQUE index stock_event 出荷 theo task",
+              "body": "**Mục tiêu**\nQ-DD06-03 thành CR, kèm điều kiện loại dòng đảo nếu CR H-5 duyệt.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] CR đã nộp",
+              "role": "BrSE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            },
+            {
+              "id": "EP03-I23-S04",
+              "title": "Review D-A trước release",
+              "body": "**Mục tiêu**\nĐối chiếu ADR-005 và POD.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Checklist phát hành cùng đạt",
+              "role": "SA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I24",
+          "title": "積込取消: dỡ hàng, vô hiệu seal, đưa task khác về 出荷再確認",
+          "body": "**Mục tiêu**\nCho dỡ hàng trước 出発 mà không sinh stock_event, giữ lịch sử seal và đưa các task bị ảnh hưởng về kiểm lại.\n\n**Phạm vi**\n- Làm: khóa R → D → 0 → 1 → 3 → 4; kiểm departure sau khóa (M_OUT-63); task → picked; seal invalid; task đã 記録 / dispatched → recheck_required; lô đang 隔離 → gọi release ở giao dịch riêng sau commit\n- Không làm: ai được quyết 積込取消 (Q-OUT-29 — tạm センター作業者 + lý do)\n\n**Nguồn**\nDD:SCR-06 4.7, S10; DB:OUT_DB R8; LAB4:OUT-SHIP-05; bidding:S3.6\n\n**Định nghĩa xong**\n- [ ] SQL P-23〜P-26 xanh\n- [ ] Seal cũ giữ lịch sử, M_OUT-61 hiện ở D-15\n- [ ] Không có stock_event\n\n**Phụ thuộc**\nEP03-I20, EP03-I23",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I20",
+            "EP03-I23"
+          ],
+          "bidding_ref": [
+            "S3.6"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I24-S01",
+              "title": "Viết TC 積込取消",
+              "body": "**Mục tiêu**\nTC P-23〜P-26.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca đồng thời với 出荷確認",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I24-S02",
+              "title": "Cài API 積込取消",
+              "body": "**Mục tiêu**\nTheo 4.7.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I25",
+          "title": "Chặn 出発 khi lô đã 出荷確認 bị 隔離 / recall và cho 出荷取消 trước 出発 (H-5)",
+          "body": "**Mục tiêu**\nXe không rời kho với hàng đang bị recall / 隔離; hàng chưa đi được đảo về kho có lý do.\n\n**Phạm vi**\n- Làm: theo PA A + A1 khuyến nghị: cổng 出発 thêm kiểm lô quarantine (M_DSP-50 【仮】), cờ lô 隔離 trong gói route; D-11 mở rộng thành 出荷取消: đảo stock_event 出荷 (reverses_id), allocation consumed → released, task → aborted, đơn → realloc_required, seal vô hiệu\n- Không làm: chốt phương án và số mã (chờ người duyệt ISS-35); sửa tài liệu đã duyệt\n\n**Nguồn**\nCR-202610-block-recalled-lot-before-departure (draft, PA A + A1); ISS-35 H-5; DB:DSP_DB R6; DB:OUT_DB R8 (R8a đề xuất); Q-FLW-TRC-17 (APV-015)\n\n**Định nghĩa xong**\n- [ ] Chỉ code khi CR được duyệt; PA B / C thì break lại\n- [ ] SQL: recall sau 出荷確認, trước 出発 → 出発 bị chặn (online và khi server nhận)\n- [ ] 出荷取消 đảo tồn đúng một lần, recall snapshot không đổi\n- [ ] 出発 offline ghi trước khi 隔離 → nhận + N-13 + N-11 (Q-CR-BRL-03)\n\n**Phụ thuộc**\nEP03-I23, EP03-I24, EP04-I19\n\n**Ràng buộc nghiệp vụ**\n**Đang chờ quyết ISS-35.** Recall là ràng buộc an toàn thực phẩm; PA A là khuyến nghị, chưa phải quyết định.\n\n**Spec gap**\nGAP-03-01, GAP-03-06",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:haccp",
+            "domain:traceability-rice-beef",
+            "blocked:ISS-35",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP03-I23",
+            "EP03-I24",
+            "EP04-I19"
+          ],
+          "bidding_ref": [
+            "S3.6",
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I25-S01",
+              "title": "Viết TC recall × 出荷確認 × 出発",
+              "body": "**Mục tiêu**\nTC đồng thời 3 thao tác.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca offline",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA",
+                "blocked:ISS-35"
+              ]
+            },
+            {
+              "id": "EP03-I25-S02",
+              "title": "Cài 出荷取消 (đảo stock_event)",
+              "body": "**Mục tiêu**\nTheo A-3 / A-5 của CR.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE",
+                "blocked:ISS-35"
+              ]
+            },
+            {
+              "id": "EP03-I25-S03",
+              "title": "Thêm kiểm lô 隔離 vào cổng 出発",
+              "body": "**Mục tiêu**\nTheo A-1 / A-2 của CR.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE",
+                "blocked:ISS-35"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I26",
+          "title": "Màn SCR-06 ba view (ハンディ View 1〜2, tablet View 3)",
+          "body": "**Mục tiêu**\nGiao diện quét / 積込確認 trên ハンディ 360 px và 出荷前チェック / 出荷確認 / 積込取消 trên tablet cửa xuất.\n\n**Phạm vi**\n- Làm: chữ 18–20 px, số lượng ≥ 32 px, vùng chạm ≥ 48 px; lý do chặn hiện trong màn, giữ dữ liệu đã quét; xác nhận 2 bước; khóa phiên 5 phút\n- Không làm: PC cho View 1〜2 (Q-DD06-04 chưa chốt)\n\n**Nguồn**\nDD:SCR-06 §3.3, §3.4, §3.7; SPEC:SCR-06; wireframe SCR-06_wf-view1〜3; LAB4:OUT-UI-02; bidding:S3.4; bidding:S3.5; bidding:S3.6\n\n**Định nghĩa xong**\n- [ ] E2E/a11y P-29 xanh\n- [ ] P-06, P-25 xanh\n- [ ] Thao tác View 3 từ ハンディ bị chặn\n\n**Phụ thuộc**\nEP03-I18, EP03-I19, EP03-I20, EP03-I21",
+          "role": "FE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I18",
+            "EP03-I19",
+            "EP03-I20",
+            "EP03-I21"
+          ],
+          "bidding_ref": [
+            "S3.4",
+            "S3.5",
+            "S3.6"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I26-S01",
+              "title": "Dựng View 1〜2 cho ハンディ",
+              "body": "**Mục tiêu**\nDanh sách task + quét + C-11.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Không cuộn ngang ở 360 px",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I26-S02",
+              "title": "Dựng View 3 cho tablet",
+              "body": "**Mục tiêu**\nD-13, D-8, D-6, D-11.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Xác nhận 2 bước",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I26-S03",
+              "title": "Kiểm E2E / a11y SCR-06",
+              "body": "**Mục tiêu**\nLuồng chính + P-29.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I27",
+          "title": "Sổ pod_sync_receipt: idempotency bản ghi tài xế, N-13, B-16",
+          "body": "**Mục tiêu**\nMọi bản ghi từ app tài xế được áp đúng một lần theo `client_record_id`; bản ghi bị từ chối có lý do và được báo.\n\n**Phạm vi**\n- Làm: bảng `pod_sync_receipt` UNIQUE client_record_id (UUID v4); INSERT ON CONFLICT → duplicate M_DSP-27; không lưu payload bị từ chối; N-13 qua mail_outbox; B-16 route in_progress > 8 giờ chưa đồng bộ; SCR-07 C-1 POD拒否 / 最終同期 đọc từ sổ; handled_at ghi một lần\n- Không làm: chống N-13 lặp chi tiết (Q-FLW-B15B16-01〜03 chờ)\n\n**Nguồn**\nDD:SCR-08 4.6 bước 3, 4.7; DB:DSP_DB R9, R10; ADR-009; LAB4:T08-06; bidding:S3.8\n\n**Định nghĩa xong**\n- [ ] SQL TP08-03 (gửi trùng tuần tự / song song) xanh\n- [ ] TP08-17 (B-16 8:00 / 8:01) xanh\n- [ ] C-1 POD拒否 đếm đúng\n\n**Phụ thuộc**\nEP04-I03, EP03-I03; EP-00 (ngoài nhóm): mail_outbox, bộ lập lịch batch",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP04-I03",
+            "EP03-I03"
+          ],
+          "bidding_ref": [
+            "S3.8"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I27-S01",
+              "title": "Viết TC idempotency và B-16",
+              "body": "**Mục tiêu**\nTC TP08-03, TP08-17.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca 2 tab",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I27-S02",
+              "title": "Cài sổ receipt và khung xử lý từng bản ghi",
+              "body": "**Mục tiêu**\n4.6 bước 3 (a)(b)(d).\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP08-03 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I27-S03",
+              "title": "Cài N-13 và job B-16",
+              "body": "**Mục tiêu**\nPhát mail + job định kỳ.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP08-17 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I28",
+          "title": "OfflineQueue mã hóa chỉ ở app tài xế (IndexedDB + WebCrypto)",
+          "body": "**Mục tiêu**\nApp tài xế giữ bản ghi khi mất sóng tới 8 giờ, mã hóa trên thiết bị, không xóa bản ghi quá hạn.\n\n**Phạm vi**\n- Làm: IndexedDB store queue / blobs / rejected / cache; AES-GCM 256, khóa non-extractable theo (thiết bị, tài xế); loại bản ghi pod / exception / seal_check / departure / return; tuổi ≥ 360 phút 【仮】 → M_DSP-38, > 480 → M_DSP-24; phạm vi tài xế; logout giữ hàng đợi (M_DSP-45); Service Worker cache shell\n- Không làm: offline cho màn kho (cấm theo NFR-AVL-02); khôi phục từ máy khác\n\n**Nguồn**\nADR-009; DD:SCR-08 §3.4, G08-01, G08-13, G08-16; NFR-AVL-02; NFR-SEC-03; LAB4:T08-01; bidding:S3.8\n\n**Định nghĩa xong**\n- [ ] Unit TP08-01, TP08-02 (không xóa) xanh\n- [ ] TP08-16 (đổi tài xế trên cùng máy) xanh\n- [ ] Không còn dữ liệu nghiệp vụ ở localStorage\n- [ ] Ngưỡng 「gần」 đọc cấu hình\n\n**Phụ thuộc**\nEP03-I03; EP-00 (ngoài nhóm): chính sách MDM / quản lý khóa (Q-DD08-01)\n\n**Ràng buộc nghiệp vụ**\nChỉ SCR-08 được offline; giao dịch kho cần khóa DB nên luôn online.",
+          "role": "FE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I03"
+          ],
+          "bidding_ref": [
+            "S3.8"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I28-S01",
+              "title": "Viết TC hàng đợi offline",
+              "body": "**Mục tiêu**\nTC TP08-01, TP08-02, TP08-16.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca > 8 giờ",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I28-S02",
+              "title": "Cài store IndexedDB và mã hóa",
+              "body": "**Mục tiêu**\nTheo §3.4.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Bản rõ chỉ gồm trường đếm",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I28-S03",
+              "title": "Cài tuổi hàng đợi, phạm vi tài xế, logout",
+              "body": "**Mục tiêu**\nA-5, A-6, M_DSP-45.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP08-01, TP08-16 xanh",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I28-S04",
+              "title": "Review mã hóa hàng đợi với セキュリティオーナー",
+              "body": "**Mục tiêu**\nRà Q-DD08-01.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có kết luận hoặc rủi ro ghi sổ",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I29",
+          "title": "Đồng bộ tự động hàng đợi tài xế, phân loại synced / duplicate / refused / retry",
+          "body": "**Mục tiêu**\nBản ghi được gửi lại tự động khi có mạng, lỗi tạm không bị coi là từ chối, mỗi bản ghi xử lý riêng.\n\n**Phạm vi**\n- Làm: trigger online / mở app / visible / mỗi 5 phút + E-1; mutex (navigator.locks); thứ tự gửi theo giờ thiết bị và loại; lô ≤ 20 【仮】; tệp gửi trước; refused → store rejected + E-2; retry không giới hạn lần\n- Không làm: server xử lý từng loại bản ghi (issue POD / EP04)\n\n**Nguồn**\nDD:SCR-08 3.4, 4.6, G08-02, G08-10; SEQ_pod-offline-sync; LAB4:T08-02; bidding:S3.8\n\n**Định nghĩa xong**\n- [ ] TP08-04, TP08-05, TP08-11 xanh\n- [ ] Lỗi 401 / 5xx giữ bản ghi ở queued\n- [ ] M_DSP-25 / 26 / 34 hiện đúng ưu tiên\n\n**Phụ thuộc**\nEP03-I28, EP03-I27",
+          "role": "FE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I28",
+            "EP03-I27"
+          ],
+          "bidding_ref": [
+            "S3.8"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I29-S01",
+              "title": "Viết TC đồng bộ",
+              "body": "**Mục tiêu**\nTC TP08-04, TP08-05, TP08-11.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca mất mạng giữa lô",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I29-S02",
+              "title": "Cài bộ lập lịch đồng bộ + mutex",
+              "body": "**Mục tiêu**\nTrigger và mutex.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Một lượt tại một thời điểm",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I29-S03",
+              "title": "Cài API sync xử lý từng bản ghi một giao dịch",
+              "body": "**Mục tiêu**\n4.6 bước 3〜4, outcome retry.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP08-05 xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I30",
+          "title": "POD theo dòng 受注: pod, pod_line, shipment_line, không trừ tồn",
+          "body": "**Mục tiêu**\nGhi kết quả giao theo từng dòng (受領済 / 持戻り / 受領拒否), sinh lịch sử giao cho 日付逆転, không đụng tồn kho.\n\n**Phạm vi**\n- Làm: registerPod 4.4: khóa route_stop → delivery_order → cặp (0); pod + pod_version 1 + pod_line bất biến; OUT shipment_line / dòng; delivery_order → delivered; chỉ dòng dispatched; POD trùng stop → already_delivered; 版 cũ khớp qua delivery_order_id\n- Không làm: POD訂正 (SCR-12); 返品 vào kho (EP-01)\n\n**Nguồn**\nDD:SCR-08 4.4, §3.5 (d), G08-06, G08-07; DB:DSP_DB R7, R11; D-B; ADR-005; LAB4:T08-05; gap-261024-wbs-A #26; bidding:S3.7\n\n**Định nghĩa xong**\n- [ ] SQL TP08-13, TP08-14 xanh\n- [ ] Tồn kho không đổi khi POD (kiểm stock_event)\n- [ ] Chỉ dòng received thành nguồn 日付逆転\n- [ ] Phát hành cùng release với EP03-I23 (出荷確認)\n\n**Phụ thuộc**\nEP03-I23, EP03-I27, EP03-I09\n\n**Ràng buộc nghiệp vụ**\nD-A: POD chỉ ghi kết quả giao; trừ tồn đã xảy ra ở 出荷確認. Hàng 持戻り / 受領拒否 chỉ về kho qua 返品 → 隔離.",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I23",
+            "EP03-I27",
+            "EP03-I09"
+          ],
+          "bidding_ref": [
+            "S3.7"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I30-S01",
+              "title": "Viết TC POD theo dòng",
+              "body": "**Mục tiêu**\nTC TP08-13, TP08-14 và ca POD trùng.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có kiểm tồn không đổi",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I30-S02",
+              "title": "Cài registerPod và pod_line",
+              "body": "**Mục tiêu**\n4.4 bước 3〜5.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I30-S03",
+              "title": "Ghi shipment_line OUT từ POD",
+              "body": "**Mục tiêu**\n4.4 bước 6, R11.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Nguồn (a) của R4 cập nhật đúng",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I30-S04",
+              "title": "Review phát hành cùng D-A",
+              "body": "**Mục tiêu**\nKiểm cờ phát hành chung với 出荷確認.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Checklist đạt",
+              "role": "SA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I31",
+          "title": "Bằng chứng POD theo hợp đồng 車上渡し / 軒先渡し và snapshot lúc server nhận",
+          "body": "**Mục tiêu**\nPOD chỉ hoàn tất khi đủ bộ bằng chứng theo cấu hình hợp đồng khách × SKU; cấu hình đổi giữa chừng thì từ chối có lý do.\n\n**Phạm vi**\n- Làm: C-2 配送条件 chỉ đọc; C-11 chỉ cho giá trị khớp + 持戻り; C-3 dựng từ pod_*_required; chụp vào pod.required_* khi server nhận; thiếu → M_DSP-21; cấu hình đổi → refused evidence_config_changed + N-13; 持戻り chỉ cần mã\n- Không làm: stop có nhiều 配送条件 (Q-DSPDB-02 chưa trả lời); cấu hình hợp đồng (EP-08)\n\n**Nguồn**\nDD:SCR-08 C-2, C-3, C-11, G08-11; DB:DSP_DB R8; BR-POD-01; LAB4:T08-07; bidding:S3.7\n\n**Định nghĩa xong**\n- [ ] TP08-07 xanh\n- [ ] Unit dựng C-3 cho 4 cờ\n- [ ] Không còn bộ bằng chứng viết cứng\n\n**Phụ thuộc**\nEP03-I30; EP-08 (ngoài nhóm): cờ pod_*_required trong hợp đồng",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I30"
+          ],
+          "bidding_ref": [
+            "S3.7"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I31-S01",
+              "title": "Viết TC bằng chứng theo hợp đồng",
+              "body": "**Mục tiêu**\nTC TP08-07 + 4 cờ.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca 持戻り",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP03-I31-S02",
+              "title": "Cài kiểm bằng chứng và snapshot",
+              "body": "**Mục tiêu**\n4.4 Error dòng 5, bước 4.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I32",
+          "title": "Upload tệp POD idempotent lên Blob với SHA-256",
+          "body": "**Mục tiêu**\nẢnh / chữ ký / 荷下ろし証跡 / 位置 được lưu một lần, kiểm hash ở server.\n\n**Phạm vi**\n- Làm: API attachments idempotent theo attachment.client_record_id; SHA-256 tính ở thiết bị và server; lệch hash → refused; lưu Blob (không log PII)\n- Không làm: chính sách WORM / thời hạn (Q-NEW-C2, EP-00)\n\n**Nguồn**\nDD:SCR-08 §3.4 tệp đính kèm, 4.6 bước 2, G08-12; COM_DB attachment; LAB4:T08-08; bidding:S3.7\n\n**Định nghĩa xong**\n- [ ] Gửi lại cùng id trả id cũ\n- [ ] Hash lệch bị từ chối\n- [ ] Ảnh nén ≤ 2 MB 【đề xuất】 kiểm ở thiết bị\n\n**Phụ thuộc**\nEP03-I28, EP03-I27; EP-00 (ngoài nhóm): port Blob Storage",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I28",
+            "EP03-I27"
+          ],
+          "bidding_ref": [
+            "S3.7"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I32-S01",
+              "title": "Cài API attachments + kiểm SHA-256",
+              "body": "**Mục tiêu**\nTheo 4.6 bước 2.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Idempotent",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP03-I32-S02",
+              "title": "Tính SHA-256 và gửi tệp từ hàng đợi",
+              "body": "**Mục tiêu**\nTệp gửi trước bản ghi chính.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Tệp lớn không chặn UI",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I33",
+          "title": "Màn SCR-08 POD登録 và vùng đồng bộ (375 px)",
+          "body": "**Mục tiêu**\nTài xế đăng ký POD theo dòng và theo dõi đồng bộ trên smartphone MDM.\n\n**Phạm vi**\n- Làm: header A-4〜A-7; View 2 C-1〜C-16; E-1, E-2; B-8 sửa bản 同期待ち (M_DSP-37) / chỉ đọc sau khi server nhận (M_DSP-36); 同期状態 tách 配送状態\n- Không làm: View 1 lịch trình và View 3 例外事象 (EP04)\n\n**Nguồn**\nDD:SCR-08 §3.3 A, C, E; SPEC:SCR-08; wireframe SCR-08_wf-view2; bidding:S3.7; bidding:S3.8\n\n**Định nghĩa xong**\n- [ ] E2E offline (giả lập) TP08-06, TP08-15 xanh\n- [ ] TP08-19 bố cục 375 px\n- [ ] Không hiện 「端末判定」\n\n**Phụ thuộc**\nEP03-I30, EP03-I31, EP03-I29",
+          "role": "FE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP03-I30",
+            "EP03-I31",
+            "EP03-I29"
+          ],
+          "bidding_ref": [
+            "S3.7",
+            "S3.8"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I33-S01",
+              "title": "Dựng View 2 POD登録",
+              "body": "**Mục tiêu**\nC-1〜C-16.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Khớp wireframe",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I33-S02",
+              "title": "Dựng header và vùng đồng bộ",
+              "body": "**Mục tiêu**\nA-4〜A-7, E-1, E-2.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Hai trục trạng thái",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP03-I33-S03",
+              "title": "Kiểm E2E offline SCR-08 POD",
+              "body": "**Mục tiêu**\nPlaywright giả lập offline.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I34",
+          "title": "POD訂正 bằng 版 mới ở SCR-12 (7 ngày, chỉ thêm bằng chứng)",
+          "body": "**Mục tiêu**\nクレーム/CS sửa POD đã vào server bằng 版 mới liên kết 版 cũ; damage_noted cần 品質管理 duyệt.\n\n**Phạm vi**\n- Làm: tạo pod_version ≥ 2 trong 7 ngày lịch JST; được sửa recipient_name, custody_checkpoint, 例外コード; bằng chứng chỉ thêm; không đổi giữa nhóm 持戻り và nhóm giao; damage_noted → 承認待ち, người duyệt khác CS; không đổi tồn / trạng thái stop; SCR-08 hiện 「訂正あり」\n- Không làm: ca recall (EP-06); nhập lại POD giấy (Q67)\n\n**Nguồn**\nSPEC:SCR-12 §3 Sửa POD, H-6, H-13; DB:DSP_DB R7; DR-POD-01; bidding:S3.9\n\n**Định nghĩa xong**\n- [ ] Test API: quá 7 ngày bị chặn; 版 承認待ち vẫn duyệt được sau hạn\n- [ ] Test: đổi nhóm 持戻り ↔ giao bị chặn (Q-TRC-24)\n- [ ] Bản mới vẫn thỏa BR-POD-01\n- [ ] Audit log đủ, 版 cũ xem được\n\n**Phụ thuộc**\nEP03-I30, EP03-I31\n\n**Spec gap**\nGAP-03-04",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP03-I30",
+            "EP03-I31"
+          ],
+          "bidding_ref": [
+            "S3.9"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I34-S01",
+              "title": "Viết DD SCR-12 — POD訂正 (View H)",
+              "body": "**Mục tiêu**\nViết detail design SCR-12 phần POD訂正 (View H) theo khuôn BM-2-901-53, bám spec đã duyệt, không đặt giá trị tạm.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có sequence, bảng xử lý server (Input / Output / Error / Detail), máy trạng thái, ma trận quyền\n- [ ] Có điểm kiểm thử biên và bảng câu hỏi mở trỏ Q-xx\n- [ ] Qua review-detail-design, đạt DoR trước sprint code",
+              "role": "BrSE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP03-I35",
+          "title": "Claim gắn dòng giao / lô / bằng chứng, trạng thái tách xử lý tồn",
+          "body": "**Mục tiêu**\nクレーム/CS tạo claim liên kết dòng giao, lô, bằng chứng, lịch sử bảo quản; trạng thái claim và xử lý tồn kiểm toán riêng.\n\n**Phạm vi**\n- Làm: View G claim: tạo, cập nhật trạng thái, 返品数量 tham chiếu; 品質判定 G-9 chỉ 品質管理; liên kết claim ↔ recall chỉ gợi ý số (G-12)\n- Không làm: ca recall, 範囲版, thông báo (EP-06); 廃棄 (EP-02)\n\n**Nguồn**\nSPEC:SCR-12 §3 Claim, View G; FR-OUT-07; UC-20; bidding:S3.9; gap-261024-wbs-A #6\n\n**Định nghĩa xong**\n- [ ] Test quyền: CS không có G-9\n- [ ] Đổi trạng thái claim không đổi tồn và ngược lại (audit riêng)\n- [ ] Claim truy được về shipment_line và lô\n\n**Phụ thuộc**\nEP03-I30; EP-06 (ngoài nhóm): khung màn SCR-12 và ca recall",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:no"
+          ],
+          "depends_on": [
+            "EP03-I30"
+          ],
+          "bidding_ref": [
+            "S3.9"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP03-I35-S01",
+              "title": "Viết DD SCR-12 — claim (View G)",
+              "body": "**Mục tiêu**\nViết detail design SCR-12 phần claim (View G) theo khuôn BM-2-901-53, bám spec đã duyệt, không đặt giá trị tạm.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có sequence, bảng xử lý server (Input / Output / Error / Detail), máy trạng thái, ma trận quyền\n- [ ] Có điểm kiểm thử biên và bảng câu hỏi mở trỏ Q-xx\n- [ ] Qua review-detail-design, đạt DoR trước sprint code",
+              "role": "BrSE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EP-04",
+      "title": "ルート計画・拘束時間 (E4)",
+      "body": "**Mục tiêu**\nXây mới lập route có version và kiểm giới hạn giờ làm tài xế theo quy định 2024 ở server, cùng các mốc 出発 / 帰着 / seal và 例外事象 từ app tài xế.\n\n**Phạm vi**\n- Làm: SCR-07 (3 view), SCR-08 (lịch trình, シール確認, 出発 / 帰着, 例外事象), engine R-HR-01〜13, ルール版 có version, kiểm lại lúc 公開, timeline giờ làm.\n- Không làm: adapter IF-MAP-01 (EP-09 S9.3), master xe / depot (EP-08), báo cáo RPT-10 (EP-07), POD (EP-03).\n\n**Nguồn**\nDD:SCR-07, DD:SCR-08; DB:DSP_DB; ADR-007, ADR-009; legal-check-d10-261012 §4.3; bidding:E4 (S4.1〜S4.5); plan-261024-dev-phase-wbs §4 (ルール版 + kiểm lại lúc 公開: S2, engine: S5), §7\n\n**Định nghĩa xong**\n- [ ] TP07-01〜22, TP08-08〜12, TP08-20 xanh trên môi trường test\n- [ ] Không thể 公開 route vi phạm qua UI hay gọi API trực tiếp (TP07-21)\n- [ ] RTM cập nhật cho FR-SCH-01〜05",
+      "labels": [
+        "type:epic"
+      ],
+      "issues": [
+        {
+          "id": "EP04-I01",
+          "title": "Chỉnh DD SCR-07 cho hệ đích Azure và chốt tham số 【仮定】",
+          "body": "**Mục tiêu**\nĐưa DD SCR-07 về App Service, bỏ phần RPC prototype, chốt cách dùng tham số 【仮定】 của engine.\n\n**Phạm vi**\n- Làm: thay rpc_route_* bằng RoutePlanningService; ranh giới giao dịch 公開; APP_ENV ↔ 4 môi trường; ghi rõ phần chờ ISS-35 (H-6); predict-risks cho 拘束時間\n- Không làm: chọn phương án CR H-6 (người duyệt quyết); trả lời Q-DD07-01 / 02, Q-A-01 (法務)\n\n**Nguồn**\nDD:SCR-07 §3.4, §4.4, §4.7, §5.6; CR-202610-driver-lock-duty-recheck-on-publish; plan-261024-dev-phase-wbs §8.3\n\n**Định nghĩa xong**\n- [ ] DD không còn RPC / grant authenticated\n- [ ] Thứ tự khóa 公開 khớp EP-00 (xem GAP-04-01)\n- [ ] Tham số 【仮定】 có chủ sở hữu và hạn trả lời\n- [ ] DoR đạt\n\n**Phụ thuộc**\n—\n\n**Spec gap**\nGAP-04-01, GAP-04-02",
+          "role": "SA",
+          "sprint": "S1",
+          "labels": [
+            "type:issue",
+            "role:SA",
+            "dd:yes",
+            "spec-gap"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S4.1",
+            "S4.2",
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I01-S01",
+              "title": "Viết lại §4 DD SCR-07 theo service",
+              "body": "**Mục tiêu**\nmakeDraft / editDraft / checkDuty / publish theo service.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Không đọc trạng thái / kết quả do client gửi",
+              "role": "SA",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP04-I01-S02",
+              "title": "Chạy predict-risks cho 公開 và engine 拘束時間",
+              "body": "**Mục tiêu**\nRà lách kiểm, đồng thời, ルール版 đổi.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Ca kiểm thêm ghi vào §5.5",
+              "role": "SA",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP04-I01-S03",
+              "title": "Gửi lô câu hỏi 法務 Q-DD07-01 / 02, Q-A-01, Q30, Q63",
+              "body": "**Mục tiêu**\nGom câu hỏi diễn giải luật.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Đã gửi, ghi hạn trả lời",
+              "role": "BrSE",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            },
+            {
+              "id": "EP04-I01-S04",
+              "title": "Review DD SCR-07 và chốt DoR",
+              "body": "**Mục tiêu**\nDuyệt DD đã chỉnh.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "BrSE",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I02",
+          "title": "Chỉnh DD SCR-08 phần lịch trình, シール確認, 出発 / 帰着, 例外事象",
+          "body": "**Mục tiêu**\nĐưa phần mốc chuyến và 例外事象 của DD SCR-08 về hệ đích; giờ thiết bị / giờ server rõ ràng.\n\n**Phạm vi**\n- Làm: service cho loadSchedule / recordSealCheck / recordTripMovement / registerException; CK-1〜CK-4; ghi phần chờ ISS-35 (cổng 出発 H-5)\n- Không làm: POD / hàng đợi (EP03)\n\n**Nguồn**\nDD:SCR-08 §3.5 (c), §3.6, 4.1〜4.3, 4.5; ADR-009; CR-202610-driver-departure-return-and-seal-check (APV-002)\n\n**Định nghĩa xong**\n- [ ] DD không còn RPC\n- [ ] Q-DD08-04 có trạng thái\n- [ ] DoR đạt\n\n**Phụ thuộc**\n—\n\n**Spec gap**\nGAP-04-03",
+          "role": "SA",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:SA",
+            "dd:yes",
+            "spec-gap"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S4.4",
+            "S4.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I02-S01",
+              "title": "Viết lại 4.1〜4.3, 4.5 DD SCR-08 theo service",
+              "body": "**Mục tiêu**\nTheo hệ đích.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Ranh giới giao dịch rõ",
+              "role": "SA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            },
+            {
+              "id": "EP04-I02-S02",
+              "title": "Review DD SCR-08 phần chuyến và chốt DoR",
+              "body": "**Mục tiêu**\nDuyệt DD.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "BrSE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I03",
+          "title": "Dựng schema DSP_DB và CR thêm 帰着予定",
+          "body": "**Mục tiêu**\nCó schema route / POD / giờ làm theo DSP_DB 1.1.1 làm nền cho EP-04 và phần POD của EP-03.\n\n**Phạm vi**\n- Làm: CR DSP_DB thêm `route_version.planned_return_at` (G-DB-1) và cột kiểm giờ thiết bị trên pod_sync_receipt; migration route, route_version, route_stop, route_stop_line, route_duty_check, trip_seal, trip_movement_event, delivery_exception, pod*, driver_duty_balance, driver_duty_day; UNIQUE một 出発 / một 帰着 / route\n- Không làm: dữ liệu số dư đầu kỳ (issue timeline)\n\n**Nguồn**\nDB:DSP_DB 1.1.1 §4.1〜4.16, R1〜R11; DD:SCR-07 G-DB-1, G07-09; DD:SCR-08 §3.6; LAB4:T07-10; LAB4:T07-05; bidding:S4.1; bidding:S4.4\n\n**Định nghĩa xong**\n- [ ] CR 帰着予定 và cột clock_check_result nộp người duyệt trước khi chốt migration\n- [ ] Migration lên / xuống sạch\n- [ ] Bảng bất biến (R5) có trigger / quyền chặn UPDATE / DELETE\n- [ ] row_version trên route\n\n**Phụ thuộc**\n—",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [],
+          "bidding_ref": [
+            "S4.1",
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I03-S01",
+              "title": "Soạn CR DSP_DB: 帰着予定 và cột kiểm giờ thiết bị",
+              "body": "**Mục tiêu**\nGộp T07-10 và đề xuất C-08.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] CR đã nộp",
+              "role": "BrSE",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            },
+            {
+              "id": "EP04-I03-S02",
+              "title": "Viết migration DSP_DB",
+              "body": "**Mục tiêu**\nBảng, FK, UNIQUE, index.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Khớp DSP_DB",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I03-S03",
+              "title": "Viết test ràng buộc DSP_DB",
+              "body": "**Mục tiêu**\nUNIQUE 出発 / 帰着, bất biến R5.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Ca vi phạm bị chặn",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I03-S04",
+              "title": "Review schema DSP_DB",
+              "body": "**Mục tiêu**\nĐối chiếu DSP_DB.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Không lệch",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I04",
+          "title": "ルール版 拘束時間 2024 kèm nguồn pháp lý và cờ xác minh",
+          "body": "**Mục tiêu**\nCó ルール版 2024-04 với đủ giá trị đã xác minh, nguồn điều luật, cờ 未検証 và tham số diễn giải 【仮定】, nạp qua release.\n\n**Phạm vi**\n- Làm: seed duty_rule_version (13 / 15 h, 休息 11 / 9 h, 284 h, 3,300 h, 運転 9 h 2日平均, 44 h 2週, 連続 4 h + ngắt 30 phút, 960 h) và cột nguồn; is_verified chỉ bật khi 法務 + trưởng 運送部門 ký; config_parameter nhóm dispatch_duty (driving_avg_2day_mode, two_week_block_anchor_date, overtime_calc_mode, statutory_holiday_weekday, daily_restraint_overlap_mode); chọn ルール版 theo 配送日\n- Không làm: màn sửa ルール版 (Q30: nạp qua release); cơ chế bảng có version chung (EP-00)\n\n**Nguồn**\nDD:SCR-07 §3.4 bảng R-HR + 「Tham số cấu hình」, G07-01, G07-02; legal-check-d10-261012 §4.3; APV-010 L-4; ADR-007; LAB4:T07-01; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] Seed có nguồn đúng điều (告示4条, 労基法140条) cho từng giá trị\n- [ ] TP07-10 (chọn ルール版 theo 配送日) xanh\n- [ ] Đổi tham số ghi audit_log, không cần sửa code\n- [ ] Không còn hằng số giờ trong code (grep kiểm ở CI)\n\n**Phụ thuộc**\nEP04-I03; EP-00 (ngoài nhóm): bảng quy tắc có version, config_parameter, audit\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I03"
+          ],
+          "bidding_ref": [
+            "S4.2",
+            "S4.3"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I04-S01",
+              "title": "Lập bảng đối chiếu giá trị ↔ nguồn pháp lý để 法務 ký",
+              "body": "**Mục tiêu**\nChuẩn bị bảng ký xác minh cho is_verified.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Bảng có điều khoản cho từng giá trị\n- [ ] Gửi 法務 / 運送部門",
+              "role": "BrSE",
+              "sprint": "S1",
+              "labels": [
+                "type:sub-issue",
+                "role:BrSE"
+              ]
+            },
+            {
+              "id": "EP04-I04-S02",
+              "title": "Viết seed ルール版 2024-04 và loader",
+              "body": "**Mục tiêu**\nNạp qua release, chọn theo 配送日.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-10 xanh",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I04-S03",
+              "title": "Thêm tham số 【仮定】 nhóm dispatch_duty",
+              "body": "**Mục tiêu**\nLưu config_parameter có thể gắn ルール版.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Đổi giá trị không deploy",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I04-S04",
+              "title": "Viết TC chọn ルール版 và cờ 未検証",
+              "body": "**Mục tiêu**\nTC TP07-10, TP07-11.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca effective_from = 配送日 + 1",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I05",
+          "title": "公開: server tự tính lại, không tin nháp, chặn ルール版 未検証 ở prod",
+          "body": "**Mục tiêu**\nKhông thể công bố route vi phạm giờ làm hay 見積 cũ, kể cả gọi API trực tiếp với nháp giả.\n\n**Phạm vi**\n- Làm: publish 4.4: kiểm theo đúng thứ tự (row_version → completed → lý do → 見積 24 h → ルール版 đổi → tính lại → 未検証 prod → xe / tài xế → đơn mất 引当); tuổi 見積 từ travel_fetched_at do server ghi; lưu nháp chỉ nhận đầu vào nghiệp vụ; 版 n → superseded; M_DSP-46 chỉ chặn môi trường prod, UAT cảnh báo\n- Không làm: khóa tài xế + lũy kế (issue H-6 riêng)\n\n**Nguồn**\nDD:SCR-07 4.4, 4.7, G07-07, G07-08; DB:DSP_DB R1, R2; Q-FLW-DSP-14; LAB4:T07-04; LAB4:T07-03; bidding:S4.2; bidding:S4.4\n\n**Định nghĩa xong**\n- [ ] TP07-21 (nháp giả qua API) xanh\n- [ ] TP07-11 (prod vs UAT) xanh\n- [ ] TP07-12, TP07-15, TP07-16 xanh\n- [ ] Quy tắc chưa cài trong engine trả 未判定, không trả 適合 (GAP-04-02)\n\n**Phụ thuộc**\nEP04-I04, EP04-I01\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.\n\n**Spec gap**\nGAP-04-02",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP04-I04",
+            "EP04-I01"
+          ],
+          "bidding_ref": [
+            "S4.2",
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I05-S01",
+              "title": "Viết TC 公開 gồm gọi API trực tiếp",
+              "body": "**Mục tiêu**\nTC TP07-11, 12, 15, 16, 21.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có nháp giả チェック済",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I05-S02",
+              "title": "Cài publish với thứ tự kiểm 4.4",
+              "body": "**Mục tiêu**\nServer tính lại, không đọc trường do client ghi.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-21 xanh",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I05-S03",
+              "title": "Cài guard M_DSP-46 theo môi trường",
+              "body": "**Mục tiêu**\nAPP_ENV từ cấu hình App Service.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-11 xanh",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I05-S04",
+              "title": "Review publish (bảo mật + pháp lý)",
+              "body": "**Mục tiêu**\nKiểm không còn đường lách.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "SA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I06",
+          "title": "Khóa tài xế và tính lại lũy kế 拘束時間 trong giao dịch 公開 (H-6)",
+          "body": "**Mục tiêu**\nHai route của cùng tài xế không thể cùng qua kiểm rồi cộng lại vượt giới hạn.\n\n**Phạm vi**\n- Làm: theo PA A khuyến nghị của CR: khóa độc quyền theo tài xế trong giao dịch 公開 (cũ + mới khi đổi tài xế, id tăng dần); sau khóa chạy lại engine trên lũy kế hiện hành (trừ 版 hiện hành của chính route, cộng 版 đang 公開); lệch → M_DSP-08 / M_DSP-33\n- Không làm: chốt phương án và vị trí khóa trong thứ tự chung (chờ ISS-35, GAP-04-01)\n\n**Nguồn**\nCR-202610-driver-lock-duty-recheck-on-publish (draft, PA A); ISS-35 H-6; DD:SCR-07 4.4 bước 1a, 4.7; DB:DSP_DB R2, R4; Q-NEW-B3; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] Chỉ code khi CR được duyệt; PA B thì break lại\n- [ ] TP07-20 (2 route khác nhau, cộng tháng 284:01) xanh\n- [ ] Không deadlock với SCR-05 / SCR-06 (test 2 kết nối)\n\n**Phụ thuộc**\nEP04-I05\n\n**Ràng buộc nghiệp vụ**\n**Đang chờ quyết ISS-35.** 改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.\n\n**Spec gap**\nGAP-04-01",
+          "role": "BE",
+          "sprint": "S2",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024",
+            "blocked:ISS-35",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP04-I05"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I06-S01",
+              "title": "Viết TC 2 phiên 公開 cùng tài xế",
+              "body": "**Mục tiêu**\nTC TP07-20 + ca đổi tài xế.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] 2 kết nối",
+              "role": "QA",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:QA",
+                "blocked:ISS-35"
+              ]
+            },
+            {
+              "id": "EP04-I06-S02",
+              "title": "Cài khóa tài xế và tính lại lũy kế",
+              "body": "**Mục tiêu**\nTheo PA A.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-20 xanh",
+              "role": "BE",
+              "sprint": "S2",
+              "labels": [
+                "type:sub-issue",
+                "role:BE",
+                "blocked:ISS-35"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I07",
+          "title": "Tạo / tạo lại nháp route từ đơn 引当済 (ルート作成)",
+          "body": "**Mục tiêu**\n配送計画者 tạo nháp route theo xe, tài xế, giờ xuất depot; đơn không gán được hiện kèm lý do liên tục.\n\n**Phạm vi**\n- Làm: makeDraft 4.1: khóa đơn (chống một đơn hai route); 拒否 vehicle_band_mismatch / date_mismatch / window_unfit / depot_time_exceeded / travel_unestimable; thứ tự đầu theo khung 受入可能時間帯; ETA tuần tự; 帰着予定; gọi IF-MAP-01 batch qua port, cache 24 h theo giờ lấy gốc\n- Không làm: tối ưu thứ tự (Q31); kiểm tải trọng (Q29); adapter Azure Maps (EP-09 S9.3)\n\n**Nguồn**\nDD:SCR-07 4.1, D-1〜D-12; DB:DSP_DB R3; FR-SCH-01; LAB4:T07-07; gap-261024-wbs-A #29; bidding:S4.1\n\n**Định nghĩa xong**\n- [ ] TP07-13 (IF-MAP lỗi + cache) xanh\n- [ ] Bấm D-7 hai lần không gán đơn hai lần\n- [ ] D-11 luôn hiện đơn 未割当 / 拒否 với lý do\n\n**Phụ thuộc**\nEP04-I03, EP04-I01, EP03-I08; EP-09 (ngoài nhóm): port IF-MAP-01; EP-08: master xe / depot",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP04-I03",
+            "EP04-I01",
+            "EP03-I08"
+          ],
+          "bidding_ref": [
+            "S4.1"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I07-S01",
+              "title": "Viết TC ルート作成",
+              "body": "**Mục tiêu**\nTC TP07-13 + 5 lý do 拒否.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca cache hết hạn",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I07-S02",
+              "title": "Cài makeDraft (phán định đơn, ETA, 帰着予定)",
+              "body": "**Mục tiêu**\n4.1 bước 1〜3, 5, 7〜9.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I07-S03",
+              "title": "Nối IF-MAP-01 qua port và cache cặp điểm",
+              "body": "**Mục tiêu**\n4.1 bước 4.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-13 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I08",
+          "title": "連続運転 ≤ 4 h và tự chèn 休息 30 phút trước khi vượt",
+          "body": "**Mục tiêu**\nNháp route tự có điểm nghỉ trước khi lái liên tục quá giới hạn; vi phạm không chèn được thì báo.\n\n**Phạm vi**\n- Làm: R-HR-12 chèn route_stop rest theo break_insert_minutes / continuous_driving_max_hours của ルール版; R-HR-09 phán định (荷役 không reset); 地名 chỉ nhập tay, không sửa thời lượng / vị trí; hiện ở SCR-07 D-13 / E-5 và SCR-08 B-4\n- Không làm: ngoại lệ 4 h 30 / ngắt < 10 phút (không áp ở lập kế hoạch, Q30)\n\n**Nguồn**\nDD:SCR-07 §3.4 R-HR-09, R-HR-12, 4.1 bước 6; FR-SCH-03; Q30; bidding:S4.3\n\n**Định nghĩa xong**\n- [ ] TP07-07 xanh (4:00 / 4:01, 2 chặng chèn 30 phút)\n- [ ] Giá trị lấy từ ルール版\n- [ ] 休息 hiện ở itinerary tài xế\n\n**Phụ thuộc**\nEP04-I07, EP04-I04\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I07",
+            "EP04-I04"
+          ],
+          "bidding_ref": [
+            "S4.3",
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I08-S01",
+              "title": "Viết TC 連続運転 / 休息",
+              "body": "**Mục tiêu**\nTC TP07-07.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên phút",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I08-S02",
+              "title": "Cài chèn 休息 và R-HR-09",
+              "body": "**Mục tiêu**\n4.1 bước 6 + phán định.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-07 xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I09",
+          "title": "Sửa nháp, 版 n+1, đơn sau 14:00 và chặn bỏ stop đã giao",
+          "body": "**Mục tiêu**\n配送計画者 sửa nháp có kiểm đồng thời, công bố 版 mới khi có đơn muộn mà không mất bằng chứng giao.\n\n**Phạm vi**\n- Làm: editDraft 4.2 (move / remove / placeName / newVersion); sửa → xóa kết quả E-3; row_version (M_DSP-14); 版 n+1 sao chép 版 n, lý do bắt buộc; N-12 gộp cho đơn 確定 sau 14:00; chặn bỏ stop đã có POD (tạm M_DSP-32, Q-DD07-03)\n- Không làm: thao tác hủy route (gap-A #36, chưa có)\n\n**Nguồn**\nDD:SCR-07 4.2, 3.4 「版 n / n+1」, G07-11, G07-16, G07-19; FR-SCH-04; Q-FLW-OUT-16 (APV-015); LAB4:T07-06; LAB4:T07-11; bidding:S4.4\n\n**Định nghĩa xong**\n- [ ] TP07-14, TP07-15, TP07-22 xanh\n- [ ] Stop có POD không bị xóa vật lý\n- [ ] 版 cũ xem được ở F-6 / F-7\n\n**Phụ thuộc**\nEP04-I07, EP04-I05",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP04-I07",
+            "EP04-I05"
+          ],
+          "bidding_ref": [
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I09-S01",
+              "title": "Viết TC 版 n+1 và bỏ stop đã giao",
+              "body": "**Mục tiêu**\nTC TP07-14, TP07-22.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có route in_progress",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I09-S02",
+              "title": "Cài editDraft và newVersion",
+              "body": "**Mục tiêu**\n4.2.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I09-S03",
+              "title": "Cài N-12 cho đơn sau 14:00",
+              "body": "**Mục tiêu**\nPhát qua mail_outbox, gộp một mail.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] N-12 gửi một lần",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I10",
+          "title": "Khung engine 拘束時間: dựng timeline, gộp kết quả, 未判定, API チェック実行",
+          "body": "**Mục tiêu**\nCó engine thuần nhận timeline tài xế + ルール版 và trả kết quả từng ràng buộc; E-3 lưu kết quả.\n\n**Phạm vi**\n- Làm: checkDuty 4.3: ghi tài xế, chọn ルール版, dựng timeline từ balance / 14 ngày / 出発 帰着 / route khác đã 公開 / nháp; gộp violation > undetermined > compliant; 1 dòng / constraint_type; 未判定 cho tài xế có mặt Go-Live thiếu balance; quy tắc chưa cài → 未判定\n- Không làm: nội dung từng quy tắc (issue riêng, S5)\n\n**Nguồn**\nDD:SCR-07 §3.4 「Gộp kết quả」, 「未判定」, 4.3; DB:DSP_DB R4; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] TP07-09 xanh\n- [ ] E-4 luôn đủ 5 loại ràng buộc\n- [ ] Engine là hàm thuần, test không cần DB\n\n**Phụ thuộc**\nEP04-I04, EP04-I08\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I04",
+            "EP04-I08"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I10-S01",
+              "title": "Viết TC gộp kết quả và 未判定",
+              "body": "**Mục tiêu**\nTC TP07-09.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có tài xế mới sau Go-Live",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I10-S02",
+              "title": "Cài khung engine và interface quy tắc",
+              "body": "**Mục tiêu**\nInterface để thêm R-HR ở S5.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Unit xanh",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I10-S03",
+              "title": "Cài API checkDuty và lưu route_duty_check",
+              "body": "**Mục tiêu**\n4.3 bước 1, 5, 6.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Kết quả xóa khi nháp đổi",
+              "role": "BE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I11",
+          "title": "R-HR-01/02: 1日拘束 13 h / tối đa 15 h, cửa sổ 24 h từ 始業",
+          "body": "**Mục tiêu**\nPhán định 拘束 ngày theo cửa sổ 24 h tính từ 始業, gồm phần chồng với ngày trước.\n\n**Phạm vi**\n- Làm: 13 h < x ≤ 15 h → 適合 + 注意; > 15 h → 違反 [始業 + 15 h, 終業]; chồng 24 h theo daily_restraint_overlap_mode = count_both 【仮定】; thiếu dữ liệu ngày trước → 未判定\n- Không làm: R-HR-03 số lần > 14 h (không phải ràng buộc luật; chỉ hiện nếu cấu hình bật, Q63); hiển thị 注意 hay không (Q-DD07-04)\n\n**Nguồn**\nDD:SCR-07 §3.4 R-HR-01, R-HR-02, 「Chồng cửa sổ 24 h」; Q-A-01; LAB4:T07-02; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] TP07-01, TP07-19, TP07-19b xanh\n- [ ] Đổi mode chỉ cần đổi cấu hình\n\n**Phụ thuộc**\nEP04-I10\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I10"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I11-S01",
+              "title": "Viết TC biên cho R-HR-01/02",
+              "body": "**Mục tiêu**\nChuyển TP07-01, TP07-19, TP07-19b thành test engine thuần.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Dữ liệu biên đúng phút\n- [ ] Có kỳ vọng 違反 và khoảng vi phạm",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I11-S02",
+              "title": "Cài quy tắc R-HR-01/02 trong engine",
+              "body": "**Mục tiêu**\nHàm thuần đọc giá trị từ ルール版 và tham số cấu hình.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-01, TP07-19, TP07-19b xanh\n- [ ] Không có hằng số giờ trong code",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I11-S03",
+              "title": "Review quy tắc R-HR-01/02 với bảng 3.4",
+              "body": "**Mục tiêu**\nĐối chiếu nguồn pháp lý và tham số 【仮定】.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "SA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I12",
+          "title": "R-HR-04/05: 拘束 tháng 284 h và năm 3,300 h",
+          "body": "**Mục tiêu**\nPhán định lũy kế 拘束 tháng / năm gồm số dư, ngày đã qua, route khác đã 公開 và route đang lập.\n\n**Phạm vi**\n- Làm: Σ tháng > 284 h, Σ năm (từ 起算日 4/1 【仮】 Q-DSP-06) > 3,300 h → 違反 với khoảng từ lúc chạm trần; thời gian 例外事象 không trừ\n- Không làm: mức nới theo 労使協定 (310 h / 3,400 h — không áp cho Yuki)\n\n**Nguồn**\nDD:SCR-07 §3.4 R-HR-04, R-HR-05; APV-010 L-4; Q-DSP-06; LAB4:T07-02; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] TP07-02, TP07-03 xanh\n- [ ] Thời gian 例外事象 vẫn cộng (R-HR-11)\n\n**Phụ thuộc**\nEP04-I10\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I10"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I12-S01",
+              "title": "Viết TC biên cho R-HR-04/05",
+              "body": "**Mục tiêu**\nChuyển TP07-02, TP07-03 thành test engine thuần.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Dữ liệu biên đúng phút\n- [ ] Có kỳ vọng 違反 và khoảng vi phạm",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I12-S02",
+              "title": "Cài quy tắc R-HR-04/05 trong engine",
+              "body": "**Mục tiêu**\nHàm thuần đọc giá trị từ ルール版 và tham số cấu hình.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-02, TP07-03 xanh\n- [ ] Không có hằng số giờ trong code",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I12-S03",
+              "title": "Review quy tắc R-HR-04/05 với bảng 3.4",
+              "body": "**Mục tiêu**\nĐối chiếu nguồn pháp lý và tham số 【仮定】.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "SA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I13",
+          "title": "R-HR-06: 休息期間 ≥ 9 h (mục tiêu 11 h)",
+          "body": "**Mục tiêu**\nPhán định khoảng nghỉ giữa 終業 trước và 始業 sau.\n\n**Phạm vi**\n- Làm: < 9 h → 違反 [始業, 前終業 + 9 h]; 9 h ≤ x < 11 h → 適合 + 注意\n- Không làm: ngoại lệ 8 h 長距離, 分割休息 (không áp cho route trong ngày, TBD Q30)\n\n**Nguồn**\nDD:SCR-07 §3.4 R-HR-06; Q30; LAB4:T07-02; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] TP07-04 xanh\n\n**Phụ thuộc**\nEP04-I10\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I10"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I13-S01",
+              "title": "Viết TC biên cho R-HR-06",
+              "body": "**Mục tiêu**\nChuyển TP07-04 thành test engine thuần.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Dữ liệu biên đúng phút\n- [ ] Có kỳ vọng 違反 và khoảng vi phạm",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I13-S02",
+              "title": "Cài quy tắc R-HR-06 trong engine",
+              "body": "**Mục tiêu**\nHàm thuần đọc giá trị từ ルール版 và tham số cấu hình.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-04 xanh\n- [ ] Không có hằng số giờ trong code",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I13-S03",
+              "title": "Review quy tắc R-HR-06 với bảng 3.4",
+              "body": "**Mục tiêu**\nĐối chiếu nguồn pháp lý và tham số 【仮定】.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "SA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I14",
+          "title": "R-HR-07/08: 運転 trung bình 2 ngày 9 h và 2 tuần 44 h",
+          "body": "**Mục tiêu**\nPhán định giờ lái trung bình theo cặp ngày và theo khối 2 tuần.\n\n**Phạm vi**\n- Làm: 2日: với X ∈ {D−1, D, D+1}, mode both_pairs 【仮定】 (đổi được either_pair / prev_pair), so tổng phút > 1,080; 2週: khối 14 ngày từ two_week_block_anchor_date 【仮定】, Σ > 5,280 phút; ngày chưa có kế hoạch = 0\n- Không làm: chốt cách đọc 施行通達 (Q-DD07-01, 法務)\n\n**Nguồn**\nDD:SCR-07 §3.4 R-HR-07, R-HR-08, 「Tham số cấu hình」; Q-DD07-01; LAB4:T07-02; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] TP07-05, TP07-05b, TP07-06, TP07-06b xanh\n- [ ] Ba mode cho cùng dữ liệu cho kết quả như DD\n\n**Phụ thuộc**\nEP04-I10\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I10"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I14-S01",
+              "title": "Viết TC biên cho R-HR-07/08",
+              "body": "**Mục tiêu**\nChuyển TP07-05〜06b thành test engine thuần.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Dữ liệu biên đúng phút\n- [ ] Có kỳ vọng 違反 và khoảng vi phạm",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I14-S02",
+              "title": "Cài quy tắc R-HR-07/08 trong engine",
+              "body": "**Mục tiêu**\nHàm thuần đọc giá trị từ ルール版 và tham số cấu hình.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-05〜06b xanh\n- [ ] Không có hằng số giờ trong code",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I14-S03",
+              "title": "Review quy tắc R-HR-07/08 với bảng 3.4",
+              "body": "**Mục tiêu**\nĐối chiếu nguồn pháp lý và tham số 【仮定】.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "SA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I15",
+          "title": "R-HR-10: 時間外 năm ≤ 960 h (bộ đếm riêng với 拘束)",
+          "body": "**Mục tiêu**\nPhán định phần 時間外 của route so với 超勤残 năm của tài xế.\n\n**Phạm vi**\n- Làm: 時間外 ngày = max(0, 拘束 − 休憩 − 480 phút) theo overtime_calc_mode 【仮定】; bỏ ngày 休日労働 (statutory_holiday_weekday 【仮定】) khỏi 960 h nhưng vẫn cộng 拘束; 960 h độc lập 3,300 h\n- Không làm: thêm phần vượt 40 h / tuần (mode daily_and_weekly_40h — chỉ khi 総務 / 法務 chọn, Q-DD07-02)\n\n**Nguồn**\nDD:SCR-07 §3.4 R-HR-10, G07-06; 労基法140条; Q-DD07-02; LAB4:T07-02; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] TP07-08, TP07-08b xanh\n\n**Phụ thuộc**\nEP04-I10\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.\n\n**Spec gap**\nGAP-04-04",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP04-I10"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I15-S01",
+              "title": "Viết TC biên cho R-HR-10",
+              "body": "**Mục tiêu**\nChuyển TP07-08, TP07-08b thành test engine thuần.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Dữ liệu biên đúng phút\n- [ ] Có kỳ vọng 違反 và khoảng vi phạm",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I15-S02",
+              "title": "Cài quy tắc R-HR-10 trong engine",
+              "body": "**Mục tiêu**\nHàm thuần đọc giá trị từ ルール版 và tham số cấu hình.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP07-08, TP07-08b xanh\n- [ ] Không có hằng số giờ trong code",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I15-S03",
+              "title": "Review quy tắc R-HR-10 với bảng 3.4",
+              "body": "**Mục tiêu**\nĐối chiếu nguồn pháp lý và tham số 【仮定】.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên bản review",
+              "role": "SA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:SA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I16",
+          "title": "Đầu vào 始業 / 終業 từ 出発 / 帰着 và số dư đầu kỳ cho timeline",
+          "body": "**Mục tiêu**\nTimeline giờ làm của tài xế dùng mốc thực tế từ app tài xế sau Go-Live và số dư / 14 ngày trước Go-Live.\n\n**Phạm vi**\n- Làm: 始業 / 終業 = 出発 / 帰着 (2 route / ngày: 出発 đầu, 帰着 cuối — Q-DSPDB-13 【仮】); 運転 / 休息 sau Go-Live = kế hoạch của 版 公開済 (Q-DSPDB-17 【仮】); nạp CSV số dư + 14 ngày (driver_duty_balance / driver_duty_day, nguồn new_driver_zero cho tài xế mới); E-7 chỉ cho 配送計画者; bỏ route superseded\n- Không làm: định dạng / chạy migration CSV toàn bộ (EP 移行)\n\n**Nguồn**\nDD:SCR-07 §3.4 「Định nghĩa thời gian」, 4.3 bước 3, E-7, G07-13; DB:DSP_DB R4; Q32; Q-DSP-23; Q-DSP-24; LAB4:T07-08; gap-261024-wbs-A #31; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] Test: 出発 / 帰着 thật thay giờ kế hoạch trong timeline ngày đã qua\n- [ ] Tài xế có mặt Go-Live thiếu CSV → 未判定 (M_DSP-33)\n- [ ] Bản ghi giờ thiết bị suspect → ngày đó 未判定\n- [ ] E-7 ẩn với 監査者\n\n**Phụ thuộc**\nEP04-I10, EP04-I19; Migration (ngoài nhóm): tệp CSV số dư đầu kỳ\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I10",
+            "EP04-I19"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I16-S01",
+              "title": "Viết TC timeline từ 出発 / 帰着",
+              "body": "**Mục tiêu**\nCa 2 route / ngày, tài xế mới, thiếu CSV.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Kỳ vọng theo DD",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I16-S02",
+              "title": "Cài timeline builder",
+              "body": "**Mục tiêu**\n4.3 bước 3.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Unit xanh",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I16-S03",
+              "title": "Cài nạp CSV số dư và 14 ngày",
+              "body": "**Mục tiêu**\nKiểm định dạng, ghi source.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Dòng lỗi báo theo dòng",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I17",
+          "title": "Kiểm hợp lý giờ thiết bị (CK-1〜CK-4) cho 出発 / 帰着 / POD / 例外事象",
+          "body": "**Mục tiêu**\nGiờ thiết bị là nguồn hồ sơ giờ làm; bản ghi giờ đáng ngờ được giữ nhưng đánh dấu và không dùng để kết luận 適合.\n\n**Phạm vi**\n- Làm: lưu cả giờ thiết bị và giờ server; CK-1 tương lai, CK-2 lệch khi online, CK-3 lùi, CK-4 ngoài ngày; dung sai 5 phút 【đề xuất】 cấu hình; suspect → không từ chối, N-13, SCR-07 C-1 đếm, E-3 ngày đó 未判定; R4 日付逆転 tie-break bằng received_at khi suspect\n- Không làm: thao tác chỉnh giờ (chưa có trong DD — GAP-04-03)\n\n**Nguồn**\nDD:SCR-08 §3.6, G08-17; Q-DD08-04; LAB4:T08-10; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] TP08-20 xanh\n- [ ] Không bản ghi nào bị từ chối chỉ vì giờ\n- [ ] Dung sai đổi bằng cấu hình\n\n**Phụ thuộc**\nEP04-I03, EP03-I27, EP04-I19\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.\n\n**Spec gap**\nGAP-04-03",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP04-I03",
+            "EP03-I27",
+            "EP04-I19"
+          ],
+          "bidding_ref": [
+            "S4.2",
+            "S3.8"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I17-S01",
+              "title": "Viết TC giờ thiết bị",
+              "body": "**Mục tiêu**\nTC TP08-20.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Biên 4:59 / 5:01",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I17-S02",
+              "title": "Cài CK-1〜CK-4 và cờ suspect",
+              "body": "**Mục tiêu**\nTrong giao dịch ghi từng bản ghi.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP08-20 xanh",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I18",
+          "title": "シール番号確認 trên app tài xế (online / offline) và báo lệch",
+          "body": "**Mục tiêu**\nTài xế xác nhận seal trước 出発; lệch thì ghi bất biến và báo, không chặn.\n\n**Phạm vi**\n- Làm: bản ghi seal_check vào hàng đợi; thiết bị so cache, server so seal hiệu lực tại giờ thiết bị; mismatch → N-14; chưa có seal → unchecked; seal đổi sau khi đã xác nhận → M_DSP-44, B-10 khóa; nhiều lần trước 出発, dùng lần mới nhất\n- Không làm: so seal mong đợi (Q-OUT-34)\n\n**Nguồn**\nDD:SCR-08 4.2, B-12, G08-03, G08-05; CR-202610-driver-departure-return-and-seal-check (APV-002); ADR-009; LAB4:T08-03; bidding:S4.4\n\n**Định nghĩa xong**\n- [ ] TP08-08 xanh\n- [ ] seal_check offline đồng bộ đúng một lần\n\n**Phụ thuộc**\nEP04-I03, EP03-I20, EP03-I28, EP03-I27",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP04-I03",
+            "EP03-I20",
+            "EP03-I28",
+            "EP03-I27"
+          ],
+          "bidding_ref": [
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I18-S01",
+              "title": "Viết TC シール確認",
+              "body": "**Mục tiêu**\nTC TP08-08.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] 4 tình huống",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I18-S02",
+              "title": "Cài recordSealCheck",
+              "body": "**Mục tiêu**\n4.2 server.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TP08-08 xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I18-S03",
+              "title": "Cài B-12 và bản ghi seal_check offline",
+              "body": "**Mục tiêu**\nSo cache, ghi hàng đợi.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Dùng được offline",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I19",
+          "title": "出発 / 帰着 trên app tài xế, đổi route.status, cổng 出荷確認",
+          "body": "**Mục tiêu**\nGhi mốc chuyến bất biến, chuyển route 運行中 / 完了 ở server và chỉ cho 出発 khi mọi dòng đã 出荷確認.\n\n**Phạm vi**\n- Làm: recordTripMovement 4.3: khóa route; một 出発 / một 帰着; online còn dòng chưa dispatched → M_DSP-47; đồng bộ muộn → shipment_unconfirmed; dòng đã 積込取消 trước khi 出発 tới server → ghi 出発, loại dòng, N-13; sau 出発 SCR-06 chặn 積込取消\n- Không làm: chặn 出発 do lô 隔離 sau 出荷確認 (H-5, EP03 issue blocked)\n\n**Nguồn**\nDD:SCR-08 4.3, B-10, B-11, G08-04; DD:SCR-07 G07-10; DB:DSP_DB R6; Q-FLW-DSP-13; LAB4:T08-04; gap-261024-wbs-A #35; bidding:S4.4; bidding:S4.5\n\n**Định nghĩa xong**\n- [ ] TP08-09〜TP08-12 xanh\n- [ ] route.status đổi trong cùng giao dịch ghi mốc\n- [ ] Mốc lưu cả giờ thiết bị và giờ server\n\n**Phụ thuộc**\nEP04-I03, EP04-I18, EP03-I23, EP03-I27\n\n**Ràng buộc nghiệp vụ**\n出発 / 帰着 là 始業 / 終業 cho kiểm 拘束時間 (Q-DSP-23 【仮】).\n\n**Spec gap**\nGAP-04-01",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024",
+            "spec-gap"
+          ],
+          "depends_on": [
+            "EP04-I03",
+            "EP04-I18",
+            "EP03-I23",
+            "EP03-I27"
+          ],
+          "bidding_ref": [
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I19-S01",
+              "title": "Viết TC 出発 / 帰着",
+              "body": "**Mục tiêu**\nTC TP08-09〜TP08-12.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca offline đồng bộ muộn",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I19-S02",
+              "title": "Cài recordTripMovement",
+              "body": "**Mục tiêu**\n4.3.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I19-S03",
+              "title": "Cài B-10 / B-11 và điều kiện enabled theo cache",
+              "body": "**Mục tiêu**\nOffline được.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] M_DSP-47 từ cache",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I20",
+          "title": "例外事象 bất biến và 計画超過スロット tách khỏi kết quả tuân thủ",
+          "body": "**Mục tiêu**\nTài xế ghi 事故 / 車両故障 / 災害 / 遅延 có bằng chứng; kết quả 拘束時間 đã tính không bị ghi đè.\n\n**Phạm vi**\n- Làm: registerException 4.5 (offline được, bất biến, event_code server sinh); SCR-07 E-6 hiện; R-HR-11 không trừ khỏi E-3; R-HR-13 slot ngoài khung 05:00–23:00 / vượt 超勤残, phân loại 事象起因 theo thời gian của từng sự kiện\n- Không làm: báo cáo RPT-10 (EP-07); dạng 客観的証拠 (Q-DSP-15)\n\n**Nguồn**\nDD:SCR-08 4.5, View 3; DD:SCR-07 §3.4 R-HR-11, R-HR-13, E-6, E-8, G07-14; DB:DSP_DB R5; FR-SCH-05; gap-261024-wbs-A #32; bidding:S4.5\n\n**Định nghĩa xong**\n- [ ] TP07-18 xanh\n- [ ] Thêm 例外事象 sau E-3 không đổi E-4\n- [ ] Không UPDATE / DELETE được delivery_exception\n\n**Phụ thuộc**\nEP04-I10, EP03-I28, EP03-I27\n\n**Ràng buộc nghiệp vụ**\n改善基準告示 (bản 2024-04) và 労基法140条; Yuki có 36協定 nhưng **không nới** (284 h / tháng, 3,300 h / năm — APV-010 L-4). Giá trị nạp từ ルール版, không viết cứng; route 公開 gắn ルール版, không hồi tố.",
+          "role": "BE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I10",
+            "EP03-I28",
+            "EP03-I27"
+          ],
+          "bidding_ref": [
+            "S4.5"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I20-S01",
+              "title": "Viết TC 例外事象 và slot",
+              "body": "**Mục tiêu**\nTC TP07-18.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Có ca nhiều sự kiện",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            },
+            {
+              "id": "EP04-I20-S02",
+              "title": "Cài registerException và R-HR-13",
+              "body": "**Mục tiêu**\n4.5 + slot.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] TC xanh",
+              "role": "BE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I20-S03",
+              "title": "Dựng SCR-08 View 3 例外事象登録",
+              "body": "**Mục tiêu**\nD-1〜D-7, offline.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Giữ form khi lỗi",
+              "role": "FE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I21",
+          "title": "Màn SCR-07 View 1 ルート作成 và View 3 公開・版履歴",
+          "body": "**Mục tiêu**\n配送計画者 lập / sửa / công bố route; 監査者 chỉ xem lịch sử 版.\n\n**Phạm vi**\n- Làm: header, bộ lọc, C-1 (POD拒否 / 最終同期 từ sổ receipt); D-1〜D-14; F-1〜F-7 (checklist F-2, lý do F-3, xác nhận F-5); quyền 監査者 chỉ F-1, F-6, F-7; PC\n- Không làm: View 2 (issue riêng)\n\n**Nguồn**\nDD:SCR-07 §3.3, 4.5, §5.1; SPEC:SCR-07; wireframe SCR-07_wf-view1, view3; LAB4:T07-09; bidding:S4.1; bidding:S4.4\n\n**Định nghĩa xong**\n- [ ] TP07-17 xanh\n- [ ] E2E: tạo → kiểm → 公開 một luồng\n- [ ] B-1 mặc định trống (Q-DSP-31)\n\n**Phụ thuộc**\nEP04-I07, EP04-I09, EP04-I05",
+          "role": "FE",
+          "sprint": "S3",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP04-I07",
+            "EP04-I09",
+            "EP04-I05"
+          ],
+          "bidding_ref": [
+            "S4.1",
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I21-S01",
+              "title": "Dựng View 1 ルート作成",
+              "body": "**Mục tiêu**\nD-1〜D-14.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] D-11 luôn hiện",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP04-I21-S02",
+              "title": "Dựng View 3 公開・版履歴",
+              "body": "**Mục tiêu**\nF-1〜F-7.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] F-4 disabled khi F-2 có ✖",
+              "role": "FE",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP04-I21-S03",
+              "title": "Kiểm E2E SCR-07 View 1 / 3",
+              "body": "**Mục tiêu**\nLuồng chính + quyền.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
+              "role": "QA",
+              "sprint": "S3",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I22",
+          "title": "Màn SCR-07 View 2 拘束時間チェック",
+          "body": "**Mục tiêu**\n配送計画者 xem ルール版, kết quả từng ràng buộc với khoảng vi phạm, 休息, 例外事象, lũy kế tài xế.\n\n**Phạm vi**\n- Làm: E-1 (cờ 未検証 M_DSP-17), E-2 giá trị + nguồn + nhãn 【仮定】, E-3, E-4 / E-4a, E-5, E-6, E-7 (chỉ 配送計画者), E-8\n- Không làm: sửa ルール版 trên màn (Q30)\n\n**Nguồn**\nDD:SCR-07 View 2; SPEC:SCR-07; wireframe SCR-07_wf-view2; bidding:S4.2\n\n**Định nghĩa xong**\n- [ ] E2E: route vi phạm hiện M_DSP-08 với khoảng JST\n- [ ] E-7 ẩn với 監査者\n- [ ] Trạng thái luôn có chữ + biểu tượng\n\n**Phụ thuộc**\nEP04-I10, EP04-I11, EP04-I12, EP04-I13, EP04-I14, EP04-I15, EP04-I16, EP04-I20",
+          "role": "FE",
+          "sprint": "S5",
+          "labels": [
+            "type:issue",
+            "role:FE",
+            "dd:yes",
+            "domain:duty-hours-2024"
+          ],
+          "depends_on": [
+            "EP04-I10",
+            "EP04-I11",
+            "EP04-I12",
+            "EP04-I13",
+            "EP04-I14",
+            "EP04-I15",
+            "EP04-I16",
+            "EP04-I20"
+          ],
+          "bidding_ref": [
+            "S4.2"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I22-S01",
+              "title": "Dựng View 2 E-1〜E-8",
+              "body": "**Mục tiêu**\nTheo bảng item.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Khớp wireframe",
+              "role": "FE",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP04-I22-S02",
+              "title": "Kiểm E2E View 2",
+              "body": "**Mục tiêu**\nLuồng vi phạm / 未判定 / 適合.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
+              "role": "QA",
+              "sprint": "S5",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EP04-I23",
+          "title": "Lịch trình tài xế SCR-08 View 1 (版 mới nhất, 2 chuyến / ngày, cache)",
+          "body": "**Mục tiêu**\nTài xế thấy route hôm nay ở 版 mới nhất kèm 休息, seal và trạng thái 出荷確認, xem được khi offline.\n\n**Phạm vi**\n- Làm: loadSchedule / markSeen 4.1: chọn route hôm nay theo phiên; 2 chuyến theo giờ xuất (Q-DSPDB-13 【仮】); gói route có seal hiện hành, trạng thái 出荷確認 từng dòng, cấu hình bằng chứng, POD 版; B-5 版 mới; M_DSP-30 khi đọc từ cache; chỉ route của chính tài xế\n- Không làm: push / SMS (không có)\n\n**Nguồn**\nDD:SCR-08 4.1, View 1, G08-14; FR-SCH-04; LAB4:T08-09; bidding:S4.4\n\n**Định nghĩa xong**\n- [ ] TP08-18 (tài xế khác / máy không MDM) xanh\n- [ ] Không gửi 版 cũ cho tài xế\n- [ ] Offline hiện cache kèm 版 và giờ lấy\n\n**Phụ thuộc**\nEP04-I03, EP04-I05, EP03-I28; EP-00 (ngoài nhóm): Entra ID + MDM cho tài xế",
+          "role": "BE",
+          "sprint": "S4",
+          "labels": [
+            "type:issue",
+            "role:BE",
+            "dd:yes"
+          ],
+          "depends_on": [
+            "EP04-I03",
+            "EP04-I05",
+            "EP03-I28"
+          ],
+          "bidding_ref": [
+            "S4.4"
+          ],
+          "sub_issues": [
+            {
+              "id": "EP04-I23-S01",
+              "title": "Cài API schedule / seen",
+              "body": "**Mục tiêu**\n4.1.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Chỉ route của phiên",
+              "role": "BE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:BE"
+              ]
+            },
+            {
+              "id": "EP04-I23-S02",
+              "title": "Dựng View 1 当日スケジュール",
+              "body": "**Mục tiêu**\nB-1〜B-12.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] 375 px, vùng chạm 48 px",
+              "role": "FE",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:FE"
+              ]
+            },
+            {
+              "id": "EP04-I23-S03",
+              "title": "Kiểm quyền và offline View 1",
+              "body": "**Mục tiêu**\nTP08-18 + offline.\n\n**Nguồn**\nnhư issue cha\n\n**Định nghĩa xong**\n- [ ] Báo cáo test",
+              "role": "QA",
+              "sprint": "S4",
+              "labels": [
+                "type:sub-issue",
+                "role:QA"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "spec_gaps": [
+    {
+      "id": "GAP-03-01",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-06_DETAIL.md:128 ↔ yuki-cold-chain-wms-2360-management/change-requests/CR-202610-block-recalled-lot-before-departure.md §3 (biến thể A1)",
+      "evidence": "DD SCR-06 §3.1 ghi hàng chỉ về kho qua 返品, không đảo stock_event 出荷; CR H-5 PA A1 đề xuất đảo stock_event 出荷 (reverses_id) khi 出荷取消 trước 出発. Cùng câu ở SCR-05_DETAIL §5.1 (:547).",
+      "desc": "Nếu CR H-5 được duyệt theo A1, DD LAB-4 SCR-05 / SCR-06 nói ngược lại (không có đường đảo 出荷). Dev đọc DD sẽ chặn sai hoặc bỏ sót đường đảo; UNIQUE index stock_event 出荷 (Q-DD06-03) cũng phải loại dòng đảo.",
+      "severity": "med",
+      "proposal": "sửa DD (SCR-05 §5.1, SCR-06 §3.1, 4.6 bước 3) ngay khi CR H-5 duyệt; ghi điều kiện reverses_id IS NULL vào CR index",
+      "issues": [
+        "EP03-I02",
+        "EP03-I23",
+        "EP03-I25"
+      ]
+    },
+    {
+      "id": "GAP-03-02",
+      "where": "yuki-wms-prototype/docs/lab4/04-adr/ADR-004-date-reversal-against-accepted-delivery-history.md:19 ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-05_DETAIL.md:226",
+      "evidence": "ADR-004: nếu khách trả lời Q-OUTDB-13 「không」 thì chỉ dùng nguồn (a); DD §3.5 định nghĩa ref luôn gồm (a)(b)(c), không có tham số chọn nguồn (khác L11 có equal_expiry_policy).",
+      "desc": "Không có cách đổi tập nguồn mốc 日付逆転 bằng cấu hình; khách trả lời 「không」 thì phải sửa code và test lại phần lõi 引当.",
+      "severity": "med",
+      "proposal": "sửa DD: thêm tham số cấu hình chọn nguồn R4 (mặc định (a)+(b)+(c) theo DD, hoặc (a) theo chữ RFP — người duyệt chọn mặc định)",
+      "issues": [
+        "EP03-I10"
+      ]
+    },
+    {
+      "id": "GAP-03-03",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-06_DETAIL.md:426 ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-05_DETAIL.md:286 (L8)",
+      "evidence": "4.5 bước 1 khóa (1) lot FOR SHARE → (3) task → (4) seal, rồi nói phần cách ly lô chạy theo giao thức D → 0 → 1 nhưng không nói giao dịch riêng; 4.3 (:365) và 4.7 (:488) thì ghi rõ giao dịch riêng.",
+      "desc": "Nếu cách ly lô khi 貨物温度 NG chạy cùng giao dịch 記録, sẽ lấy (D) sau khi đã giữ (1) — trái L8 (không lấy mức thấp sau mức cao), nguy cơ deadlock với 引当 / 受注取消.",
+      "severity": "med",
+      "proposal": "sửa DD 4.5: lưu pre_shipment_check + deviation_case rồi COMMIT, cách ly lô ở giao dịch riêng như 4.3 / 4.7; cùng chỉnh khi CR H-7 duyệt",
+      "issues": [
+        "EP03-I02",
+        "EP03-I21",
+        "EP03-I22"
+      ]
+    },
+    {
+      "id": "GAP-03-04",
+      "where": "yuki-cold-chain-wms-2360-management/specs/traceability/screen-specification/SCR-12_SPEC.md:124 ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-08_DETAIL.md:272-283 (§3.6)",
+      "evidence": "Hạn tạo 版 訂正 = 7 ngày lịch JST tính từ completed_at_jst; completed_at là giờ thiết bị, DD SCR-08 §3.6 cho phép giờ thiết bị sai và chỉ gắn cờ suspect.",
+      "desc": "Với POD suspect, hạn 7 ngày có thể lệch (đồng hồ chậm làm hạn dài ra, nhanh làm hạn ngắn lại); spec không nói dùng mốc nào khi suspect.",
+      "severity": "low",
+      "proposal": "hỏi khách (cùng lô Q-DD08-04): khi suspect thì hạn tính theo received_at của server; ghi vào DD SCR-12",
+      "issues": [
+        "EP03-I34"
+      ]
+    },
+    {
+      "id": "GAP-03-05",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-05_DETAIL.md:288 (L10) ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-08_DETAIL.md:451 (4.6 bước 3) ↔ yuki-wms-prototype/docs/lab4/README.md (REC-DB-01 request_id)",
+      "evidence": "OUT dùng bảng idempotency_key 【đề xuất】, DSP dùng pod_sync_receipt, REC dùng cột request_id; ba cơ chế cho cùng một nhu cầu gửi lại an toàn.",
+      "desc": "Ba sổ idempotency khác nhau về hạn giữ, cách trả kết quả cũ và cách dọn; khi chuyển sang App Service nên có một middleware chung, trừ sổ đồng bộ tài xế vốn mang nghĩa nghiệp vụ (N-13, B-16).",
+      "severity": "low",
+      "proposal": "chấp nhận pod_sync_receipt riêng; EP-00 chốt một cơ chế cho thao tác online (OUT / REC) trước S2, cập nhật CR Q-DD05-06",
+      "issues": [
+        "EP03-I04",
+        "EP03-I08",
+        "EP03-I27"
+      ]
+    },
+    {
+      "id": "GAP-03-06",
+      "where": "yuki-cold-chain-wms-2360-management/change-requests/CR-202610-block-recalled-lot-before-departure.md §4 A-5 (R8a) ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-08_DETAIL.md:356 (4.3 Error)",
+      "evidence": "R8a cho 出荷取消 khi route chưa có trip_movement_event departure ở server; 出発 có thể đã xảy ra offline và đồng bộ sau. 4.3 chỉ xử lý dòng 積込取消 trước khi 出発 tới server, không có nhánh cho dòng đã 出荷取消.",
+      "desc": "Xe đã đi thật (offline) nhưng server chưa biết → センター作業者 vẫn 出荷取消 được, tồn bị cộng lại về vị trí lấy hàng trong khi hàng đang trên xe. Q-CR-BRL-03 chỉ phủ chiều ngược lại (出発 trước, 隔離 sau).",
+      "severity": "med",
+      "proposal": "bổ sung vào CR H-5 trước khi duyệt: 出荷取消 yêu cầu xác nhận hàng còn ở dock; 出発 đồng bộ sau 出荷取消 → nhánh riêng (N-13 + N-11, đánh dấu chênh tồn để kiểm)",
+      "issues": [
+        "EP03-I25",
+        "EP04-I19"
+      ]
+    },
+    {
+      "id": "GAP-04-01",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-07_DETAIL.md:434 (4.4 bước 1a) + SCR-05_DETAIL.md:297 (mức D2) ↔ yuki-cold-chain-wms-2360-management/change-requests/CR-202610-driver-lock-duty-recheck-on-publish.md:36, :46",
+      "evidence": "DD: khóa advisory theo tài xế × ngày rồi tài xế × tháng, đứng **sau** delivery_order; CR PA A: khóa độc quyền theo driver_user_profile_id **trước** (R) route, và áp cả cho giao dịch ghi 出発 / 帰着. DD SCR-08 4.3 (:365) chỉ khóa route.",
+      "desc": "Hai tài liệu đặt khóa tài xế ở hai vị trí khác nhau trong thứ tự khóa chung và khác khóa (ngày / tháng vs tài xế). Làm theo cả hai sẽ đảo thứ tự giữa 公開 và 出発 / 帰着 → nguy cơ deadlock; làm theo DD thì 出発 / 帰着 không tuần tự với 公開.",
+      "severity": "high",
+      "proposal": "CR: chốt một vị trí khóa tài xế trong thứ tự chung (EP-00) khi duyệt CR H-6, rồi sửa DD SCR-07 4.4 / SCR-08 4.3 / bảng L8",
+      "issues": [
+        "EP04-I01",
+        "EP04-I05",
+        "EP04-I06",
+        "EP04-I19"
+      ]
+    },
+    {
+      "id": "GAP-04-02",
+      "where": "yuki-cold-chain-wms-2360-management/process-trail/plans/plan-261024-dev-phase-wbs.md:92 ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-07_DETAIL.md:527 (G07-08)",
+      "evidence": "Plan: ルール版 + kiểm lại lúc publish ở S2, engine ở S5. G07-08: publish 「gọi lại engine hiện có ở server」 — dựa trên engine prototype; D-3 không dùng lại prototype nên S2〜S4 chưa có engine đầy đủ.",
+      "desc": "Từ S2 tới S5, publish chỉ kiểm được các quy tắc đã cài; nếu quy tắc chưa cài bị coi là đạt thì route vi phạm 公開 được trên môi trường test / UAT sớm và test TP07-21 xanh giả.",
+      "severity": "med",
+      "proposal": "chấp nhận lịch, sửa DD: engine trả 未判定 cho ràng buộc chưa cài (chặn 公開); ghi DoD ở EP04-I05 / EP04-I10",
+      "issues": [
+        "EP04-I05",
+        "EP04-I10"
+      ]
+    },
+    {
+      "id": "GAP-04-03",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-08_DETAIL.md:283 ↔ yuki-wms-prototype/docs/lab4/03-detail-design/SCR-07_DETAIL.md:163 (C-1), :226-227 (R-HR-04/05)",
+      "evidence": "Bản ghi 出発 / 帰着 suspect → E-3 coi ngày đó 未判定 tới khi 配送計画者 xác nhận; C-1 chỉ có POD拒否 (handled_at), không có thao tác xác nhận / sửa giờ. R-HR-04 / 05 lũy kế tháng / năm gồm ngày đó.",
+      "desc": "Một mốc suspect làm 未判定 cả lũy kế tháng / năm của tài xế → mọi route sau trong tháng không 公開 được cho tới khi có người xác nhận, mà màn chưa có thao tác đó; nếu giờ sai thật thì không có đường sửa.",
+      "severity": "med",
+      "proposal": "sửa DD: thêm thao tác xác nhận (và ghi giờ hiệu chỉnh có lý do, bất biến) ở SCR-07 C-1; gộp vào Q-DD08-04",
+      "issues": [
+        "EP04-I02",
+        "EP04-I16",
+        "EP04-I17"
+      ]
+    },
+    {
+      "id": "GAP-04-04",
+      "where": "yuki-wms-prototype/docs/lab4/03-detail-design/SCR-07_DETAIL.md:232 (R-HR-10) ↔ yuki-cold-chain-wms-2360-management/process-trail/reports/legal-check-d10-261012.md:55",
+      "evidence": "DD chỉ dùng 休日労働 để loại khỏi bộ đếm 960 h; legal-check §4.3 chỉ trích 休日労働 trong điều kiện 労使協定. Bảng R-HR không có dòng giới hạn số ngày 休日労働.",
+      "desc": "Chưa rõ 改善基準告示 bản 2024 có giới hạn tần suất 休日労働 cho tài xế xe tải cần kiểm khi lập route hay không [CẦN XÁC MINH]; nếu có thì engine thiếu một ràng buộc.",
+      "severity": "low",
+      "proposal": "hỏi khách (法務, cùng lô Q-DD07-02); có thì thêm R-HR mới qua ルール版 + CR",
+      "issues": [
+        "EP04-I15"
+      ]
+    }
+  ],
+  "differences": [
+    {
+      "lab4_ref": "ADR-002; DD:SCR-05 4.2〜4.6, DD:SCR-06 4.x (RPC trong Postgres)",
+      "change": "Logic 引当 / 積込 / 出荷 viết ở service của App Service (AllocationService, ShipmentService); PostgreSQL giữ CHECK, UNIQUE, khóa hàng, advisory lock và transaction",
+      "reason": "D-1, D-3; quy ước §2",
+      "impact": "Mọi issue BE EP-03 mô tả theo service; test SQL/RPC trên PGlite đổi thành integration test trên PostgreSQL"
+    },
+    {
+      "lab4_ref": "ADR-002 RLS chỉ đọc; LAB4:L5-DB-01 = SEC-02 (tài xế chỉ đọc route của mình)",
+      "change": "Phân quyền đọc theo 職務 và theo tài xế kiểm ở API App Service (phiên Entra ID), không dùng RLS",
+      "reason": "D-1 (Entra ID, App Service)",
+      "impact": "EP04-I23, EP03-I30: DoD có test 403 cho route của tài xế khác"
+    },
+    {
+      "lab4_ref": "DD:SCR-07 G07-08 (`/rest/v1/rpc/rpc_route_save_draft`, grant authenticated)",
+      "change": "Không có PostgREST; nhưng giữ nguyên yêu cầu: publish không tin nháp, tự tính lại ở server",
+      "reason": "D-1, D-3",
+      "impact": "EP04-I05 giữ TP07-21 dưới dạng gọi API App Service trực tiếp"
+    },
+    {
+      "lab4_ref": "ADR-012; Supabase Auth, MFA theo vai (ADR-008 giữ)",
+      "change": "Đăng nhập Entra ID; tài xế dùng thiết bị MDM tuân thủ (điều kiện truy cập ở IdP); offline mở shell từ Service Worker",
+      "reason": "D-1",
+      "impact": "EP03-I28, EP04-I23 phụ thuộc EP-00 (Entra ID + MDM); Q-DSP-27 vẫn mở"
+    },
+    {
+      "lab4_ref": "LAB4:T08-01 (localStorage prototype); ADR-009",
+      "change": "Viết mới OfflineQueue bằng IndexedDB + WebCrypto như DD đích; không sửa code prototype",
+      "reason": "D-3",
+      "impact": "EP03-I28 là task xây mới, mã T08-01 chỉ ghi ở Nguồn"
+    },
+    {
+      "lab4_ref": "LAB4:T07-01〜T07-11, T08-01〜T08-10, OUT-ALLOC-01〜04, OUT-SHIP-01〜05, OUT-DEV-01, OUT-SCAN-01, OUT-JOB-01, OUT-UI-01〜02 (task 「sửa gap prototype」)",
+      "change": "Đổi thành task xây mới trên Azure; giữ mã LAB-4 ở mục Nguồn để truy vết",
+      "reason": "D-3; quy ước §2",
+      "impact": "Không có issue nào 「sửa」 prototype; gap code (G1〜G18, S1〜S16, G07-xx, G08-xx) dùng làm điểm kiểm thử / DoD"
+    },
+    {
+      "lab4_ref": "DD:SCR-05 G17, G18 (p_expired_lot_ids, rpc_audit_append)",
+      "change": "Không áp dụng cho hệ mới (không có tham số đó); chuyển thành DoD 「server tự sinh sự kiện, client không ghi được audit / event」",
+      "reason": "D-3",
+      "impact": "EP03-I08, EP03-I11 DoD; audit chung ở EP-00"
+    },
+    {
+      "lab4_ref": "DD:SCR-08 attachment (Supabase Storage, md5 trong prototype)",
+      "change": "Tệp POD lưu Azure Blob qua port Storage, SHA-256 ở thiết bị và server",
+      "reason": "D-1 (Blob WORM)",
+      "impact": "EP03-I32 phụ thuộc EP-00 port Blob; thời hạn WORM chờ Q-NEW-C2"
+    },
+    {
+      "lab4_ref": "DD:SCR-05 4.6 job R12; DD:SCR-08 B-16; mail_outbox N-11〜N-14",
+      "change": "Job định kỳ chạy bằng Azure Functions timer; mail qua outbox + Service Bus / Functions",
+      "reason": "D-1 (Service Bus / Functions)",
+      "impact": "EP03-I16, EP03-I27 phụ thuộc bộ lập lịch / outbox của EP-00"
+    },
+    {
+      "lab4_ref": "DD:SCR-07 IF-MAP-01 (mô phỏng travel() trong prototype)",
+      "change": "Adapter Azure Maps qua port IF-MAP-01 (EP-09 S9.3); EP-04 chỉ gọi port + cache",
+      "reason": "D-1 (Maps)",
+      "impact": "EP04-I07 phụ thuộc EP-09"
+    },
+    {
+      "lab4_ref": "DD:SCR-07 §3.4 bảng 未検証 (APP_ENV PRD / STG / UAT)",
+      "change": "Ánh xạ sang 4 môi trường dev / test / UAT / prod; chặn M_DSP-46 chỉ ở prod, UAT cảnh báo; giá trị APP_ENV từ cấu hình App Service",
+      "reason": "D-1 (OPS-ENV-01)",
+      "impact": "EP04-I05 DoD TP07-11 theo prod / UAT"
+    },
+    {
+      "lab4_ref": "DD:SCR-07 G07-08, plan §4 (engine S5)",
+      "change": "Publish không 「gọi engine hiện có」; engine xây mới theo lịch S3 (khung) → S5 (từng quy tắc), quy tắc chưa cài trả 未判定",
+      "reason": "D-3; plan-261024 §4",
+      "impact": "EP04-I05, EP04-I10; xem GAP-04-02"
+    },
+    {
+      "lab4_ref": "DD:SCR-05 / SCR-06 thứ tự khóa L8 (pg_advisory_xact_lock)",
+      "change": "Giữ nguyên trên PostgreSQL Flexible; service phải giữ một kết nối cho cả giao dịch (không dùng pooler chế độ statement)",
+      "reason": "D-1",
+      "impact": "EP03-I08 DoD; quy ước kết nối ở EP-00"
+    }
+  ]
+}

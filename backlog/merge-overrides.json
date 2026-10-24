@@ -1,0 +1,82 @@
+{
+ "_doc": "Điều chỉnh khi gộp 4 nhóm (2026-10-24): ranh giới dùng chung ↔ nơi dùng, phụ thuộc chéo nhóm, sprint. Áp bởi scripts/merge-and-validate-backlog.py.",
+ "sprint": {
+  "EP03-I26": "S4"
+ },
+ "depends_add": {
+  "EP01-I05": [
+   "EP00-I19"
+  ],
+  "EP05-I05": [
+   "EP00-I19"
+  ],
+  "EP03-I14": [
+   "EP00-I19"
+  ],
+  "EP03-I21": [
+   "EP00-I19",
+   "EP01-I09"
+  ],
+  "EP04-I04": [
+   "EP00-I20",
+   "EP11-I01"
+  ],
+  "EP04-I05": [
+   "EP00-I20"
+  ],
+  "EP03-I12": [
+   "EP00-I21"
+  ],
+  "EP02-I12": [
+   "EP00-I16"
+  ],
+  "EP05-I07": [
+   "EP00-I16",
+   "EP02-I12",
+   "EP01-I09"
+  ],
+  "EP06-I10": [
+   "EP02-I12"
+  ],
+  "EP03-I15": [
+   "EP02-I12"
+  ],
+  "EP01-I08": [
+   "EP00-I17"
+  ],
+  "EP02-I03": [
+   "EP00-I17"
+  ],
+  "EP03-I27": [
+   "EP00-I17"
+  ],
+  "EP07-I19": [
+   "EP08-I15"
+  ],
+  "EP00-I11": [
+   "EP09-I08"
+  ]
+ },
+ "note_append": {
+  "EP01-I05": "\n\n**Ranh giới (khi gộp):** bảng `temperature_policy_version` và hàm đánh giá dùng chung thuộc EP00-I19. Issue này chỉ làm phần áp dụng lúc nhập (受入) và 一時温度帯.",
+  "EP00-I19": "\n\n**Ranh giới (khi gộp):** đây là nơi duy nhất dựng hàm đánh giá dải dùng chung. Các nơi dùng: EP01-I05 (nhập), EP05-I05 (logger), EP03-I14 (引当 / 積込).",
+  "EP00-I20": "\n\n**Ranh giới (khi gộp):** chỉ schema `duty_rule_version` và cơ chế nạp qua release. Nội dung quy tắc và nguồn pháp lý thuộc EP04-I04, được xác minh ở EP11-I01.",
+  "EP04-I04": "\n\n**Ranh giới (khi gộp):** dùng schema của EP00-I20. Giá trị phải qua xác minh EP11-I01 trước khi bật cờ 検証済.",
+  "EP02-I12": "\n\n**Ranh giới (khi gộp):** dịch vụ cách ly dùng chung cho EP05-I07 (alarm), EP06-I10 (recall), EP03-I15 (解放 → 再引当). Thứ tự khóa theo EP00-I16."
+ },
+ "iteration_p10": [
+  "EP11-I01",
+  "EP11-I02",
+  "EP11-I03",
+  "EP11-I04",
+  "EP11-I05",
+  "EP11-I06",
+  "EP11-I07",
+  "EP11-I08",
+  "EP15-I01",
+  "EP15-I02",
+  "EP15-I09",
+  "EP15-I12",
+  "EP15-I13"
+ ]
+}
