@@ -1,0 +1,47 @@
+name: "CR (đồng bộ change request)"
+description: Đồng bộ 1 CR đã duyệt (APV) ở management repo vào backlog/prototype
+title: "CR-YYYYMM-slug [ROLE] "
+labels: ["type:cr"]
+projects: ["linhvtm-2475/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Title dùng **nguyên mã CR** ở management repo (`CR-YYYYMM-slug`), không đặt mã mới.
+        Sau khi tạo xong, vào Project #1 set field `Loại task=CR`.
+  - type: input
+    id: cr-apv
+    attributes:
+      label: CR + APV liên quan
+      placeholder: "CR-202610-shipment-cancel-offline-departure-conflict, APV-027"
+    validations:
+      required: true
+  - type: input
+    id: nguon
+    attributes:
+      label: Nguồn
+      placeholder: "yuki-cold-chain-wms-2360-management/change-requests/{CR-ID}.md"
+    validations:
+      required: true
+  - type: textarea
+    id: pham-vi-dong-bo
+    attributes:
+      label: Phạm vi đồng bộ
+      value: |
+        - [ ] detail design LAB-4 liên quan đã cập nhật (liệt kê file)
+        - [ ] spec-gaps.md / differences-vs-lab4.md cập nhật nếu CR đóng gap đang mở
+        - [ ] Issue/Sub-issue backlog bị ảnh hưởng đã gỡ nhãn blocked:* nếu có
+    validations:
+      required: true
+  - type: textarea
+    id: tieu-chi-nghiem-thu
+    attributes:
+      label: Tiêu chí nghiệm thu
+      placeholder: "4 script kiểm tra ở management repo chạy 0 vi phạm; spec-gaps.md không còn ghi \"còn thiếu\" cho gap này"
+    validations:
+      required: true
+  - type: input
+    id: phu-thuoc
+    attributes:
+      label: Phụ thuộc
+      placeholder: "ID issue/epic bị ảnh hưởng"

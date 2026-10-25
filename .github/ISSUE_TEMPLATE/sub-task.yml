@@ -1,0 +1,30 @@
+name: "Sub-task"
+description: Một việc của một vai trong 1 Story (≤ 2 ngày công)
+title: "EPxxIyy-Szz [ROLE] "
+labels: ["type:sub-issue"]
+projects: ["linhvtm-2475/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Title dùng mã sub-task theo WBS (`EPxxIyy-Szz`), thay `ROLE` bằng PIC đảm nhiệm.
+        Sau khi tạo xong, vào Project #1 set field `Loại task=Sub-task`, `Role`, `Iteration` (sprint), và gán `Parent issue` = Story cha.
+  - type: textarea
+    id: mo-ta
+    attributes:
+      label: Mô tả
+      description: 1-2 câu — việc cụ thể của vai này, sinh ra gì cho Story cha
+    validations:
+      required: true
+  - type: input
+    id: nguon
+    attributes:
+      label: Nguồn
+      placeholder: "như issue cha, hoặc con trỏ riêng nếu khác"
+  - type: textarea
+    id: tieu-chi-nghiem-thu
+    attributes:
+      label: Tiêu chí nghiệm thu
+      description: Mỗi dòng ghi rõ nghiệm thu bằng gì
+    validations:
+      required: true

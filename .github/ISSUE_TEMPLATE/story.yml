@@ -1,0 +1,64 @@
+name: "Story"
+description: Một kết quả kiểm được — một chức năng, quy tắc, API hoặc màn hình (≤ 1 sprint / 1 người)
+title: "EPxxIyy [ROLE] "
+labels: ["type:issue"]
+projects: ["linhvtm-2475/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Title dùng mã issue theo WBS (`EPxxIyy`), thay `ROLE` bằng PIC đảm nhiệm.
+        Sau khi tạo xong, vào Project #1 set field `Loại task=Story`, `Role`, `Iteration` (sprint).
+  - type: textarea
+    id: mo-ta
+    attributes:
+      label: Mô tả
+      description: 2-3 câu — làm gì, nhìn thấy gì khi xong
+    validations:
+      required: true
+  - type: textarea
+    id: pham-vi
+    attributes:
+      label: Phạm vi
+      placeholder: |
+        Làm: ...
+        Không làm: ...
+    validations:
+      required: true
+  - type: input
+    id: nguon
+    attributes:
+      label: Nguồn
+      placeholder: "DD:SCR-05 §4.2, SPEC:SCR-02, DB:OUT_DB R4a, ADR-003, bidding:S3.2 — chỉ con trỏ, không chép nội dung"
+    validations:
+      required: true
+  - type: textarea
+    id: tieu-chi-nghiem-thu
+    attributes:
+      label: Tiêu chí nghiệm thu
+      description: Mỗi dòng ghi rõ nghiệm thu bằng gì (test tự động, review DD, demo PM...)
+    validations:
+      required: true
+  - type: input
+    id: phu-thuoc
+    attributes:
+      label: Phụ thuộc
+      placeholder: "ID issue khác"
+  - type: dropdown
+    id: rang-buoc-nghiep-vu
+    attributes:
+      label: Ràng buộc nghiệp vụ đặc thù (nếu có)
+      multiple: true
+      options:
+        - duty-hours-2024 (拘束時間 / 改善基準告示)
+        - date-reversal (日付逆転禁止)
+        - expiry-type (賞味 / 消費)
+        - delivery-window (1/3・1/2 tập quán thương mại)
+        - traceability-rice-beef (米・牛 bắt buộc)
+        - temp-band (ngưỡng 3 dải có version)
+        - haccp
+  - type: input
+    id: spec-gap
+    attributes:
+      label: Spec gap (nếu có)
+      placeholder: "GAP-xx-nn"

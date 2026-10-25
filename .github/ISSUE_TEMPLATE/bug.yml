@@ -1,0 +1,93 @@
+name: "Bug"
+description: Báo lỗi phát hiện khi test/chạy thật (ST, UAT, sau go-live...)
+title: "BUG-XX [ROLE] "
+labels: ["type:bug"]
+projects: ["linhvtm-2475/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Sửa title: thay `XX` bằng số issue GitHub vừa được cấp (xem ở URL/tiêu đề sau khi tạo), thay `ROLE` bằng người xử lý (BE/FE/QA/Infra/BrSE/PM/SA).
+        Sau khi tạo xong, vào Project #1 set thêm field `Loại task=Bug`, `Loại bug`, `Mức độ` (và `Nguyên nhân gốc` sau khi điều tra xong) — form này không tự set được field Project.
+  - type: textarea
+    id: mo-ta-loi
+    attributes:
+      label: Mô tả lỗi
+      description: 1-2 câu, hiện tượng quan sát được và khi nào xảy ra
+    validations:
+      required: true
+  - type: textarea
+    id: buoc-tai-hien
+    attributes:
+      label: Bước tái hiện
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: ket-qua-mong-doi
+    attributes:
+      label: Kết quả mong đợi
+    validations:
+      required: true
+  - type: textarea
+    id: ket-qua-thuc-te
+    attributes:
+      label: Kết quả thực tế
+    validations:
+      required: true
+  - type: input
+    id: moi-truong
+    attributes:
+      label: Môi trường
+      placeholder: "sprint ST/UAT…, thiết bị/trình duyệt nếu liên quan"
+  - type: input
+    id: phat-hien-o
+    attributes:
+      label: Phát hiện ở
+      placeholder: "ID Story/Sub-issue hoặc màn hình (vd EP06-I10, SCR-06)"
+    validations:
+      required: true
+  - type: input
+    id: nguon
+    attributes:
+      label: Nguồn
+      placeholder: "SPEC/DD liên quan, vd DD:SCR-06 §4.8"
+  - type: dropdown
+    id: loai-bug
+    attributes:
+      label: Loại bug (để điền tiếp vào field Project cùng tên)
+      options:
+        - Functional
+        - UI/UX
+        - Data
+        - Performance
+        - Security
+        - Integration
+        - Compatibility
+        - Environment/Config
+    validations:
+      required: true
+  - type: dropdown
+    id: muc-do
+    attributes:
+      label: Mức độ (để điền tiếp vào field Project cùng tên)
+      options:
+        - Blocker
+        - Critical
+        - Major
+        - Minor
+        - Trivial
+    validations:
+      required: true
+  - type: textarea
+    id: tieu-chi-dong
+    attributes:
+      label: Tiêu chí đóng (nghiệm thu)
+      value: |
+        - [ ] Tái hiện lại đúng bước trên không còn lỗi
+        - [ ] Test case liên quan (nếu có) chạy Pass
+        - [ ] QA xác nhận trên môi trường test, không chỉ dev local
+    validations:
+      required: true

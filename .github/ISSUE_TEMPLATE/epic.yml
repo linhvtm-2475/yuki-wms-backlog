@@ -1,0 +1,45 @@
+name: "Epic"
+description: Nhóm chức năng lớn theo Epic bidding (EP-00…EP-15)
+title: "EP-XX [EPIC] "
+labels: ["type:epic"]
+projects: ["linhvtm-2475/1"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Title dùng mã epic đã có trong WBS (`EP-00`…`EP-15`), không đặt mã mới.
+        Sau khi tạo xong, vào Project #1 set field `Loại task=Epic`.
+  - type: textarea
+    id: mo-ta
+    attributes:
+      label: Mô tả
+      description: 2-3 câu — làm ra cái gì, nhìn thấy gì khi xong, ở mức người ngoài spec cũng hình dung được
+    validations:
+      required: true
+  - type: textarea
+    id: pham-vi
+    attributes:
+      label: Phạm vi
+      placeholder: |
+        Làm: ...
+        Không làm: ...
+    validations:
+      required: true
+  - type: input
+    id: nguon
+    attributes:
+      label: Nguồn
+      placeholder: "REQ:..., SPEC:..., bidding:E..."
+    validations:
+      required: true
+  - type: textarea
+    id: tieu-chi-nghiem-thu
+    attributes:
+      label: Tiêu chí nghiệm thu
+      description: Mỗi dòng ghi rõ nghiệm thu bằng gì (vd demo cho PM)
+    validations:
+      required: true
+  - type: input
+    id: phu-thuoc
+    attributes:
+      label: Phụ thuộc
