@@ -9119,6 +9119,55 @@
      "In Progress": "47fc9ee4",
      "Done": "98236657"
     }
+   },
+   "Loại task": {
+    "id": "PVTSSF_lAHOBMx0vc4BogQ4zhnHtBk",
+    "options": {
+     "Epic": "ec1e8df9",
+     "Story": "a10ac2ce",
+     "Sub-task": "a1a0204b",
+     "Bug": "a7cfab26",
+     "CR": "d2ccdf56"
+    }
+   },
+   "Loại bug": {
+    "id": "PVTSSF_lAHOBMx0vc4BogQ4zhnHtCQ",
+    "options": {
+     "Functional": "5f77d930",
+     "UI/UX": "9e30ad58",
+     "Data": "601520e6",
+     "Performance": "fcba8087",
+     "Security": "109d6849",
+     "Integration": "66c8e8c0",
+     "Compatibility": "2d909ee0",
+     "Environment/Config": "8629b7ba"
+    }
+   },
+   "Nguyên nhân gốc": {
+    "id": "PVTSSF_lAHOBMx0vc4BogQ4zhnHtDQ",
+    "options": {
+     "Requirement": "1dd894b7",
+     "Design": "5e3e9ad2",
+     "Coding": "23f0f5f1",
+     "Data/Config": "bdcb0b30",
+     "Test Gap": "56cf2881",
+     "Regression": "217a8b72",
+     "Third-party": "62cd6ec6",
+     "Environment": "8b9a89bd"
+    }
+   },
+   "Mức độ": {
+    "id": "PVTSSF_lAHOBMx0vc4BogQ4zhnHtE0",
+    "options": {
+     "Blocker": "ec1259d3",
+     "Critical": "8b0da1e5",
+     "Major": "f1d8821a",
+     "Minor": "b372c95d",
+     "Trivial": "ecda9d18"
+    }
+   },
+   "Actual Hours": {
+    "id": "PVTF_lAHOBMx0vc4BogQ4zhnHtGM"
    }
   }
  }

@@ -469,8 +469,7 @@
      "labels": [
       "type:issue",
       "role:BE",
-      "dd:yes",
-      "blocked:ISS-35"
+      "dd:yes"
      ],
      "depends_on": [
       "EP00-I09"
@@ -510,8 +509,7 @@
        "labels": [
         "type:sub-issue",
         "role:BE",
-        "dd:yes",
-        "blocked:ISS-35"
+        "dd:yes"
        ]
       },
       {
@@ -5702,8 +5700,7 @@
       "type:issue",
       "role:BE",
       "dd:yes",
-      "domain:haccp",
-      "blocked:ISS-35"
+      "domain:haccp"
      ],
      "depends_on": [
       "EP05-I06",
@@ -7467,7 +7464,6 @@
       "role:BE",
       "dd:yes",
       "domain:temp-band",
-      "blocked:ISS-35",
       "spec-gap"
      ],
      "depends_on": [
@@ -7486,8 +7482,7 @@
        "sprint": "S4",
        "labels": [
         "type:sub-issue",
-        "role:QA",
-        "blocked:ISS-35"
+        "role:QA"
        ]
       },
       {
@@ -7498,8 +7493,7 @@
        "sprint": "S4",
        "labels": [
         "type:sub-issue",
-        "role:BE",
-        "blocked:ISS-35"
+        "role:BE"
        ]
       }
      ]
@@ -7625,7 +7619,6 @@
       "dd:yes",
       "domain:haccp",
       "domain:traceability-rice-beef",
-      "blocked:ISS-35",
       "spec-gap"
      ],
      "depends_on": [
@@ -7646,8 +7639,7 @@
        "sprint": "S4",
        "labels": [
         "type:sub-issue",
-        "role:QA",
-        "blocked:ISS-35"
+        "role:QA"
        ]
       },
       {
@@ -7658,8 +7650,7 @@
        "sprint": "S4",
        "labels": [
         "type:sub-issue",
-        "role:BE",
-        "blocked:ISS-35"
+        "role:BE"
        ]
       },
       {
@@ -7670,8 +7661,7 @@
        "sprint": "S4",
        "labels": [
         "type:sub-issue",
-        "role:BE",
-        "blocked:ISS-35"
+        "role:BE"
        ]
       }
      ]
@@ -8506,7 +8496,6 @@
       "role:BE",
       "dd:yes",
       "domain:duty-hours-2024",
-      "blocked:ISS-35",
       "spec-gap"
      ],
      "depends_on": [
@@ -8524,8 +8513,7 @@
        "sprint": "S2",
        "labels": [
         "type:sub-issue",
-        "role:QA",
-        "blocked:ISS-35"
+        "role:QA"
        ]
       },
       {
@@ -8536,8 +8524,7 @@
        "sprint": "S2",
        "labels": [
         "type:sub-issue",
-        "role:BE",
-        "blocked:ISS-35"
+        "role:BE"
        ]
       }
      ]
@@ -9745,8 +9732,7 @@
      "labels": [
       "type:issue",
       "role:BE",
-      "dd:no",
-      "blocked:ISS-35"
+      "dd:no"
      ],
      "depends_on": [
       "EP06-I09",
@@ -11575,8 +11561,7 @@
       "type:issue",
       "role:QA",
       "dd:no",
-      "domain:duty-hours-2024",
-      "blocked:ISS-35"
+      "domain:duty-hours-2024"
      ],
      "depends_on": [
       "EP14-I01",

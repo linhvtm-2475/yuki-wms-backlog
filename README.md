@@ -2,7 +2,15 @@
 
 Backlog cho hệ thống quản lý kho lạnh 3 dải nhiệt của một công ty logistics **hư cấu**. Backlog được break từ detail design và basic design của bài thực hành.
 
-- **Board:** GitHub Project gắn với repo này. Có các trường Status, Iteration (sprint 2 tuần), Role, SWP, Hours.
+## Repo liên quan
+
+| Repo | Vai trò |
+|---|---|
+| [`AIDD-lab1-Linh`](https://github.com/linhvtm-2475/AIDD-lab1-Linh) (management) | 基本設計 đã duyệt — nguồn sự thật nghiệp vụ/DB/API |
+| `yuki-wms-backlog` (repo này) | Epic/Story/Sub-task/Bug/CR — theo dõi tiến độ |
+| [`yuki-wms-app`](https://github.com/linhvtm-2475/yuki-wms-app) | Code thật (Azure, Sprint 0 trở đi) — cùng link vào **GitHub Project #1** với repo này |
+
+- **Board:** GitHub Project #1, gắn với cả repo này lẫn `yuki-wms-app`. Có các trường Status, Iteration (sprint 2 tuần), Role, SWP, Hours, Actual Hours, Loại task, Loại bug, Nguyên nhân gốc, Mức độ.
 - **Cấu trúc:**
   - **Epic** (16): `EP-00` nền tảng, `EP-01`…`EP-14` theo nhóm chức năng, `EP-15` quản lý.
   - **Issue** (306): một kết quả kiểm được, ≤ 1 sprint cho 1 người.

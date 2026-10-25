@@ -75,3 +75,61 @@ Chỉ chứa issue và markdown tự viết. **Không** có:
 - khóa / bí mật
 
 Tài khoản demo và địa chỉ email (kể cả email demo) cũng không đưa vào.
+
+## 8. Title, Loại task, Bug, CR (chốt 2026-10-25) — áp dụng từ nay, backfill 805 item cũ sau
+
+### 8.1 Title (mọi loại)
+`{ID} [{ROLE hoặc EPIC/CR}] {Động từ + Đối tượng}` — ví dụ `EP09-I01 [Infra] Dựng điểm nhận tệp SFTP managed cho ERP`.
+ID đặt đầu để sort/tìm theo epic không cần mở label. `domain:*` vẫn chỉ ở label, không nhét vào title.
+
+### 8.2 Field Project mới (đã tạo trên GitHub Project #1, xem `backlog/github-map.json` → `project.fields`)
+| Field | Kiểu | Giá trị |
+|---|---|---|
+| `Loại task` | single-select | `Epic`, `Story`, `Sub-task`, `Bug`, `CR` — song song với label `type:*` (label vẫn giữ, field chỉ để group/filter trên board) |
+| `Loại bug` | single-select | `Functional`, `UI/UX`, `Data`, `Performance`, `Security`, `Integration`, `Compatibility`, `Environment/Config` |
+| `Nguyên nhân gốc` | single-select | `Requirement`, `Design`, `Coding`, `Data/Config`, `Test Gap`, `Regression`, `Third-party`, `Environment` — điền SAU khi điều tra xong, không bắt buộc lúc mới báo bug |
+| `Mức độ` | single-select | `Blocker`, `Critical`, `Major`, `Minor`, `Trivial` |
+| `Actual Hours` | number | Giờ thực tế, ghi tay khi đóng task/bug — so với `Hours` (ước lượng, đã có) |
+
+**Giới hạn đã gặp:** field `Status` mặc định của GitHub Project (Todo/In Progress/Done) **không thể thêm option qua API** (`updateProjectV2Field` không áp dụng option mới cho field built-in, đã test trên cả field built-in lẫn field tự tạo — field tự tạo thêm option mới cũng bị bỏ qua, chỉ field-create lúc tạo mới nhận option). Pipeline nghiệm thu đầy đủ `Backlog → Todo → In Progress → In Review → Resolved → Done → Reopened` **phải thêm tay 4 option còn thiếu (Backlog, In Review, Resolved, Reopened) qua giao diện Project** (Settings của field Status), API không làm được.
+
+### 8.3 Bug — body template
+```
+**Mô tả lỗi:** <1-2 câu: hiện tượng, khi nào xảy ra>
+
+**Bước tái hiện:**
+1. ...
+**Kết quả mong đợi:** ...
+**Kết quả thực tế:** ...
+
+**Môi trường:** <sprint ST/UAT…, thiết bị/trình duyệt nếu liên quan>
+**Phát hiện ở:** <ID Story/Sub-issue hoặc màn hình>
+**Nguồn:** <SPEC/DD liên quan>
+
+**Tiêu chí đóng (nghiệm thu):**
+- [ ] Tái hiện lại đúng bước trên không còn lỗi
+- [ ] Test case liên quan (nếu có) chạy Pass
+- [ ] QA xác nhận trên môi trường test, không chỉ dev local
+```
+ID: `BUG-{số thứ tự}`, label `type:bug`, field `Loại task`=`Bug`. `Loại bug` bắt buộc lúc báo; `Nguyên nhân gốc` + `Mức độ` điền trong lúc xử lý.
+
+### 8.4 CR (đồng bộ thay đổi đã duyệt ở management repo vào backlog/prototype) — body template
+```
+**Mô tả:** Đồng bộ CR {CR-ID} (APV-xxx) đã duyệt ở management repo vào backlog/prototype.
+
+**Nguồn:** CR: yuki-cold-chain-wms-2360-management/change-requests/{CR-ID}.md; APV-xxx
+
+**Phạm vi đồng bộ:**
+- [ ] detail design LAB-4 liên quan đã cập nhật (liệt kê file)
+- [ ] spec-gaps.md / differences-vs-lab4.md cập nhật nếu CR đóng gap đang mở
+- [ ] Issue/Sub-issue backlog bị ảnh hưởng đã gỡ nhãn blocked:* nếu có
+
+**Tiêu chí nghiệm thu:** 4 script kiểm tra ở management repo chạy 0 vi phạm; spec-gaps.md không còn ghi "còn thiếu" cho gap này
+
+**Phụ thuộc:** <issue/epic bị ảnh hưởng>
+```
+ID: dùng nguyên mã CR của management repo (`CR-YYYYMM-slug`, không đặt mã mới). Label `type:cr`, field `Loại task`=`CR`. Role mặc định `BrSE`/`SA`.
+
+### 8.5 Mô tả / Tiêu chí nghiệm thu (Epic, Story, Sub-task — áp mới + backfill dần)
+- Đổi mục **Mục tiêu** (1 câu) → **Mô tả** (2–3 câu): ghép Mục tiêu cũ + rút gọn phần "Làm" trong Phạm vi, không viết tay lại.
+- Đổi mục **Định nghĩa xong** → **Tiêu chí nghiệm thu**: mỗi dòng thêm vế nghiệm thu bằng gì, suy theo `role` (BE/FE → test tự động + review code; QA → test case Pass; SA → DD được người khác review; Infra → chạy thử môi trường thật; Epic → demo cho PM).
